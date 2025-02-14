@@ -317,7 +317,7 @@ class _OrdersPageState extends State<OrdersPage> {
         return AlertDialog(
           title: Text('Confirm Payment'),
           content: Text(
-              'Order will be edit. Do you confirm?'),
+              'Products transfer to your cart. Do you confirm?'),
           actions: [
             TextButton(
               child: Text('Cancel'),
