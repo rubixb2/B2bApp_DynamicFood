@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:odoosaleapp/services/CustomerService.dart';
+import 'package:odoosaleapp/services/InvoiceService.dart';
 import 'package:odoosaleapp/services/OrderService.dart';
+import 'package:odoosaleapp/theme.dart';
 
 import 'helpers/PdfScreen.dart';
 import 'helpers/SessionManager.dart';
@@ -78,11 +80,11 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
             Row(
               children: [
                 Spacer(),
-                Text("Credit: ", style: TextStyle(color: Colors.green, fontSize: 18)),
-                Text("${customerDetail!.credit}", style: TextStyle(color: Colors.green, fontSize: 16)),
+                Text("Credit: ", style: TextStyle(color: Colors.green, fontSize: 18, fontWeight: FontWeight.bold)),
+                Text("${customerDetail!.credit}", style: TextStyle(color: Colors.green, fontSize: 18, fontWeight: FontWeight.bold)),
                 SizedBox(width: 20),
-                Text("Overdue: ", style: TextStyle(color: Colors.red, fontSize: 18)),
-                Text("${customerDetail!.overdueDept}", style: TextStyle(color: Colors.red, fontSize: 16)),
+                Text("Overdue: ", style: TextStyle(color: Colors.red, fontSize: 18,fontWeight: FontWeight.bold)),
+                Text("${customerDetail!.overdueDept}", style: TextStyle(color: Colors.red, fontSize: 18, fontWeight: FontWeight.bold)),
                 Spacer()
               ],
             ),
@@ -93,8 +95,8 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
                   children: [
                     TabBar(
                       tabs: [
-                        Tab(child: Text('Orders',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),),
-                        Tab(child: Text('Invoices',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+                        Tab(child: Text('Orders',style: AppTextStyles.list2)),
+                        Tab(child: Text('Invoices',style: AppTextStyles.list2)),
                       ],
                     ),
                     Expanded(
@@ -115,14 +117,14 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
                                   Row(
                                     children: [
                                       Text(order.name.length>12 ? order.name.substring(0,12): order.name,
-                                          style: TextStyle(fontSize: 14)),
+                                          style: AppTextStyles.bodyTextBold),
                                       SizedBox(width: 15),
                                       Text('Total: \€${order.amountTotal.toStringAsFixed(2)}',
-                                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                          style: AppTextStyles.bodyTextBold),
                                       Spacer(),
                                       Text(
                                         order.createDate.length>10 ? order.createDate.substring(0,10) : order.createDate,
-                                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                        style: AppTextStyles.bodyTextBold,
                                       ),
 
 
@@ -133,7 +135,7 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
                                   Text(
                                     order.invoiceStatus ,
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 16,
                                       color: order.invoiceStatus == 'invoiced'  ? Colors.green : Colors.red,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -148,7 +150,8 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
                                         onPressed: order.invoiceStatus != 'invoiced'
                                             ? () => completeOrder(order.id)
                                             : null,
-                                        child: Text('Complete'),
+                                        child: Text('Complete',style: AppTextStyles.buttonTextWhite),
+                                        style: AppButtonStyles.secondaryButton,
                                       ) ,
                                      /* ElevatedButton(
                                         onPressed: order.invoiceStatus != 'invoiced'
@@ -166,7 +169,8 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
                                         onPressed: order.pdfUrl.isNotEmpty
                                             ? () => _openPdf(order.pdfUrl)
                                             : null,
-                                        child: Text('PDF'),
+                                        child: Text('PDF',style: AppTextStyles.buttonTextWhite),
+                                        style: AppButtonStyles.secondaryButton,
                                       ),
                                       /*ElevatedButton(
                             onPressed: order.invoicePdfUrl.isNotEmpty
@@ -195,25 +199,27 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(invoice.name.length>50 ? invoice.name.substring(0,50): invoice.name,
-                                      style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
+                                      style: AppTextStyles.bodyTextBold
+                                  ),
                                   Row(
                                     children: [
                                       Text(
                                         invoice.paymentState ?? "",
                                         style: TextStyle(
-                                          fontSize: 14,
+                                          fontSize: 16,
                                           color: (invoice.paymentState ?? "").toLowerCase() == "paid" ? Colors.green : Colors.red,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                       SizedBox(width: 15),
                                       Text('Total: \€${invoice.amountTotalSigned.toStringAsFixed(2)}',
-                                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                          style: AppTextStyles.bodyTextBold
+                                      ),
 
                                       Spacer(),
                                       Text(
                                         invoice.invoiceDate!.length>10 ? invoice.invoiceDate!.substring(0,10) : invoice.invoiceDate!,
-                                        style: TextStyle(fontSize: 14),
+                                        style:AppTextStyles.bodyTextBold,
                                       ),
                                       SizedBox(width: 10),
                                       Text(invoice.overdueDay ?? "",
@@ -230,14 +236,22 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
                                         onPressed: (invoice.paymentState ?? "").toLowerCase() != "paid"
                                             ? () => _addPayment(invoice.id)
                                             : null,
-                                        child: Text('Add Payment'),
+                                        child: Text('Add Payment',style: AppTextStyles.buttonTextWhite),
+                                        style: AppButtonStyles.secondaryButton,
+                                      ) ,
+                                      ElevatedButton(
+                                        onPressed:
+                                            () => refund(invoice.id),
+                                        child: Text('Refund',style: AppTextStyles.buttonTextWhite),
+                                        style: AppButtonStyles.secondaryButton,
                                       ) ,
 
                                       ElevatedButton(
                                         onPressed: (invoice.pdfUrl ?? "").isNotEmpty
                                             ? () => _openPdf(invoice.pdfUrl ?? "")
                                             : null,
-                                        child: Text('PDF'),
+                                        child: Text('PDF',style: AppTextStyles.buttonTextWhite),
+                                        style: AppButtonStyles.secondaryButton,
                                       ),
                                       /*ElevatedButton(
                             onPressed: order.invoicePdfUrl.isNotEmpty
@@ -264,6 +278,56 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
         ),
       ),
     );
+  }
+  void refund(int invoiceId) {
+    _confirmRefund(invoiceId);
+  }
+  void _confirmRefund(int invoiceId) {
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Payment'),
+          content: Text(
+            'Order will be refund. Do you confirm?',style: AppTextStyles.buttonTextBlack,),
+          actions: [
+            TextButton(
+              child: Text('Cancel',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.notrButton,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text('Confirm',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.confimButton,
+              onPressed: () {
+                Navigator.of(context).pop();
+                _makeORefund(invoiceId);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  Future<void> _makeORefund(int invoiceId) async {
+    var res = await InvoiceService().refund(sessionId: _getSessionId(),invoiceId: invoiceId);
+    if (res)
+    {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Refund success..')),
+      );
+      Navigator.pop(context);
+    }
+    else
+    {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occured..')),
+
+      );
+    }
   }
   void completeOrder(int id) async {
     try {

@@ -7,6 +7,7 @@ import 'package:odoosaleapp/models/invoice/InvoiceApiResoponseModel.dart';
 import 'package:odoosaleapp/models/invoice/PaymentLineTypeResponseModel.dart';
 import 'package:odoosaleapp/models/order/OrderApiResoponseModel.dart';
 import 'package:odoosaleapp/services/InvoiceService.dart';
+import 'package:odoosaleapp/theme.dart';
 
 import 'helpers/PdfViewerScreen.dart';
 import 'helpers/SessionManager.dart';
@@ -102,7 +103,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
               } else if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else if (!snapshot.hasData) {
-                return Center(child: Text('No invoice found.'));
+                return Center(child: Text('No invoice found.',style: AppTextStyles.list1,));
               }
               final invoices = snapshot.data!.bills;
               return ListView.builder(
@@ -118,29 +119,29 @@ class _InvoicesPageState extends State<InvoicesPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(invoice.partnerName.length>50 ? invoice.partnerName.substring(0,50): invoice.partnerName,
-                              style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold)),
+                              style: AppTextStyles.bodyTextBold),
                           SizedBox(height: 5),
                           Row(
                             children: [
                               Text(
                                 invoice.paymentState,
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 14,
                                   color: invoice.paymentState.toLowerCase() == "paid" ? Colors.green : Colors.red,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               SizedBox(width: 8),
                               Text('Total: \€${invoice.amountTotal.toStringAsFixed(2)}',
-                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                                  style: AppTextStyles.bodyTextBold),
 
                               SizedBox(width: 8),
                               Text(invoice.overdueDay,
-                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color:  Colors.red,)),
+                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color:  Colors.red,)),
                               Spacer(),
                               Text(
                                 invoice.invoiceDate.length>10 ? invoice.invoiceDate.substring(0,10) : invoice.invoiceDate,
-                                style: TextStyle(fontSize: 11),
+                                style: AppTextStyles.bodyTextBold,
                               ),
                             ],
                           ),
@@ -153,19 +154,22 @@ class _InvoicesPageState extends State<InvoicesPage> {
                                 onPressed: invoice.paymentState.toLowerCase() != "paid"
                                     ? () => _openAddPaymentModal(invoice.id)
                                     : null,
-                                child: Text('Add Payment'),
+                                child: Text('Add Payment',style: AppTextStyles.buttonTextWhite),
+                                style: AppButtonStyles.secondaryButton,
                               ) ,
                               ElevatedButton(
                                 onPressed:
                                     () => refund(invoice.id),
-                                child: Text('Refund'),
+                                child: Text('Refund',style: AppTextStyles.buttonTextWhite),
+                                style: AppButtonStyles.secondaryButton,
                               ) ,
 
                               ElevatedButton(
                                 onPressed: invoice.accessUrl.isNotEmpty
                                     ? () => _openPdf(invoice.accessUrl)
                                     : null,
-                                child: Text('PDF'),
+                                child: Text('PDF',style: AppTextStyles.buttonTextWhite),
+                                style: AppButtonStyles.secondaryButton,
                               ),
                               /*ElevatedButton(
                             onPressed: order.invoicePdfUrl.isNotEmpty
@@ -243,16 +247,18 @@ class _InvoicesPageState extends State<InvoicesPage> {
         return AlertDialog(
           title: Text('Confirm Payment'),
           content: Text(
-              'A payment of €$amount will be recorded. Do you confirm?'),
+              'A payment of €$amount will be recorded. Do you confirm?',style: AppTextStyles.buttonTextBlack),
           actions: [
             TextButton(
-              child: Text('Cancel'),
+              child: Text('Cancel',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.notrButton,
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text('Confirm'),
+              child: Text('Confirm',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.confimButton,
               onPressed: () {
                 Navigator.of(context).pop();
                 _makePayment();
@@ -354,13 +360,15 @@ class _InvoicesPageState extends State<InvoicesPage> {
           ),
           actions: [
             TextButton(
-              child: Text('Cancel'),
+              child: Text('Cancel',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.notrButton,
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text('Add'),
+              child: Text('Add',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.confimButton,
               onPressed: _isAddButtonEnabled
                   ? () {
 
@@ -382,16 +390,18 @@ class _InvoicesPageState extends State<InvoicesPage> {
         return AlertDialog(
           title: Text('Confirm Payment'),
           content: Text(
-              'Order will be refund. Do you confirm?'),
+              'Order will be refund. Do you confirm?',style: AppTextStyles.buttonTextBlack,),
           actions: [
             TextButton(
-              child: Text('Cancel'),
+              child: Text('Cancel',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.notrButton,
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text('Confirm'),
+              child: Text('Confirm',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.confimButton,
               onPressed: () {
                 Navigator.of(context).pop();
                 _makeORefund(invoiceId);
@@ -402,6 +412,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
       },
     );
   }
+
   Future<void> _makeORefund(int invoiceId) async {
     var res = await InvoiceService().refund(sessionId: _getSessionId(),invoiceId: invoiceId);
     if (res)

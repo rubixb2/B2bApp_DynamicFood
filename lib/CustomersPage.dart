@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:odoosaleapp/helpers/PdfScreen.dart';
 import 'package:odoosaleapp/models/customer/CustomerApiResponse.dart';
 import 'package:odoosaleapp/services/CustomerService.dart';
+import 'package:odoosaleapp/theme.dart';
 
 import 'CustomerDetail.dart';
-import 'helpers/PdfViewerScreen.dart';
 import 'helpers/SessionManager.dart';
-import 'models/order/OrdersResponseModel.dart';
 
 class CustomersPage extends StatefulWidget {
   const CustomersPage({Key? key}) : super(key: key);
@@ -97,19 +95,17 @@ class _CustomersPageState extends State<CustomersPage> {
 
                         children: [
                           Text(invoice.name.length>50 ? invoice.name.substring(0,50): invoice.name,
-                              style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold)),
+                              style: AppTextStyles.bodyTextBold),
                           Row(
                             children: [
                               Text(
                                 invoice.city ?? '' ,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: AppTextStyles.bodyTextBold
                               ),
                               SizedBox(width: 15),
                               Text(invoice.street ?? '',
-                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                  style: AppTextStyles.bodyTextBold
+                              ),
 
                             ],
                           ),
@@ -132,24 +128,6 @@ class _CustomersPageState extends State<CustomersPage> {
     );
   }
 
-  void _openPdf(String url) {
-    // Burada PDF açma işlemi yapılabilir (Örneğin: launch(url) kullanarak)
-    print('Opening PDF: $url');
-    // url = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
-    openPdf(context, url);
-  }
-  void completeOrder(int id) {
-    // Burada PDF açma işlemi yapılabilir (Örneğin: launch(url) kullanarak)
-    print('Opening PDF: $id');
-  }
-  void discount(int id) {
-    // Burada PDF açma işlemi yapılabilir (Örneğin: launch(url) kullanarak)
-    print('Opening PDF: $id');
-  }
-  void editOrder(int id) {
-    // Burada PDF açma işlemi yapılabilir (Örneğin: launch(url) kullanarak)
-    print('Opening PDF: $id');
-  }
 
   void openDetail(BuildContext context, int id) {
     Navigator.push(

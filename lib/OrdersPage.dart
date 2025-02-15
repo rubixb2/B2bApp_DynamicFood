@@ -3,6 +3,7 @@ import 'package:odoosaleapp/helpers/PdfScreen.dart';
 import 'package:odoosaleapp/models/order/OrderApiResoponseModel.dart';
 import 'package:odoosaleapp/services/CartService.dart';
 import 'package:odoosaleapp/services/OrderService.dart';
+import 'package:odoosaleapp/theme.dart';
 
 import 'helpers/PdfViewerScreen.dart';
 import 'helpers/SessionManager.dart';
@@ -86,29 +87,26 @@ class _OrdersPageState extends State<OrdersPage> {
                         /*Text((order.partnerName.length>50 ? order.partnerName.substring(0,50): order.partnerName)+"-"+order.cartId.toString() +"-"+order.id.toString(),
                             style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold)),*/
                         Text((order.partnerName.length>50 ? order.partnerName.substring(0,50): order.partnerName),
-                            style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold)),
+                            style:AppTextStyles.bodyTextBold),
                         SizedBox(height: 5),
                         Row(
                           children: [
                             Text(
                               order.orderCompleteStatus ? 'Completed' : 'Pending',
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 14,
                                 color: order.orderCompleteStatus ? Colors.green : Colors.red,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             SizedBox(width: 10),
                             Text('Total: \€${order.amountTotal.toStringAsFixed(2)}',
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                style: AppTextStyles.bodyTextBold),
                             Spacer(),
                             Text(
                               order.dateOrder.length>10 ? order.dateOrder.substring(0,10) : order.dateOrder,
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                              style: AppTextStyles.bodyTextBold,
                             ),
-
-
-
                           ],
                         ),
                         SizedBox(height: 5),
@@ -118,27 +116,32 @@ class _OrdersPageState extends State<OrdersPage> {
 
                             ElevatedButton(
                               onPressed: order.orderCompleteStatus == false
-                                  ? () => completeOrder(order.id)
+                                  ? () => _confirmCompleteOrder(order.id)
                                   : null,
-                              child: Text('Complete',style: TextStyle(fontSize: 12)),
+                              child: Text('Complete',style: AppTextStyles.buttonTextWhite),
+                              style: AppButtonStyles.secondaryButton,
                             ) ,
                             ElevatedButton(
                               onPressed: order.orderCompleteStatus == false
                                   ? () => discount(order.id)
                                   : null,
-                              child: Text('Discount',style: TextStyle(fontSize: 12)),
+                              child: Text('Discount',style: AppTextStyles.buttonTextWhite),
+                              style: AppButtonStyles.secondaryButton,
+
                             ) ,
                             ElevatedButton(
                               onPressed: order.orderCompleteStatus == false
                                   ? () => editOrder(order.cartId,order.partnerName ?? "-",order.partnerid)
                                   : null,
-                              child: Text('Edit',style: TextStyle(fontSize: 12)),
+                              child: Text('Edit',style: AppTextStyles.buttonTextWhite),
+                              style: AppButtonStyles.secondaryButton,
                             ) ,
                             ElevatedButton(
                               onPressed: order.orderPdfUrl.isNotEmpty
                                   ? () => _openPdf(order.orderPdfUrl)
                                   : null,
-                              child: Text('PDF',style: TextStyle(fontSize: 12)),
+                              child: Text('PDF',style: AppTextStyles.buttonTextWhite),
+                              style: AppButtonStyles.secondaryButton,
                             ),
                             /*ElevatedButton(
                             onPressed: order.invoicePdfUrl.isNotEmpty
@@ -172,6 +175,34 @@ class _OrdersPageState extends State<OrdersPage> {
   void _openPdf(String url) {
     print('Opening PDF: $url');
     openPdf(context, url);
+  }
+
+  void _confirmCompleteOrder(int id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Complete Order'),
+          content: const Text('Order will be completed, Do you confirm?',style: AppTextStyles.buttonTextBlack),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), // İptal butonu
+              child: const Text('Cancel',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.notrButton,
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Dialog'u kapat
+                completeOrder(id); // Sepeti sil
+              },
+              child: const Text('Confirm', style: AppTextStyles.buttonTextWhite),
+              style: AppButtonStyles.confimButton,
+
+            ),
+          ],
+        );
+      },
+    );
   }
   void completeOrder(int id) async {
     try {
@@ -258,13 +289,14 @@ class _OrdersPageState extends State<OrdersPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text("Cancel"),
+              child: Text("Cancel", style: AppTextStyles.buttonTextWhite),
+              style: AppButtonStyles.notrButton,
             ),
             ElevatedButton(
               onPressed: () {
                 if (selectedType.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Please enter a discount value")),
+                    SnackBar(content: Text("Please enter a discount value",style: AppTextStyles.buttonTextBlack)),
                   );
                   return;
                 }
@@ -273,19 +305,19 @@ class _OrdersPageState extends State<OrdersPage> {
                     ? double.parse(percentageController.text)
                     : double.parse(amountController.text);
 
-                applyDiscount(id, discountValue, selectedType);
+                _confirmDiscount(id, discountValue, selectedType);
                 Navigator.of(context).pop();
               },
-              child: Text("Apply"),
+              child: Text("Apply", style: AppTextStyles.buttonTextWhite),
+              style: AppButtonStyles.confimButton,
             ),
           ],
         );
       },
     );
   }
-  Future<void> applyDiscount(int id, double value, String type) async {
-    print('params: $id  $value    $type');
 
+  Future<void> _applyDiscount(int id, double value, String type) async {
     try {
       final sessionId = _getSessionId();
 
@@ -315,21 +347,54 @@ class _OrdersPageState extends State<OrdersPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirm Payment'),
+          title: Text('Confirm Edit'),
           content: Text(
-              'Products transfer to your cart. Do you confirm? '),
+              'Products transfer to your cart. Do you confirm? ',style: AppTextStyles.buttonTextBlack),
           actions: [
             TextButton(
-              child: Text('Cancel'),
+              child: Text('Cancel', style: AppTextStyles.buttonTextWhite),
+              style: AppButtonStyles.notrButton,
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text('Confirm'),
+              child: Text('Confirm', style: AppTextStyles.buttonTextWhite),
+              style: AppButtonStyles.confimButton,
               onPressed: () {
                 Navigator.of(context).pop();
                 _makeOrderEdit(cartId,customerName,customerId);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _confirmDiscount(int id, double value, String type) {
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Discount'),
+          content: Text(
+              'Discount will be applied. Do you confirm? ',style: AppTextStyles.buttonTextBlack),
+          actions: [
+            TextButton(
+              child: Text('Cancel', style: AppTextStyles.buttonTextWhite),
+              style: AppButtonStyles.notrButton,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text('Confirm', style: AppTextStyles.buttonTextWhite),
+              style: AppButtonStyles.confimButton,
+              onPressed: () {
+                Navigator.of(context).pop();
+                _applyDiscount(id,value,type);
               },
             ),
           ],

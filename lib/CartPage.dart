@@ -8,6 +8,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'models/cart/CartProductModel.dart';
 import 'models/cart/CustomerDropListModel.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'theme.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({Key? key}) : super(key: key);
@@ -114,8 +115,8 @@ class _CartPageState extends State<CartPage> {
       appBar: AppBar(
         title:Row(children: [
           Text(
-            '$_cartId-${_customerName.length > 10 ? _customerName.substring(0, 10) : _customerName}'
-            ,style: TextStyle(fontSize: 12)
+            '$_cartId-${_customerName.length > 15 ? _customerName.substring(0, 15) : _customerName}'
+            ,style: AppTextStyles.bodyTextBold
         ),
           Spacer(),
           FutureBuilder<CartResponseModel?>(
@@ -138,14 +139,14 @@ class _CartPageState extends State<CartPage> {
               return Row(children: [
               Text(
               'Total: \€${cartAmount.toStringAsFixed(2)}', // Ondalık basamak ekleyerek düzgün görünmesini sağlıyoruz
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+              style: AppTextStyles.bodyTextBold,
 
 
               ),
                 SizedBox(width: 15),
                 Text(
                   'T.Total: \€${cartAmountTaxed.toStringAsFixed(2)}', // Ondalık basamak ekleyerek düzgün görünmesini sağlıyoruz
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                  style: AppTextStyles.bodyTextBold,
                 ),
               ],);
             },
@@ -219,7 +220,7 @@ class _CartPageState extends State<CartPage> {
 
                 final cart = snapshot.data;
                 if (cart == null || cart.cartProducts.isEmpty) {
-                  return const Center(child: Text('Cart is empty.'));
+                  return const Center(child: Text('Cart is empty.',style: AppTextStyles.list1,));
                 }
 
                 return ListView.builder(
@@ -272,14 +273,12 @@ class _CartPageState extends State<CartPage> {
                                   // Product Name and Total Price
                                   Text(
                                     product.productName ?? 'Product Name',
-                                    style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold),
+                                    style: AppTextStyles.bodyTextBold,
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
                                     'Total Price: ${product.productTotalPrice.toStringAsFixed(2)}',
-                                    style: const TextStyle(fontSize: 12),
+                                    style: AppTextStyles.subText,
                                   ),
                                   const SizedBox(width: 3),
 
@@ -400,7 +399,7 @@ class _CartPageState extends State<CartPage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            onPressed: _placeOrder, // Sipariş oluşturma fonksiyonu
+            onPressed: _confirmAddOrder, // Sipariş oluşturma fonksiyonu
             heroTag: 'orderBtn',
             tooltip: 'Place Order',
             child: const Icon(Icons.shop),
@@ -556,18 +555,49 @@ class _CartPageState extends State<CartPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Delete Cart'),
-          content: const Text('Are you sure you want to delete the cart? This action cannot be undone.'),
+          content: const Text('Are you sure you want to delete the cart? This action cannot be undone.',style: AppTextStyles.buttonTextBlack),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(), // İptal butonu
-              child: const Text('Cancel'),
+              child: const Text('Cancel',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.notrButton,
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Dialog'u kapat
                 _deleteCart(); // Sepeti sil
               },
-              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+              child: const Text('Delete', style: AppTextStyles.buttonTextWhite),
+              style: AppButtonStyles.dangerButton,
+
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _confirmAddOrder() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Add Order'),
+          content: const Text('Order will be added, Do you confirm?',style: AppTextStyles.buttonTextBlack),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), // İptal butonu
+              child: const Text('Cancel',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.notrButton,
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Dialog'u kapat
+                _placeOrder(); // Sepeti sil
+              },
+              child: const Text('Confirm', style: AppTextStyles.buttonTextWhite),
+              style: AppButtonStyles.confimButton,
+
             ),
           ],
         );

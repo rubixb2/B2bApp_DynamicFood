@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:odoosaleapp/services/CartService.dart';
 import 'package:odoosaleapp/services/ProductService.dart';
+import 'package:odoosaleapp/theme.dart';
 
 import 'helpers/SessionManager.dart';
 import 'models/cart/CustomerDropListModel.dart';
@@ -249,10 +250,7 @@ class _ProductPageState extends State<ProductPage> {
                               padding: const EdgeInsets.all(2.0),
                               child: Text(
                                 product.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 10,
-                                ),
+                                style: AppTextStyles.bodyTextBold2
                               ),
                             ),
                             Padding(
@@ -260,8 +258,7 @@ class _ProductPageState extends State<ProductPage> {
                               const EdgeInsets.symmetric(horizontal: 2.0),
                               child: Text(
                                 'Stock: ${product.stockCount}',
-                                style: const TextStyle(fontSize: 10,color: Colors.black,
-                                    fontWeight: FontWeight.bold),
+                                style: AppTextStyles.subText
                               ),
                             ),
                           ],
@@ -321,18 +318,11 @@ class _ProductPageState extends State<ProductPage> {
                         children: [
                           Text(
                             product.name,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: AppTextStyles.bodyTextBold2,
                           ),
                           Text(
                             'Stock: ${product.stockCount}',
-                            style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold
-                            ),
+                            style: AppTextStyles.subText,
                           ),
                         ],
                       ),
@@ -346,7 +336,7 @@ class _ProductPageState extends State<ProductPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Piece Quantity', style: TextStyle(fontSize: 12)),
+                    const Text('Piece Quantity', style: AppTextStyles.subText),
                     Row(
                       children: [
                         _buildQuantityButton(() => updateQuantity(pieceController, -1), Icons.remove),
@@ -363,7 +353,7 @@ class _ProductPageState extends State<ProductPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Box Quantity', style: TextStyle(fontSize: 12)),
+                    const Text('Box Quantity', style: AppTextStyles.subText),
                     Row(
                       children: [
                         _buildQuantityButton(() => updateQuantity(boxController, -1), Icons.remove),
@@ -384,16 +374,11 @@ class _ProductPageState extends State<ProductPage> {
                     _addToCart(context, product.id, pieceQuantity, boxQuantity);
                     Navigator.pop(context); // Modalı kapat
                   },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
+                  style: AppButtonStyles.primaryButton,
                   child: const Center(
                     child: Text(
                       'Add to Cart',
-                      style: TextStyle(fontSize: 16),
+                      style: AppTextStyles.buttonTextWhite,
                     ),
                   ),
                 ),
