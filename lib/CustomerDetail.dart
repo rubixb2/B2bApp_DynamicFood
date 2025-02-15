@@ -64,17 +64,26 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              customerDetail!.name,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
             Row(
               children: [
-                Text("Credit: ", style: TextStyle(color: Colors.green, fontSize: 16)),
+                Spacer(),
+                Text(
+                  customerDetail!.name,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Spacer()
+              ],
+            ),
+
+            Row(
+              children: [
+                Spacer(),
+                Text("Credit: ", style: TextStyle(color: Colors.green, fontSize: 18)),
                 Text("${customerDetail!.credit}", style: TextStyle(color: Colors.green, fontSize: 16)),
                 SizedBox(width: 20),
-                Text("Overdue: ", style: TextStyle(color: Colors.red, fontSize: 16)),
+                Text("Overdue: ", style: TextStyle(color: Colors.red, fontSize: 18)),
                 Text("${customerDetail!.overdueDept}", style: TextStyle(color: Colors.red, fontSize: 16)),
+                Spacer()
               ],
             ),
             Expanded(
@@ -84,8 +93,8 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
                   children: [
                     TabBar(
                       tabs: [
-                        Tab(text: 'Orders'),
-                        Tab(text: 'Invoices'),
+                        Tab(child: Text('Orders',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),),
+                        Tab(child: Text('Invoices',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
                       ],
                     ),
                     Expanded(
@@ -106,14 +115,14 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
                                   Row(
                                     children: [
                                       Text(order.name.length>12 ? order.name.substring(0,12): order.name,
-                                          style: TextStyle(fontSize: 16)),
+                                          style: TextStyle(fontSize: 14)),
                                       SizedBox(width: 15),
                                       Text('Total: \€${order.amountTotal.toStringAsFixed(2)}',
                                           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                                      SizedBox(width: 15),
+                                      Spacer(),
                                       Text(
                                         order.createDate.length>10 ? order.createDate.substring(0,10) : order.createDate,
-                                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                                       ),
 
 
@@ -186,7 +195,7 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(invoice.name.length>50 ? invoice.name.substring(0,50): invoice.name,
-                                      style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold)),
+                                      style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
                                   Row(
                                     children: [
                                       Text(
@@ -201,7 +210,7 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
                                       Text('Total: \€${invoice.amountTotalSigned.toStringAsFixed(2)}',
                                           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
 
-                                      SizedBox(width: 15),
+                                      Spacer(),
                                       Text(
                                         invoice.invoiceDate!.length>10 ? invoice.invoiceDate!.substring(0,10) : invoice.invoiceDate!,
                                         style: TextStyle(fontSize: 14),
@@ -212,7 +221,6 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
 
                                     ],
                                   ),
-                                  SizedBox(height: 8),
                                   SizedBox(height: 8),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

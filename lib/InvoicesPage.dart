@@ -118,29 +118,29 @@ class _InvoicesPageState extends State<InvoicesPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(invoice.partnerName.length>50 ? invoice.partnerName.substring(0,50): invoice.partnerName,
-                              style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
+                              style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold)),
                           SizedBox(height: 5),
                           Row(
                             children: [
                               Text(
                                 invoice.paymentState,
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 11,
                                   color: invoice.paymentState.toLowerCase() == "paid" ? Colors.green : Colors.red,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              SizedBox(width: 12),
+                              SizedBox(width: 8),
                               Text('Total: \€${invoice.amountTotal.toStringAsFixed(2)}',
-                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
 
-                              SizedBox(width: 12),
+                              SizedBox(width: 8),
                               Text(invoice.overdueDay,
-                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color:  Colors.red,)),
+                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color:  Colors.red,)),
                               Spacer(),
                               Text(
                                 invoice.invoiceDate.length>10 ? invoice.invoiceDate.substring(0,10) : invoice.invoiceDate,
-                                style: TextStyle(fontSize: 12),
+                                style: TextStyle(fontSize: 11),
                               ),
                             ],
                           ),

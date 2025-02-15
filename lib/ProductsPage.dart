@@ -231,7 +231,7 @@ class _ProductPageState extends State<ProductPage> {
                       onTap: () => _showAddToCartModal(context, product),
                       child: Card(
                         elevation: 4,
-                        margin: const EdgeInsets.all(8),
+                        margin: const EdgeInsets.all(5),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -251,7 +251,7 @@ class _ProductPageState extends State<ProductPage> {
                                 product.name,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 12,
+                                  fontSize: 10,
                                 ),
                               ),
                             ),
@@ -260,7 +260,7 @@ class _ProductPageState extends State<ProductPage> {
                               const EdgeInsets.symmetric(horizontal: 2.0),
                               child: Text(
                                 'Stock: ${product.stockCount}',
-                                style: const TextStyle(fontSize: 11,color: Colors.black,
+                                style: const TextStyle(fontSize: 10,color: Colors.black,
                                     fontWeight: FontWeight.bold),
                               ),
                             ),
@@ -290,119 +290,121 @@ class _ProductPageState extends State<ProductPage> {
       controller.text = currentValue.toString();
     }
 
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
       builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Ürün Bilgileri
-              Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      product.imageUrl,
-                      height: 60,
-                      fit: BoxFit.fitHeight,
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Ürün Bilgileri
+                Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        product.imageUrl,
+                        height: 60,
+                        fit: BoxFit.fitHeight,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            product.name,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'Stock: ${product.stockCount}',
+                            style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                // 📌 Adet (Piece) Seçimi
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Piece Quantity', style: TextStyle(fontSize: 12)),
+                    Row(
                       children: [
-                        Text(
-                          product.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          'Stock: ${product.stockCount}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold
-                          ),
-                        ),
+                        _buildQuantityButton(() => updateQuantity(pieceController, -1), Icons.remove),
+                        _buildEditableQuantityField(pieceController),
+                        _buildQuantityButton(() => updateQuantity(pieceController, 1), Icons.add),
                       ],
                     ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                // 📌 Kutu (Box) Seçimi
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Box Quantity', style: TextStyle(fontSize: 12)),
+                    Row(
+                      children: [
+                        _buildQuantityButton(() => updateQuantity(boxController, -1), Icons.remove),
+                        _buildEditableQuantityField(boxController),
+                        _buildQuantityButton(() => updateQuantity(boxController, 1), Icons.add),
+                      ],
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                ElevatedButton(
+                  onPressed: () {
+                    int pieceQuantity = int.tryParse(pieceController.text) ?? 0;
+                    int boxQuantity = int.tryParse(boxController.text) ?? 1;
+
+                    _addToCart(context, product.id, pieceQuantity, boxQuantity);
+                    Navigator.pop(context); // Modalı kapat
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // 📌 Adet (Piece) Seçimi
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Piece Quantity', style: TextStyle(fontSize: 16)),
-                  Row(
-                    children: [
-                      _buildQuantityButton(() => updateQuantity(pieceController, -1), Icons.remove),
-                      _buildEditableQuantityField(pieceController),
-                      _buildQuantityButton(() => updateQuantity(pieceController, 1), Icons.add),
-                    ],
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // 📌 Kutu (Box) Seçimi
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Box Quantity', style: TextStyle(fontSize: 16)),
-                  Row(
-                    children: [
-                      _buildQuantityButton(() => updateQuantity(boxController, -1), Icons.remove),
-                      _buildEditableQuantityField(boxController),
-                      _buildQuantityButton(() => updateQuantity(boxController, 1), Icons.add),
-                    ],
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // 📌 Sepete Ekle Butonu
-              ElevatedButton(
-                onPressed: () {
-                  int pieceQuantity = int.tryParse(pieceController.text) ?? 0;
-                  int boxQuantity = int.tryParse(boxController.text) ?? 1;
-
-                  _addToCart(context, product.id, pieceQuantity, boxQuantity);
-                  Navigator.pop(context); // Modalı kapat
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                  child: const Center(
+                    child: Text(
+                      'Add to Cart',
+                      style: TextStyle(fontSize: 16),
+                    ),
                   ),
                 ),
-                child: const Center(
-                  child: Text(
-                    'Add to Cart',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
     );
   }
+
 
   // + / - Butonları
   Widget _buildQuantityButton(VoidCallback onPressed, IconData icon) {
@@ -414,21 +416,19 @@ class _ProductPageState extends State<ProductPage> {
     );
   }
 
-// Sayı Girişi (Edit edilebilir alan)
-// Sayı Girişi (Edit edilebilir alan)
-// Sayı Girişi (Edit edilebilir alan)
   Widget _buildEditableQuantityField(TextEditingController controller) {
     return SizedBox(
-      width: 60, // Aradaki alanı genişlettik
+      width: 100, // Aradaki alanı genişlettik
       child: TextField(
         controller: controller,
         textAlign: TextAlign.center,
-        keyboardType: TextInputType.number,
+        keyboardType: TextInputType.numberWithOptions(decimal: true,signed: false), // Sayı ve sadece tam sayılar
         inputFormatters: [
           FilteringTextInputFormatter.digitsOnly, // Sadece sayı girilebilir
         ],
         decoration: const InputDecoration(
           contentPadding: EdgeInsets.symmetric(vertical: 10), // Daha iyi hizalama
+          suffixIcon: Icon(Icons.done), // 'Done' simgesi, isteğe bağlı
         ),
         onTap: () {
           // Tıklanınca içeriği temizle
@@ -443,8 +443,10 @@ class _ProductPageState extends State<ProductPage> {
             ),
           );
         },
+        textInputAction: TextInputAction.done, // "Done" butonunu aktif yap
       ),
     );
   }
+
 
 }
