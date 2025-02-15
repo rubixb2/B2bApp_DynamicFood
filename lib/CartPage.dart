@@ -115,7 +115,7 @@ class _CartPageState extends State<CartPage> {
         title:Row(children: [
           Text(
             '$_cartId-${_customerName.length > 10 ? _customerName.substring(0, 10) : _customerName}'
-            ,style: TextStyle(fontSize: 14)
+            ,style: TextStyle(fontSize: 12)
         ),
           Spacer(),
           FutureBuilder<CartResponseModel?>(
@@ -138,14 +138,14 @@ class _CartPageState extends State<CartPage> {
               return Row(children: [
               Text(
               'Total: \€${cartAmount.toStringAsFixed(2)}', // Ondalık basamak ekleyerek düzgün görünmesini sağlıyoruz
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
 
 
               ),
                 SizedBox(width: 15),
                 Text(
                   'T.Total: \€${cartAmountTaxed.toStringAsFixed(2)}', // Ondalık basamak ekleyerek düzgün görünmesini sağlıyoruz
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                 ),
               ],);
             },

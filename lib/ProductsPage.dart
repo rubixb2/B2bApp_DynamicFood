@@ -231,7 +231,7 @@ class _ProductPageState extends State<ProductPage> {
                       onTap: () => _showAddToCartModal(context, product),
                       child: Card(
                         elevation: 4,
-                        margin: const EdgeInsets.all(8),
+                        margin: const EdgeInsets.all(5),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -251,7 +251,7 @@ class _ProductPageState extends State<ProductPage> {
                                 product.name,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 12,
+                                  fontSize: 10,
                                 ),
                               ),
                             ),
@@ -260,7 +260,7 @@ class _ProductPageState extends State<ProductPage> {
                               const EdgeInsets.symmetric(horizontal: 2.0),
                               child: Text(
                                 'Stock: ${product.stockCount}',
-                                style: const TextStyle(fontSize: 11,color: Colors.black,
+                                style: const TextStyle(fontSize: 10,color: Colors.black,
                                     fontWeight: FontWeight.bold),
                               ),
                             ),
@@ -414,21 +414,19 @@ class _ProductPageState extends State<ProductPage> {
     );
   }
 
-// Sayı Girişi (Edit edilebilir alan)
-// Sayı Girişi (Edit edilebilir alan)
-// Sayı Girişi (Edit edilebilir alan)
   Widget _buildEditableQuantityField(TextEditingController controller) {
     return SizedBox(
       width: 60, // Aradaki alanı genişlettik
       child: TextField(
         controller: controller,
         textAlign: TextAlign.center,
-        keyboardType: TextInputType.number,
+        keyboardType: TextInputType.numberWithOptions(decimal: true,signed: false), // Sayı ve sadece tam sayılar
         inputFormatters: [
           FilteringTextInputFormatter.digitsOnly, // Sadece sayı girilebilir
         ],
         decoration: const InputDecoration(
           contentPadding: EdgeInsets.symmetric(vertical: 10), // Daha iyi hizalama
+          suffixIcon: Icon(Icons.done), // 'Done' simgesi, isteğe bağlı
         ),
         onTap: () {
           // Tıklanınca içeriği temizle
@@ -443,8 +441,10 @@ class _ProductPageState extends State<ProductPage> {
             ),
           );
         },
+        textInputAction: TextInputAction.done, // "Done" butonunu aktif yap
       ),
     );
   }
+
 
 }

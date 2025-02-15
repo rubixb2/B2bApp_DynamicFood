@@ -86,25 +86,25 @@ class _OrdersPageState extends State<OrdersPage> {
                         /*Text((order.partnerName.length>50 ? order.partnerName.substring(0,50): order.partnerName)+"-"+order.cartId.toString() +"-"+order.id.toString(),
                             style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold)),*/
                         Text((order.partnerName.length>50 ? order.partnerName.substring(0,50): order.partnerName),
-                            style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
+                            style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold)),
                         SizedBox(height: 5),
                         Row(
                           children: [
                             Text(
                               order.orderCompleteStatus ? 'Completed' : 'Pending',
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 12,
                                 color: order.orderCompleteStatus ? Colors.green : Colors.red,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             SizedBox(width: 10),
                             Text('Total: \€${order.amountTotal.toStringAsFixed(2)}',
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                             Spacer(),
                             Text(
                               order.dateOrder.length>10 ? order.dateOrder.substring(0,10) : order.dateOrder,
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                             ),
 
 
@@ -120,25 +120,25 @@ class _OrdersPageState extends State<OrdersPage> {
                               onPressed: order.orderCompleteStatus == false
                                   ? () => completeOrder(order.id)
                                   : null,
-                              child: Text('Complete'),
+                              child: Text('Complete',style: TextStyle(fontSize: 12)),
                             ) ,
                             ElevatedButton(
                               onPressed: order.orderCompleteStatus == false
                                   ? () => discount(order.id)
                                   : null,
-                              child: Text('Discount'),
+                              child: Text('Discount',style: TextStyle(fontSize: 12)),
                             ) ,
                             ElevatedButton(
                               onPressed: order.orderCompleteStatus == false
                                   ? () => editOrder(order.cartId,order.partnerName ?? "-",order.partnerid)
                                   : null,
-                              child: Text('Edit'),
+                              child: Text('Edit',style: TextStyle(fontSize: 12)),
                             ) ,
                             ElevatedButton(
                               onPressed: order.orderPdfUrl.isNotEmpty
                                   ? () => _openPdf(order.orderPdfUrl)
                                   : null,
-                              child: Text('PDF'),
+                              child: Text('PDF',style: TextStyle(fontSize: 12)),
                             ),
                             /*ElevatedButton(
                             onPressed: order.invoicePdfUrl.isNotEmpty
