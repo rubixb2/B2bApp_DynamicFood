@@ -1,3 +1,4 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:odoosaleapp/services/CustomerService.dart';
@@ -8,6 +9,7 @@ import 'package:odoosaleapp/theme.dart';
 import 'helpers/PdfScreen.dart';
 import 'helpers/SessionManager.dart';
 import 'models/customer/CustomersDetailResponseModel.dart';
+import 'models/invoice/PaymentLineTypeResponseModel.dart';
 
 
 class CustomerDetail extends StatefulWidget {
@@ -23,6 +25,14 @@ class CustomerDetail extends StatefulWidget {
 class _CustomerDetailModalState extends State<CustomerDetail> {
   CustomersDetailResponseModel? customerDetail;
   bool isLoading = true;
+  String _amount = '';
+  double amount = 0;
+  int selectedId = 0;
+  int selectedMethodId = 0;
+  bool _isAddButtonEnabled = true;
+  PaymentMethod? selectedMethod; // Seçili müşteri
+  late Future<PaymentLineTypeResponseModel?> dropListFuture = Future.value();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -51,6 +61,7 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
       print('Error fetching customer detail: $e');
     }
   }
+
   String _getSessionId() {
     return SessionManager().sessionId ?? "";
   }
@@ -126,9 +137,6 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
                                         order.createDate.length>10 ? order.createDate.substring(0,10) : order.createDate,
                                         style: AppTextStyles.bodyTextBold,
                                       ),
-
-
-
                                     ],
                                   ),
                                   SizedBox(height: 8),
@@ -148,7 +156,7 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
 
                                       ElevatedButton(
                                         onPressed: order.invoiceStatus != 'invoiced'
-                                            ? () => completeOrder(order.id)
+                                            ? () => _confirmCompleteOrder(order.id)
                                             : null,
                                         child: Text('Complete',style: AppTextStyles.buttonTextWhite),
                                         style: AppButtonStyles.secondaryButton,
@@ -234,7 +242,7 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
 
                                       ElevatedButton(
                                         onPressed: (invoice.paymentState ?? "").toLowerCase() != "paid"
-                                            ? () => _addPayment(invoice.id)
+                                            ? () => _openAddPaymentModal(invoice.id)
                                             : null,
                                         child: Text('Add Payment',style: AppTextStyles.buttonTextWhite),
                                         style: AppButtonStyles.secondaryButton,
@@ -288,7 +296,7 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirm Payment'),
+          title: Text('Confirm Refund'),
           content: Text(
             'Order will be refund. Do you confirm?',style: AppTextStyles.buttonTextBlack,),
           actions: [
@@ -312,23 +320,64 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
       },
     );
   }
+
   Future<void> _makeORefund(int invoiceId) async {
     var res = await InvoiceService().refund(sessionId: _getSessionId(),invoiceId: invoiceId);
     if (res)
     {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Refund success..')),
+        SnackBar(
+          content: Text('Refund successfully!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
       );
+      await Future.delayed(const Duration(seconds: 2));
+      /*  ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Refund success..')),
+      );*/
       Navigator.pop(context);
     }
     else
     {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occured..')),
-
+        SnackBar(
+          content: Text('An error occured.'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
       );
     }
   }
+
+  void _confirmCompleteOrder(int id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Complete Order'),
+          content: const Text('Order will be completed, Do you confirm?',style: AppTextStyles.buttonTextBlack),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), // İptal butonu
+              child: const Text('Cancel',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.notrButton,
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Dialog'u kapat
+                completeOrder(id); // Sepeti sil
+              },
+              child: const Text('Confirm', style: AppTextStyles.buttonTextWhite),
+              style: AppButtonStyles.confimButton,
+
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void completeOrder(int id) async {
     try {
       final sessionId = _getSessionId();
@@ -340,10 +389,26 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
       );
 
       if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Order completed successfully!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
 
-        setState(() {
-       //   _initializeOrders();
-        });
+        fetchCustomerDetail();
+
+      }
+      else
+      {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An error occured!'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -351,16 +416,201 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
       );
     }
   }
+
   void _openPdf(String url) {
     // Burada PDF açma işlemi yapılabilir (Örneğin: launch(url) kullanarak)
     print('Opening PDF: $url');
     // url = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
     openPdf(context, url);
   }
-  void _addPayment(int id) {
 
+  void _openAddPaymentModal(int id) {
+    selectedId = id;
+    // _isAddButtonEnabled=false;
+    // _selectedMethod = null;
+    selectedMethod=null;
+    _amount = "";
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Add Payment'),
+          content: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FutureBuilder<PaymentLineTypeResponseModel?>(
+                  future: dropListFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    }
+
+                    final dropList = snapshot.data!.PaymentTypeList;
+                    if (dropList == null || dropList.isEmpty) {
+                      return const Center(
+                          child: Text('No customers available.'));
+                    }
+
+                    return DropdownSearch<PaymentMethod>(
+                      selectedItem: selectedMethod,
+                      popupProps: PopupProps.dialog(
+                        showSearchBox: false, // Arama kutusunu gösterir
+                        searchFieldProps: TextFieldProps(
+                          decoration: InputDecoration(
+                            labelText: "Search Customer",
+                            hintText: "Type to search",
+                          ),
+                        ),
+                      ),
+                      dropdownDecoratorProps: const DropDownDecoratorProps(
+                        dropdownSearchDecoration: InputDecoration(
+                          labelText: "Select Payment Method",
+                          hintText: "Search Method",
+                        ),
+                      ),
+                      asyncItems: (String filter) async {
+                        // Filtreyi kullanarak veriyi dinamik olarak çek
+                        final filteredList = await _fetchPaymentMethods();
+                        return filteredList!.PaymentTypeList;
+                      },
+                      itemAsString: (PaymentMethod customer) => customer.name,
+                      onChanged: (value) {
+                        setState(() {
+                          selectedMethodId = value != null ? value!.id : 0;
+                          selectedMethod = value;
+                        });
+                      },
+                    );
+                  },
+                ),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Amount'),
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) {
+                    setState(() {
+                      _amount = value;
+                      amount = double.tryParse(_amount.replaceAll(",", ".")) ?? 0;
+                      // _validateForm();
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an amount';
+                    }
+                    if (double.tryParse(value) == null) {
+                      return 'Enter a valid number';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.notrButton,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text('Add',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.confimButton,
+              onPressed: _isAddButtonEnabled
+                  ? () {
+
+                _confirmPayment();
+              }
+                  : null,
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void _confirmPayment() {
+
+    amount>0 && selectedMethodId>0 ?
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Payment'),
+          content: Text(
+              'A payment of €$amount will be recorded. Do you confirm?',style: AppTextStyles.buttonTextBlack),
+          actions: [
+            TextButton(
+              child: Text('Cancel',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.notrButton,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text('Confirm',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.confimButton,
+              onPressed: () {
+                Navigator.of(context).pop();
+                _makePayment();
+              },
+            ),
+          ],
+        );
+      },
+    ): null;
+  }
+  Future<void> _makePayment() async {
+    var res = await InvoiceService().addPayment(sessionId: _getSessionId(),amount: amount,invoiceId: selectedId,paymentType: selectedMethodId);
+    if (res)
+    {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text( amount.toString() + 'Payment added successfully!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      await Future.delayed(const Duration(seconds: 2));
+
+      setState(() {
+        selectedId = 0;
+        selectedMethodId = 0;
+        amount = 0;
+        _amount = "";
+      });
+      await Future.delayed(const Duration(seconds: 2));
+      Navigator.pop(context);
+    }
+    else
+    {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('An error occured.'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+
+  Future<PaymentLineTypeResponseModel?> _fetchPaymentMethods() async {
+    try {
+      dropListFuture = InvoiceService().fetchPaymentMethods(sessionId: _getSessionId());
+      return dropListFuture ?? null ;
+    } catch (e) {
+      print("Error fetching payment methods: $e");
+    }
 
   }
+
   void openPdf(BuildContext context, String url) {
     Navigator.push(
       context,

@@ -1,33 +1,48 @@
-
-
 import 'package:flutter/material.dart';
-//import 'package:fluttertoast/fluttertoast.dart';
 import 'package:odoosaleapp/services/UserService.dart';
-
+import 'package:odoosaleapp/theme.dart';
+import 'SignUpPage.dart';
 import 'helpers/SessionManager.dart';
 
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
-class LoginPage extends StatelessWidget {
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool isLoading = false;
 
-  LoginPage({super.key});
+  void handleLogin(BuildContext context, bool guest) async {
+    String username = "";
+    String password = "";
 
+    if (!guest) {
+      username = emailController.text;
+      password = passwordController.text;
+    } else {
+      username = "app@canlar.be";
+      password = "123";
+    }
 
-  void handleLogin(BuildContext context) async {
-    final username = emailController.text;
-    final password = passwordController.text;
+    setState(() {
+      isLoading = true;
+    });
 
     final apiService = UserService();
     final data = await apiService.login(username, password);
+
+    setState(() {
+      isLoading = false;
+    });
 
     if (data != null) {
       SessionManager().setSessionId(data['SessionId']);
       SessionManager().setUserName(username);
       SessionManager().setUserId(data['UserId']);
-     /* await UserPreferences.saveUserInfo(
-        data['SessionId']
-      );*/
 
       Navigator.pushReplacementNamed(context, '/home');
     } else {
@@ -40,9 +55,6 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-  /*    appBar: AppBar(
-        title: Text('Login'),
-      ),*/
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -71,46 +83,54 @@ class LoginPage extends StatelessWidget {
               obscureText: true,
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                handleLogin(context);
-                /*Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => HomePage()),
-                );*/
-              },
-              child: const Text('Login'),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: isLoading ? null : () => handleLogin(context, false),
+                child: isLoading
+                    ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+                    : const Text('Login', style: AppTextStyles.buttonTextWhite),
+                style: AppButtonStyles.primaryButton,
+              ),
             ),
             const SizedBox(height: 20),
             Center(
               child: Row(
                 children: [
-                  Spacer(),
+                  const Spacer(),
                   GestureDetector(
                     onTap: () {
-                      //  Fluttertoast.showToast(msg: "Forgot Password Clicked!");
+                      handleLogin(context, true);
                     },
                     child: const Text(
-                      'Forgot Password?',
-                      style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+                      'Guest',
+                      style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline,fontSize: 16),
                     ),
                   ),
                   const SizedBox(width: 50),
                   GestureDetector(
                     onTap: () {
-                      //  Fluttertoast.showToast(msg: "Sign Up Clicked!");
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SignUpPage()),
+                      );
                     },
                     child: const Text(
                       'Sign Up',
-                      style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+                      style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline,fontSize: 16),
                     ),
                   ),
-                  Spacer()
+                  const Spacer()
                 ],
               ),
             ),
-
-
           ],
         ),
       ),

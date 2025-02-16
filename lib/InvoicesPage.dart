@@ -219,25 +219,38 @@ class _InvoicesPageState extends State<InvoicesPage> {
 
   Future<void> _makePayment() async {
     var res = await InvoiceService().addPayment(sessionId: _getSessionId(),amount: amount,invoiceId: selectedId,paymentType: selectedMethodId);
-    if (true)
+    if (res)
       {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text( amount.toString() + 'Payment added successfully!')),
-
+           SnackBar(
+            content: Text( amount.toString() + 'Payment added successfully!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
         );
+        await Future.delayed(const Duration(seconds: 2));
+
         setState(() {
           selectedId = 0;
           selectedMethodId = 0;
           amount = 0;
           _amount = "";
         });
+        await Future.delayed(const Duration(seconds: 2));
         Navigator.pop(context);
       }
     else
-      {
-
-      }
+    {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('An error occured.'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
+
   void _confirmPayment() {
 
     amount>0 && selectedMethodId>0 ?
@@ -418,15 +431,26 @@ class _InvoicesPageState extends State<InvoicesPage> {
     if (res)
     {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Refund success..')),
+        SnackBar(
+          content: Text('Refund successfully!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
       );
+      await Future.delayed(const Duration(seconds: 2));
+    /*  ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Refund success..')),
+      );*/
       Navigator.pop(context);
     }
     else
     {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occured..')),
-
+        SnackBar(
+          content: Text('An error occured.'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
       );
     }
   }

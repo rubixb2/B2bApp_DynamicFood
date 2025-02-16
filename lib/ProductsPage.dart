@@ -130,8 +130,13 @@ class _ProductPageState extends State<ProductPage> {
 
       if (res) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Product added to cart successfully!')),
+          SnackBar(
+            content: Text('Product added'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 1),
+          ),
         );
+
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -413,7 +418,7 @@ class _ProductPageState extends State<ProductPage> {
         ],
         decoration: const InputDecoration(
           contentPadding: EdgeInsets.symmetric(vertical: 10), // Daha iyi hizalama
-          suffixIcon: Icon(Icons.done), // 'Done' simgesi, isteğe bağlı
+    //      suffixIcon: Icon(Icons.done), // 'Done' simgesi, isteğe bağlı
         ),
         onTap: () {
           // Tıklanınca içeriği temizle

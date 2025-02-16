@@ -103,7 +103,8 @@ class OrderService {
   }
 
   Future<bool> orderEdit(
-      {required String sessionId, required int cartId}) async {
+      {
+        required String sessionId, required int cartId}) async {
     try {
       final response = await http.post(
         Uri.parse(_editOrderUrl),
@@ -116,14 +117,13 @@ class OrderService {
         if (data['Control'] == 1) {
           return true;
         } else {
-          throw Exception(data['Message']);
+          return false;
         }
       } else {
         throw Exception('Failed to update product');
       }
     } catch (e) {
-      print('Error updating product: $e');
-      rethrow;
+      return false;
     }
   }
 

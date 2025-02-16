@@ -3,6 +3,7 @@ import 'package:odoosaleapp/models/customer/CustomerApiResponse.dart';
 import 'package:odoosaleapp/services/CustomerService.dart';
 import 'package:odoosaleapp/theme.dart';
 
+import 'CustomerAddPage.dart';
 import 'CustomerDetail.dart';
 import 'helpers/SessionManager.dart';
 
@@ -41,22 +42,41 @@ class _CustomersPageState extends State<CustomersPage> {
         body: Column(children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: searchController,
-              onChanged: (value) {
-                _initializeCustomers(searchKey: value);
-              },
-              decoration: InputDecoration(
-                labelText: 'Search Customer',
-                hintText: 'Enter customer name',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: searchController,
+                    onChanged: (value) {
+                      _initializeCustomers(searchKey: value);
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Search Customer',
+                      hintText: 'Enter customer name',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: const Icon(Icons.search),
+                    ),
+                  ),
                 ),
-                prefixIcon: const Icon(Icons.search),
-              ),
+                ElevatedButton(
+                  onPressed: () {
+                    _openCustomerAdd(context);
+                  },
+                  style: AppButtonStyles.primaryButton,
+                  child: const Center(
+                    child: Text(
+                      'Add',
+                      style: AppTextStyles.buttonTextWhite,
+                    ),
+                  ),
+                ),
+
+              ],
             ),
           ),
-          Expanded(child:   FutureBuilder<CustomerApiResponse?>(
+        Expanded(child:   FutureBuilder<CustomerApiResponse?>(
             future: invoicesFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -138,5 +158,15 @@ class _CustomersPageState extends State<CustomersPage> {
       ),
     );
   }
+  void _openCustomerAdd(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CustomerAddPage(),
+        //builder: (context) => PdfViewerScreen(pdfUrl: url),
+      ),
+    );
+  }
+
 
 }

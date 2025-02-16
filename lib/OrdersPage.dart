@@ -162,13 +162,6 @@ class _OrdersPageState extends State<OrdersPage> {
         )
       ],
       )
-
-
-
-
-
-
-
     );
   }
 
@@ -204,6 +197,7 @@ class _OrdersPageState extends State<OrdersPage> {
       },
     );
   }
+
   void completeOrder(int id) async {
     try {
       final sessionId = _getSessionId();
@@ -215,10 +209,26 @@ class _OrdersPageState extends State<OrdersPage> {
       );
 
       if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Order completed successfully!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
 
-        setState(() {
-          _initializeOrders();
-        });
+        _initializeOrders();
+
+      }
+      else
+      {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An error occured!'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -230,6 +240,7 @@ class _OrdersPageState extends State<OrdersPage> {
   void discount(int id) {
     showDiscountModal(id);
   }
+
   void editOrder(int cartId,String custonerName,int customerId) {
     _confirmEdit(cartId,custonerName,customerId);
   }
@@ -296,7 +307,11 @@ class _OrdersPageState extends State<OrdersPage> {
               onPressed: () {
                 if (selectedType.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Please enter a discount value",style: AppTextStyles.buttonTextBlack)),
+                    SnackBar(
+                      content: Text('İnvalid value'),
+                      backgroundColor: Colors.red,
+                      duration: Duration(seconds: 1),
+                    ),
                   );
                   return;
                 }
@@ -305,7 +320,8 @@ class _OrdersPageState extends State<OrdersPage> {
                     ? double.parse(percentageController.text)
                     : double.parse(amountController.text);
 
-                _confirmDiscount(id, discountValue, selectedType);
+               // _confirmDiscount(id, discountValue, selectedType);
+                _applyDiscount(id, discountValue, selectedType);
                 Navigator.of(context).pop();
               },
               child: Text("Apply", style: AppTextStyles.buttonTextWhite),
@@ -330,9 +346,24 @@ class _OrdersPageState extends State<OrdersPage> {
 
       if (res) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Discount apply successfully!')),
+          SnackBar(
+            content: Text('Discount apply successfully!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
         );
+       _initializeOrders();
       }
+      else
+        {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('An error occured!'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to discount apply: $e')),
@@ -411,15 +442,22 @@ class _OrdersPageState extends State<OrdersPage> {
       SessionManager().setCustomerId(customerId);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Edit Success, Please check cart')),
-
+        SnackBar(
+          content: Text('Your cart is updated, please check your cart'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
       );
       Navigator.pop(context);
     }
     else
     {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occured..')),
+        SnackBar(
+          content: Text('An error occured!'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
       );
     }
   }

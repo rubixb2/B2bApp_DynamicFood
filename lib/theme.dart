@@ -2,16 +2,37 @@ import 'package:flutter/material.dart';
 
 // Renk Paleti
 class AppColors {
-  static const Color primaryColor = Color(0xFF6200EE);
+ /* static const Color primaryColor = Color(0xFF6200EE);
   static const Color secondaryColor = Color(0xFF8900EE);
   static const Color backgroundColor = Color(0xFFF5F5F5);
   static const Color dangerColor = Color(0xFFB00020);
   static const Color confirmColor = Color(0xFF4CAF50);
   static const Color neutralColor = Color(0xFF9E9E9E);
   static const Color textColor = Color(0xFF333333);
-  static const Color textColorWhite = Color(0xFFffffff);
+  static const Color textColorWhite = Color(0xFFffffff);*/
 
-  /*Primary (Ana): 0xFF6200EE (Mor)
+  static const Color primaryColor = Color(0xFF673AB7); // Daha koyu pastel mor
+  static const Color secondaryColor = Color(0xFF7E57C2); // Daha doygun eflatun
+  static const Color backgroundColor = Color(0xFFEFEFEF); // Hafif kırık beyaz
+  static const Color dangerColor = Color(0xFFEF5350); // Daha koyu pastel kırmızı
+  static const Color confirmColor = Color(0xFF66BB6A); // Daha doygun pastel yeşil
+  static const Color neutralColor = Color(0xFF9E9E9E); // Orta koyulukta gri
+  static const Color textColor = Color(0xFF303030); // Daha koyu gri
+  static const Color textColorWhite = Color(0xFFFFFFFF); // Beyaz (değiştirmedim)
+
+
+ /* static const Color primaryColor = Color(0xFF7C4DFF); // Daha yoğun pastel mor
+  static const Color secondaryColor = Color(0xFF965AFF); // Biraz daha belirgin eflatun
+  static const Color backgroundColor = Color(0xFFF2F2F2); // Çok hafif kırık beyaz
+  static const Color dangerColor = Color(0xFFFF8080); // Daha belirgin pastel kırmızı
+  static const Color confirmColor = Color(0xFF81C784); // Daha doygun pastel yeşil
+  static const Color neutralColor = Color(0xFFBDBDBD); // Orta tonlu pastel gri
+  static const Color textColor = Color(0xFF424242); // Orta koyulukta gri
+  static const Color textColorWhite = Color(0xFFFFFFFF); // Beyaz (değiştirmedim)*/
+
+
+
+/*Primary (Ana): 0xFF6200EE (Mor)
 Secondary (İkincil): 0xFF03DAC6 (Turkuaz)
 Danger (Tehlike): 0xFFB00020 (Kırmızı)
 Confirm (Onay): 0xFF4CAF50 (Yeşil)

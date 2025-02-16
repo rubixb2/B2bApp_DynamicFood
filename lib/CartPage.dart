@@ -214,13 +214,16 @@ class _CartPageState extends State<CartPage> {
           Expanded(child: FutureBuilder<CartResponseModel?>(
               future: cartFuture,
               builder: (context, snapshot) {
-                if (snapshot.hasError) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else
+                  if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
-
                 final cart = snapshot.data;
                 if (cart == null || cart.cartProducts.isEmpty) {
-                  return const Center(child: Text('Cart is empty.',style: AppTextStyles.list1,));
+                 // return const Center(child: CircularProgressIndicator());
+                  return const Center(child: Text('Cart is Empty',style: AppTextStyles.list2,));
                 }
 
                 return ListView.builder(
