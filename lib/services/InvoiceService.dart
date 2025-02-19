@@ -10,6 +10,7 @@ class InvoiceService {
   final String _baseUrl = SessionManager().baseUrl+'bills/List';
   final String _getPaymentMethodsUrl = SessionManager().baseUrl+'bills/PaymentLineTypes';
   final String _addpaymentUrl = SessionManager().baseUrl+'bills/addpayment';
+  final String _previewUrl = SessionManager().baseUrl+'bills/preview';
   final String _refundUrl = SessionManager().baseUrl+'bills/refund';
 
 
@@ -67,6 +68,7 @@ class InvoiceService {
       return null;
     }
   }
+
   Future<bool> addPayment(
       {required String sessionId,required int invoiceId,required int paymentType, required double amount}) async {
     try {
@@ -90,6 +92,33 @@ class InvoiceService {
     } catch (e) {
       print('Error: $e');
       return false;
+    }
+  }
+
+  Future<String?> preview(
+      {required String sessionId,required int invoiceId}) async {
+    try {
+      final response = await http.post(
+        Uri.parse(_previewUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'sessionId': sessionId,'invoiceId': invoiceId}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['Control'] == 1) {
+          var pdfUrl = data['Date']['pdfUrl'];
+          return pdfUrl;
+        } else {
+          var msg = data['Message'];
+          return null;
+        }
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Error: $e');
+      return null;
     }
   }
   Future<bool> refund(

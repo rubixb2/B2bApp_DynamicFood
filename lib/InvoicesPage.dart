@@ -167,7 +167,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
                               ElevatedButton(
                                 onPressed: invoice.accessUrl.isNotEmpty
                                     ? () => _openPdf(invoice.accessUrl)
-                                    : null,
+                                    : () => _prewiew(invoice.id),
                                 child: Text('PDF',style: AppTextStyles.buttonTextWhite),
                                 style: AppButtonStyles.secondaryButton,
                               ),
@@ -198,6 +198,25 @@ class _InvoicesPageState extends State<InvoicesPage> {
     print('Opening PDF: $url');
     // url = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
     openPdf(context, url);
+  }
+  Future<void> _prewiew(int id) async {
+
+    var url = await InvoiceService().preview(sessionId: _getSessionId(), invoiceId: id);
+
+    if(url != null)
+      {
+        openPdf(context, url);
+      }
+    else
+      {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An error occured.'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
   }
 
   void completeOrder(int id) {
