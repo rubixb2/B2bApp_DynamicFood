@@ -35,7 +35,7 @@ class _CustomerAddPageState extends State<CustomerAddPage> {
 
   String? validateCompanyName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Company Name gerekli';
+      return 'Company Name required';
     }
     return null;
   }

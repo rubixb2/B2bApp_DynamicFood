@@ -103,7 +103,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
               } else if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else if (!snapshot.hasData) {
-                return Center(child: Text('No invoice found.',style: AppTextStyles.list1,));
+                return Center(child: Text('No invoice found.',style: AppTextStyles.list2,));
               }
               final invoices = snapshot.data!.bills;
               return ListView.builder(
@@ -199,14 +199,15 @@ class _InvoicesPageState extends State<InvoicesPage> {
     // url = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
     openPdf(context, url);
   }
+
   void completeOrder(int id) {
     // Burada PDF açma işlemi yapılabilir (Örneğin: launch(url) kullanarak)
     print('Opening PDF: $id');
   }
+
   void refund(int invoiceId) {
     _confirmRefund(invoiceId);
   }
-
 
   void openPdf(BuildContext context, String url) {
     Navigator.push(

@@ -8,6 +8,7 @@ class OrdersResponseModel {
   final double amountTotal;
   final bool orderCompleteStatus;
   final String orderPdfUrl;
+  final String invoicestatus;
   final String invoicePdfUrl;
 
   OrdersResponseModel({
@@ -20,6 +21,7 @@ class OrdersResponseModel {
     required this.amountTotal,
     required this.orderCompleteStatus,
     required this.orderPdfUrl,
+    required this.invoicestatus,
     required this.invoicePdfUrl,
   });
 
@@ -35,6 +37,7 @@ class OrdersResponseModel {
       amountTotal: json['amount_total'],
       orderCompleteStatus: json['order_complete_status'],
       orderPdfUrl: json['order_pdf_url'],
+      invoicestatus: json['invoice_status'],
       invoicePdfUrl: json['invoice_pdf_url']
     );
   }

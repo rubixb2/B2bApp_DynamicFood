@@ -38,6 +38,7 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
   void initState() {
     super.initState();
     fetchCustomerDetail();
+    _fetchPaymentMethods();
   }
 
   void fetchCustomerDetail() async {
@@ -383,12 +384,12 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
       final sessionId = _getSessionId();
 
       // Cart silme işlemi için servisi çağır
-      final success = await OrderService().completeOrder(
+      final pdfUrl = await OrderService().completeOrder(
         sessionId: sessionId,
         orderId: id,
       );
 
-      if (success) {
+      if (pdfUrl != null && pdfUrl.isNotEmpty)  {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Order completed successfully!'),

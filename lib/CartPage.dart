@@ -4,10 +4,14 @@ import 'package:odoosaleapp/models/cart/CartReponseModel.dart';
 import 'package:odoosaleapp/models/product/ProductsResponseModel.dart';
 import 'package:odoosaleapp/services/CartService.dart';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:odoosaleapp/services/InvoiceService.dart';
+import 'package:odoosaleapp/services/OrderService.dart';
 
+import 'helpers/PdfScreen.dart';
 import 'models/cart/CartProductModel.dart';
 import 'models/cart/CustomerDropListModel.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'models/invoice/PaymentLineTypeResponseModel.dart';
 import 'theme.dart';
 
 class CartPage extends StatefulWidget {
@@ -21,16 +25,32 @@ class _CartPageState extends State<CartPage> {
   late Future<CartResponseModel?> cartFuture = Future.value();
   final CartService cartService = CartService();
   late Future<List<CustomerDropListModel>> dropListFuture = Future.value([]);
+  late Future<PaymentLineTypeResponseModel?> paymentListFuture = Future.value();
   int _cartId = 0;
   int _customerId = 0;
   String _customerName = '';
   String _sessionId = '';
+
+  bool _orderCompleted = false;
+  bool _incoiceCreated = false;
+  String _orderPdfUrl = '';
+  String _invoicePdfUrl = '';
+  String _amount = '';
+  double amount = 0;
+  int _invoiceId = 0;
+  int paymentMethodId = 0;
+  bool _isAddButtonEnabled = true;
+  PaymentMethod? selectedMethod; // Seçili müşteri
+  final _formKey = GlobalKey<FormState>();
+
+
   CustomerDropListModel? selectedCustomer; // Seçili müşteri
 
   @override
   void initState() {
     super.initState();
     _initializeCart();
+    _fetchPaymentMethods();
   }
 
   Future<void> _initializeCart() async {
@@ -47,15 +67,26 @@ class _CartPageState extends State<CartPage> {
       setState(() {
         dropListFuture = CartService().getCustomerList(sessionId: sessionId);
         cartFuture =
-            CartService().fetchCart(sessionId: sessionId, cartId: cartId);
+            CartService().fetchCart(sessionId: sessionId, cartId: cartId,completedCart: false);
       });
     } else {
       setState(() {
         cartFuture =
-            CartService().fetchCart(sessionId: sessionId, cartId: cartId);
+            CartService().fetchCart(sessionId: sessionId, cartId: cartId,completedCart: false);
 
       });
     }
+    _cartId = _getCartId();
+    while(_cartId == 0)
+    {
+      await Future.delayed(const Duration(milliseconds: 10));
+      _cartId = _getCartId();
+    }
+    setState(() {
+      _customerName = _getCustomerName();
+      _cartId = _getCartId();
+
+    });
   }
 
   String _getSessionId() {
@@ -97,7 +128,7 @@ class _CartPageState extends State<CartPage> {
       if (true) {
         setState(() {
           cartFuture =
-              cartService.fetchCart(sessionId: sessionId, cartId: cartId);
+              cartService.fetchCart(sessionId: sessionId, cartId: cartId,completedCart: false);
         });
       } else {
         setState(() {});
@@ -420,6 +451,7 @@ class _CartPageState extends State<CartPage> {
       ),
     );
   }
+
   Future<List<CustomerDropListModel>> _fetchCustomers(String query) async {
     // Burada arama metnine göre filtreleyip veriyi getirebilirsiniz
     final allCustomers = await dropListFuture;
@@ -433,6 +465,7 @@ class _CartPageState extends State<CartPage> {
           [];
     }
   }
+
   void _deleteCart() async {
     try {
       final sessionId = _getSessionId();
@@ -444,7 +477,8 @@ class _CartPageState extends State<CartPage> {
         cartId: cartId,
       );
 
-      if (success) {
+      if (success)
+      {
         dropListFuture = CartService().getCustomerList(sessionId: sessionId);
         SessionManager().setCartId(0);
         SessionManager().setCustomerName('');
@@ -457,9 +491,15 @@ class _CartPageState extends State<CartPage> {
      /*   ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Cart deleted successfully!')),
         );*/
+        cartFuture = cartService.fetchCart(sessionId: sessionId, cartId: cartId,completedCart: false);
+        _cartId = _getCartId();
+        while(_cartId == 0)
+          {
+            await Future.delayed(const Duration(milliseconds: 10));
+            _cartId = _getCartId();
+          }
+        //await Future.delayed(const Duration(seconds: 1));
         setState(() {
-          cartFuture =
-              cartService.fetchCart(sessionId: sessionId, cartId: cartId);
           _cartId = _getCartId();
           _customerId = _getCustomerId();
           _customerName = _getCustomerName();
@@ -491,7 +531,7 @@ class _CartPageState extends State<CartPage> {
         );*/
         setState(() {
           cartFuture =
-              cartService.fetchCart(sessionId: sessionId, cartId: cartId);
+              cartService.fetchCart(sessionId: sessionId, cartId: cartId,completedCart: false);
           _cartId = _getCartId();
           _customerId = _getCustomerId();
           _customerName = _getCustomerName();
@@ -505,37 +545,76 @@ class _CartPageState extends State<CartPage> {
   }
 
   void _placeOrder() async {
+    _orderPdfUrl = "";
+    _invoicePdfUrl = "";
     try {
       final sessionId = _getSessionId();
       final cartId = _getCartId();
 
       // Order işlemi için servisi çağır
-      final success = await cartService.placeOrder(
+      final res = await cartService.placeOrder(
         sessionId: sessionId,
         cartId: cartId,
       );
 
-      if (success) {
+      if (res != null && res.id >0) {
         dropListFuture = CartService().getCustomerList(sessionId: sessionId);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Order placed successfully!')),
         );
-        SessionManager().setCartId(0);
+        await resetCart();
+        _showOrderModal(res.id);
+      /*  SessionManager().setCartId(0);
         SessionManager().setCustomerName('');
         SessionManager().setCustomerId(0);
         SessionManager().setPriceListId(0);
         _cartId = _getCartId();
         _customerName = _getCustomerName();
         _customerId = _getCustomerId();
+        _showOrderModal(res.id);
         setState(() {
           cartFuture = cartService.fetchCart(sessionId: sessionId, cartId: 0);
-        });
+        });*/
+
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to place order: $e')),
       );
     }
+  }
+
+  Future<void> resetCart()  async {
+    SessionManager().setCartId(0);
+    SessionManager().setCustomerName('');
+    SessionManager().setCustomerId(0);
+    SessionManager().setPriceListId(0);
+    _cartId = _getCartId();
+    _customerName = _getCustomerName();
+    _customerId = _getCustomerId();
+    cartService.createCart(sessionId: _getSessionId());
+    while(_cartId == 0)
+    {
+      await Future.delayed(const Duration(milliseconds: 10));
+      _cartId = _getCartId();
+    }
+    cartFuture = cartService.fetchCart(sessionId: _getSessionId(), cartId: _cartId,completedCart: false);
+    setState(() {
+      _cartId = _getCartId();
+      _customerName = _getCustomerName();
+      _customerId = _getCustomerId();
+    });
+    while(_cartId == 0)
+    {
+      await Future.delayed(const Duration(milliseconds: 10));
+      _cartId = _getCartId();
+    }
+    setState(() {
+      _cartId = _getCartId();
+      _customerName = _getCustomerName();
+      _customerId = _getCustomerId();
+
+    });
   }
 
   void handleSetCustomer() async {
@@ -606,6 +685,612 @@ class _CartPageState extends State<CartPage> {
         );
       },
     );
+  }
+
+  void _showOrderModal(int orderId) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Order ID: $orderId',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  Spacer(),
+                  Text(
+                    'Invoice ID: $_invoiceId',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              // Order ID Gösterimi
+
+              // İki Kolonlu Butonlar
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // 1. Kolon
+                  Column(
+                    children: [
+                      SizedBox(
+                        width: 180 ,
+                          child:
+                      ElevatedButton(
+
+                        onPressed: () { _orderCompleted == false ?
+                          showDiscountModal(orderId,context) : null;
+                        },
+                        child: Text('Apply Discount', style: AppTextStyles.buttonTextWhite),
+                        style: _orderCompleted == false ? AppButtonStyles.primaryButton  : AppButtonStyles.notrButton,
+                      ))
+                      ,
+                      SizedBox(height: 10),
+                      SizedBox(
+                        width: 180 ,
+                        child:
+                      ElevatedButton(
+                        onPressed: () { _orderCompleted == false ?
+                          _confirmCompleteOrder(orderId) : null;
+                        },
+                        child: Text('Complete Order', style: AppTextStyles.buttonTextWhite),
+                        style:  _orderCompleted == false ? AppButtonStyles.primaryButton  : AppButtonStyles.notrButton,
+                      )
+                      ),
+                      SizedBox(height: 10),
+                      SizedBox(
+                        width: 180 ,
+                        child:
+                      ElevatedButton(
+                        onPressed: () {
+                          _orderCompleted && _orderPdfUrl.isNotEmpty  ? _openPdf(_orderPdfUrl): null;
+                        },
+                        child: Text('Order PDF', style: AppTextStyles.buttonTextWhite),
+                        style:  _orderCompleted && _orderPdfUrl.isNotEmpty  ?  AppButtonStyles.confimButton : AppButtonStyles.notrButton,
+                      )
+                      ),
+                    ],
+                  ),
+                  Spacer(),
+
+                  // 2. Kolon
+                  Column(
+                    children: [
+                      SizedBox(
+                        width: 180 ,
+                        child:
+                      ElevatedButton(
+                        onPressed: () { _orderCompleted && orderId>0 && _invoiceId == 0 && _incoiceCreated == false ?
+                          _confirmInvoiceCreate(orderId) : null;
+                        },
+                        child: Text('Create Invoice', style: AppTextStyles.buttonTextWhite),
+                        style: _orderCompleted && orderId >0  && _invoiceId == 0 && _incoiceCreated == false
+                            ?  AppButtonStyles.primaryButton: AppButtonStyles.notrButton,
+                      )
+                      ),
+                      SizedBox(height: 10),
+                      SizedBox(
+                          width: 180 ,
+                          child:
+                          ElevatedButton(
+                            onPressed: () { _incoiceCreated && _invoiceId>0 ?
+                              _openAddPaymentModal(_invoiceId): null;
+                            },
+                            child: Text('Add Payment', style: AppTextStyles.buttonTextWhite),
+                            style:_incoiceCreated && _invoiceId > 0 ? AppButtonStyles.primaryButton: AppButtonStyles.notrButton,
+                          )
+                      ),
+                      SizedBox(height: 10),
+                      SizedBox(
+                        width: 180 ,
+                        child:
+                      ElevatedButton(
+                        onPressed: () {
+                          _invoicePdfUrl.isNotEmpty  ? _openPdf(_invoicePdfUrl): null;
+                        },
+                        child: Text('Invoice PDF', style: AppTextStyles.buttonTextWhite),
+                        style:  _invoicePdfUrl.isNotEmpty  ?  AppButtonStyles.confimButton : AppButtonStyles.notrButton,
+                      )
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 20),
+
+              SizedBox(
+                width: double.infinity,
+                child:
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('Close',style: AppTextStyles.buttonTextWhite),
+                style: AppButtonStyles.secondaryButton,
+              )
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _openPdf(String url) {
+    print('Opening PDF: $url');
+    openPdf(context, url);
+  }
+
+  void openPdf(BuildContext context, String url) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PdfScreen(url: url),
+      ),
+    );
+  }
+
+  void _confirmCompleteOrder(int id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Complete Order'),
+          content: const Text('Order will be completed, Do you confirm?',style: AppTextStyles.buttonTextBlack),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), // İptal butonu
+              child: const Text('Cancel',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.notrButton,
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Dialog'u kapat
+                completeOrder(id); // Sepeti sil
+              },
+              child: const Text('Confirm', style: AppTextStyles.buttonTextWhite),
+              style: AppButtonStyles.confimButton,
+
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void completeOrder(int id) async {
+    _orderPdfUrl = "";
+    try {
+      final sessionId = _getSessionId();
+
+      // Cart silme işlemi için servisi çağır
+      final pdfUrl = await OrderService().completeOrder(
+        sessionId: sessionId,
+        orderId: id,
+      );
+
+      if (pdfUrl != null && pdfUrl.isNotEmpty) {
+        setState(() {
+          Navigator.of(context).pop();
+          _orderPdfUrl = pdfUrl;
+          _orderCompleted = true;
+          _showOrderModal(id);
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Order completed successfully!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      else
+      {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An error occured!'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed complete order: $e')),
+      );
+    }
+  }
+
+  void _confirmInvoiceCreate(int id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Invoice Create '),
+          content: const Text('Invoice will be created, Do you confirm?',style: AppTextStyles.buttonTextBlack),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), // İptal butonu
+              child: const Text('Cancel',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.notrButton,
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Dialog'u kapat
+                invoiceCreate(id); // Sepeti sil
+              },
+              child: const Text('Confirm', style: AppTextStyles.buttonTextWhite),
+              style: AppButtonStyles.confimButton,
+
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void invoiceCreate(int id) async {
+    _invoicePdfUrl = "";
+    try {
+      final sessionId = _getSessionId();
+
+      // Cart silme işlemi için servisi çağır
+      final invoice = await OrderService().createInvoice(
+        sessionId: sessionId,
+        orderId: id,
+      );
+
+      if (invoice != null && invoice.data.pdfUrl.isNotEmpty)
+      {
+        setState(() {
+          Navigator.of(context).pop();
+          _invoiceId = invoice.data.invoiceId;
+          _invoicePdfUrl = invoice.data.pdfUrl;
+          _incoiceCreated = true;
+          _showOrderModal(id);
+          //_openAddPaymentModal(_invoiceId);
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('invoice created successfully!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      else
+      {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An error occured!'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed complete order: $e')),
+      );
+    }
+  }
+
+  void showDiscountModal(int id,BuildContext ctx) {
+    TextEditingController percentageController = TextEditingController();
+    TextEditingController amountController = TextEditingController();
+    String selectedType = "";
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Apply Discount"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: percentageController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: "Discount Percentage"),
+                enabled: selectedType != "amount",
+                onChanged: (value) {
+                  if (value.isNotEmpty) {
+                    setState(() {
+                      selectedType = "percentage";
+                      amountController.clear();
+                    });
+                  }
+                },
+              ),
+              TextField(
+                controller: amountController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: "Discount Amount"),
+                enabled: selectedType != "percentage",
+                onChanged: (value) {
+                  if (value.isNotEmpty) {
+                    setState(() {
+                      selectedType = "amount";
+                      percentageController.clear();
+                    });
+                  }
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text("Cancel", style: AppTextStyles.buttonTextWhite),
+              style: AppButtonStyles.notrButton,
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (selectedType.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('İnvalid value'),
+                      backgroundColor: Colors.red,
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+                  return;
+                }
+
+                double discountValue = selectedType == "percentage"
+                    ? double.parse(percentageController.text)
+                    : double.parse(amountController.text);
+
+                // _confirmDiscount(id, discountValue, selectedType);
+                _applyDiscount(id, discountValue, selectedType,ctx);
+                Navigator.of(context).pop();
+              },
+              child: Text("Apply", style: AppTextStyles.buttonTextWhite),
+              style: AppButtonStyles.confimButton,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _applyDiscount(int id, double value, String type,BuildContext ctx) async {
+    try {
+      final sessionId = _getSessionId();
+
+      final res = await CartService().cartDiscount(
+          sessionId: sessionId,
+          orderId: id,
+          val: value,
+          type: type
+      );
+
+      if (res) {
+
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(
+            content: Text('Discount apply successfully!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      else
+      {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(
+            content: Text('An error occured!'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(content: Text('Failed to discount apply: $e')),
+      );
+    }
+
+  }
+
+  void _openAddPaymentModal(int id) {
+    _invoiceId = id;
+    // _isAddButtonEnabled=false;
+    // _selectedMethod = null;
+    selectedMethod=null;
+    _amount = "";
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Add Payment'),
+          content: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FutureBuilder<PaymentLineTypeResponseModel?>(
+                  future: paymentListFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    }
+
+                    final dropList = snapshot.data!.PaymentTypeList;
+                    if (dropList == null || dropList.isEmpty) {
+                      return const Center(
+                          child: Text('No customers available.'));
+                    }
+
+                    return DropdownSearch<PaymentMethod>(
+                      selectedItem: selectedMethod,
+                      popupProps: PopupProps.dialog(
+                        showSearchBox: false, // Arama kutusunu gösterir
+                        searchFieldProps: TextFieldProps(
+                          decoration: InputDecoration(
+                            labelText: "Search method",
+                            hintText: "Type to search",
+                          ),
+                        ),
+                      ),
+                      dropdownDecoratorProps: const DropDownDecoratorProps(
+                        dropdownSearchDecoration: InputDecoration(
+                          labelText: "Select Payment Method",
+                          hintText: "Search Method",
+                        ),
+                      ),
+                      asyncItems: (String filter) async {
+                        // Filtreyi kullanarak veriyi dinamik olarak çek
+                        final filteredList = await _fetchPaymentMethods();
+                        return filteredList!.PaymentTypeList;
+                      },
+                      itemAsString: (PaymentMethod customer) => customer.name,
+                      onChanged: (value) {
+                        setState(() {
+                          paymentMethodId = value != null ? value!.id : 0;
+                          selectedMethod = value;
+                        });
+                      },
+                    );
+                  },
+                ),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Amount'),
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) {
+                    setState(() {
+                      _amount = value;
+                      amount = double.tryParse(_amount.replaceAll(",", ".")) ?? 0;
+                      // _validateForm();
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an amount';
+                    }
+                    if (double.tryParse(value) == null) {
+                      return 'Enter a valid number';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.notrButton,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text('Add',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.confimButton,
+              onPressed: _isAddButtonEnabled
+                  ? () {
+
+                _confirmPayment();
+              }
+                  : null,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _makePayment() async {
+    var res = await InvoiceService().addPayment(sessionId: _getSessionId(),amount: amount,invoiceId: _invoiceId,paymentType: paymentMethodId);
+    if (res)
+    {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text( amount.toString() + 'Payment added successfully!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 1),
+        ),
+      );
+      await Future.delayed(const Duration(seconds: 2));
+
+      setState(() {
+     //   _invoiceId = 0;
+    //    paymentMethodId = 0;
+     //   amount = 0;
+     //   _amount = "";
+      });
+     // await Future.delayed(const Duration(seconds: 2));
+      Navigator.pop(context);
+    }
+    else
+    {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('An error occured.'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  void _confirmPayment() {
+
+    amount>0 && paymentMethodId>0 ?
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Payment'),
+          content: Text(
+              'A payment of €$amount will be recorded. Do you confirm?',style: AppTextStyles.buttonTextBlack),
+          actions: [
+            TextButton(
+              child: Text('Cancel',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.notrButton,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text('Confirm',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.confimButton,
+              onPressed: () {
+                Navigator.of(context).pop();
+                _makePayment();
+              },
+            ),
+          ],
+        );
+      },
+    ): null;
+  }
+
+  Future<PaymentLineTypeResponseModel?> _fetchPaymentMethods() async {
+    try {
+      paymentListFuture = InvoiceService().fetchPaymentMethods(sessionId: _getSessionId());
+      return paymentListFuture ?? null ;
+    } catch (e) {
+      print("Error fetching payment methods: $e");
+    }
+
   }
 
 }

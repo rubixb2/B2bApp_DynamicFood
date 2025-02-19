@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:odoosaleapp/models/cart/CartReponseModel.dart';
+import 'package:odoosaleapp/models/invoice/InvoiceCreateResponseModel.dart';
 import 'package:odoosaleapp/models/order/OrderApiResoponseModel.dart';
 import 'package:odoosaleapp/models/order/OrdersResponseModel.dart';
 
@@ -11,6 +12,7 @@ import '../models/cart/CustomerDropListModel.dart';
 class OrderService {
   final String _baseUrl = 'https://apiodootest.nametech.be/Api/orders/List';
   final String _completeOrderUrl = 'https://apiodootest.nametech.be/Api/orders/complete';
+  final String _createInvoiceUrl = 'https://apiodootest.nametech.be/Api/orders/InvoiceCreate';
 
   final String _addOrderUrl = 'https://apiodootest.nametech.be/Api/orders/add';
   final String _editOrderUrl = 'https://apiodootest.nametech.be/Api/cart/activate2';
@@ -44,7 +46,7 @@ class OrderService {
     }
   }
 
-  Future<bool> completeOrder({
+  Future<String?> completeOrder({
     required String sessionId,
     required int orderId
   }) async {
@@ -55,28 +57,63 @@ class OrderService {
         body: jsonEncode({
           'sessionId': sessionId,
           'orderId': orderId
-
-
         }),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['Control'] == 1) {
+          var jsonData = data['Data']['pdfUrl'];
+          var pdfUrl = jsonData;
+          return pdfUrl.toString();
 
-          return true;
         } else {
           var msg = data['Message'];
           throw Exception(msg);
         }
       } else {
-        throw Exception('Failed complete order');
+       return null;
       }
     } catch (e) {
       print('Error adding complete order $e');
-      return false;
+      return null;
     }
   }
+
+  Future<InvoiceCreateResponseModel?> createInvoice({
+    required String sessionId,
+    required int orderId
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse(_createInvoiceUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'sessionId': sessionId,
+          'orderId': orderId
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final invoiceRes = InvoiceCreateResponseModel.fromJson(data);
+        if (invoiceRes.control == 1) {
+
+          return invoiceRes;
+
+        } else {
+          var msg = data['Message'];
+          throw Exception(msg);
+        }
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Error adding complete order $e');
+      return null;
+    }
+  }
+
   Future<bool> placeOrder(
       {required String sessionId, required int cartId}) async {
     try {

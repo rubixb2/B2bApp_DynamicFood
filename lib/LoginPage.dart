@@ -24,10 +24,9 @@ class _LoginPageState extends State<LoginPage> {
       username = emailController.text;
       password = passwordController.text;
     } else {
-      username = "app@canlar.be";
+      username = "app@test.com";
       password = "123";
     }
-
     setState(() {
       isLoading = true;
     });
@@ -114,7 +113,7 @@ class _LoginPageState extends State<LoginPage> {
                       style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline,fontSize: 16),
                     ),
                   ),
-                  const SizedBox(width: 50),
+                 /* const SizedBox(width: 50),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -126,7 +125,7 @@ class _LoginPageState extends State<LoginPage> {
                       'Sign Up',
                       style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline,fontSize: 16),
                     ),
-                  ),
+                  ),*/
                   const Spacer()
                 ],
               ),
