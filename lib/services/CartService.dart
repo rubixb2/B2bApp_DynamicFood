@@ -38,7 +38,9 @@ class CartService {
         if (data['Control'] == 1) {
           var jsonData = data['Data'];
           final cartData = CartResponseModel.fromJson(jsonData);
+          int cid = cartData.customerId == '' ? 0 : int.parse(cartData.customerId);
           SessionManager().setCartId(cartData.id);
+          SessionManager().setCustomerId(cid);
           SessionManager().setCustomerName(cartData.customerName ?? "");
           return cartData;
         } else {

@@ -36,6 +36,9 @@ class _OrdersPageState extends State<OrdersPage> {
   String _getSessionId() {
     return SessionManager().sessionId ?? "";
   }
+  int _getCartId() {
+    return SessionManager().cartId ?? 0;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -422,8 +425,9 @@ class _OrdersPageState extends State<OrdersPage> {
               child: Text('Confirm', style: AppTextStyles.buttonTextWhite),
               style: AppButtonStyles.confimButton,
               onPressed: () {
-                Navigator.of(context).pop();
                 _makeOrderEdit(cartId,customerName,customerId);
+                Navigator.of(context).pop();
+
               },
             ),
           ],
@@ -464,7 +468,7 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   Future<void> _makeOrderEdit(int cartId,String customerName,int customerId) async {
-    var res = await OrderService().orderEdit(sessionId: _getSessionId(),cartId: cartId);
+    var res = await OrderService().orderEdit(sessionId: _getSessionId(),oldCartId: cartId,currentCartId: _getCartId());
     if (res)
     {
       SessionManager().setCustomerName(customerName);
@@ -477,7 +481,7 @@ class _OrdersPageState extends State<OrdersPage> {
           duration: Duration(seconds: 2),
         ),
       );
-      Navigator.pop(context);
+    //  Navigator.pop(context);
     }
     else
     {

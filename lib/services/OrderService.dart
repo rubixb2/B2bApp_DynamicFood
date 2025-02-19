@@ -141,12 +141,12 @@ class OrderService {
 
   Future<bool> orderEdit(
       {
-        required String sessionId, required int cartId}) async {
+        required String sessionId, required int oldCartId,required currentCartId}) async {
     try {
       final response = await http.post(
         Uri.parse(_editOrderUrl),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'sessionId': sessionId, 'cartId': cartId}),
+        body: jsonEncode({'sessionId': sessionId, 'oldCartId': oldCartId, 'cartId': currentCartId}),
       );
 
       if (response.statusCode == 200) {
