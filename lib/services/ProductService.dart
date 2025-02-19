@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import '../helpers/SessionManager.dart';
 import '../models/product/ProductsResponseModel.dart';
 
 class ProductService {
-  final String apiUrl = 'https://apiodootest.nametech.be/Api/Products/List';
+  final String apiUrl = SessionManager().baseUrl+'Products/List';
 
   Future<List<ProductsResponseModel>> fetchProducts({
     required String sessionId,

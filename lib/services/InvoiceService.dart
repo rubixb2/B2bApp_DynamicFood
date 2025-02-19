@@ -3,12 +3,14 @@ import 'package:http/http.dart' as http;
 import 'package:odoosaleapp/models/invoice/InvoiceApiResoponseModel.dart';
 import 'package:odoosaleapp/models/invoice/PaymentLineTypeResponseModel.dart';
 
+import '../helpers/SessionManager.dart';
+
 // CartService Class
 class InvoiceService {
-  final String _baseUrl = 'https://apiodootest.nametech.be/Api/bills/List';
-  final String _getPaymentMethodsUrl = 'https://apiodootest.nametech.be/Api/bills/PaymentLineTypes';
-  final String _addpaymentUrl = 'https://apiodootest.nametech.be/Api/bills/addpayment';
-  final String _refundUrl = 'https://apiodootest.nametech.be/Api/bills/refund';
+  final String _baseUrl = SessionManager().baseUrl+'bills/List';
+  final String _getPaymentMethodsUrl = SessionManager().baseUrl+'bills/PaymentLineTypes';
+  final String _addpaymentUrl = SessionManager().baseUrl+'bills/addpayment';
+  final String _refundUrl = SessionManager().baseUrl+'bills/refund';
 
 
   Future<InvoiceApiResponseModel?> fetchInvoices(

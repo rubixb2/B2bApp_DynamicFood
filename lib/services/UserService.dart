@@ -3,10 +3,9 @@ import 'package:http/http.dart' as http;
 import 'package:odoosaleapp/helpers/SessionManager.dart';
 
 class UserService {
-  final String loginUrl = 'https://apiodootest.nametech.be/Api/Users/Login';
-  final String logoutUrl = 'https://apiodootest.nametech.be/Api/Users/Logout';
-  final String sessionCheckUrl =
-      'https://apiodootest.nametech.be/Api/Users/GetBySession';
+  final String loginUrl = SessionManager().baseUrl+'Users/Login';
+  final String logoutUrl = SessionManager().baseUrl+'Users/Logout';
+  final String sessionCheckUrl = SessionManager().baseUrl+'Users/GetBySession';
 
   Future<Map<String, dynamic>?> login(String username, String password) async {
     final response = await http.post(

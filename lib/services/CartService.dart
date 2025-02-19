@@ -8,20 +8,20 @@ import '../models/order/AddOrderResponseModel.dart';
 
 // CartService Class
 class CartService {
-  final String _baseUrl = 'https://apiodootest.nametech.be/Api/cart/get';
-  final String _createCartUrl = 'https://apiodootest.nametech.be/Api/cart/create';
-  final String _addToCartUrl = 'https://apiodootest.nametech.be/Api/cart/add';
+  final String _baseUrl = SessionManager().baseUrl+'cart/get';
+  final String _createCartUrl = SessionManager().baseUrl+'cart/create';
+  final String _addToCartUrl = SessionManager().baseUrl+'cart/add';
   final String _getCustomerListUrl =
-      'https://apiodootest.nametech.be/Api/customers/droplist';
+      SessionManager().baseUrl+'customers/droplist';
   final String _updateProductUrl =
-      'https://apiodootest.nametech.be/Api/cart/UpdateProduct';
+      SessionManager().baseUrl+'cart/UpdateProduct';
   final String _discountCartUrl =
-      'https://apiodootest.nametech.be/Api/cart/CartDiscount';
+      SessionManager().baseUrl+'cart/CartDiscount';
   final String _updateCartUrl =
-      'https://apiodootest.nametech.be/Api/cart/Update';
+      SessionManager().baseUrl+'cart/Update';
   final String _deleteProductUrl =
-      'https://apiodootest.nametech.be/Api/cart/DeleteProduct';
-  final String _addOrderUrl = 'https://apiodootest.nametech.be/Api/orders/add';
+      SessionManager().baseUrl+'cart/DeleteProduct';
+  final String _addOrderUrl = SessionManager().baseUrl+'orders/add';
 
 
   Future<CartResponseModel?> fetchCart(

@@ -10,12 +10,12 @@ import '../models/cart/CustomerDropListModel.dart';
 
 // CartService Class
 class OrderService {
-  final String _baseUrl = 'https://apiodootest.nametech.be/Api/orders/List';
-  final String _completeOrderUrl = 'https://apiodootest.nametech.be/Api/orders/complete';
-  final String _createInvoiceUrl = 'https://apiodootest.nametech.be/Api/orders/InvoiceCreate';
+  final String _baseUrl = SessionManager().baseUrl+'orders/List';
+  final String _completeOrderUrl = SessionManager().baseUrl+'orders/complete';
+  final String _createInvoiceUrl = SessionManager().baseUrl+'orders/InvoiceCreate';
 
-  final String _addOrderUrl = 'https://apiodootest.nametech.be/Api/orders/add';
-  final String _editOrderUrl = 'https://apiodootest.nametech.be/Api/cart/activate2';
+  final String _addOrderUrl = SessionManager().baseUrl+'orders/add';
+  final String _editOrderUrl = SessionManager().baseUrl+'cart/activate2';
 
 
   Future<OrderApiResponseModel?> fetchOrders(
