@@ -35,7 +35,7 @@ class _CustomerAddPageState extends State<CustomerAddPage> {
 
   String? validateCompanyName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Company Name gerekli';
+      return 'Company Name required';
     }
     return null;
   }
@@ -48,7 +48,7 @@ class _CustomerAddPageState extends State<CustomerAddPage> {
       String sessionId = _getSessionId(); // Oturum ID'sini al
       return await CustomerService().fetchCountryList(sessionId: sessionId,searchKey: query);
     } catch (e) {
-      print("Ülkeler getirilirken hata: $e");
+      print("Country error: $e");
       return null;
     }
   }
@@ -56,9 +56,9 @@ class _CustomerAddPageState extends State<CustomerAddPage> {
 
   Future<void> checkBTW() async {
     String btw = btwController.text;
-    ScaffoldMessenger.of(context).showSnackBar(
+    /*ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(btw)),
-    );
+    );*/
   //  String sessionId = "session_id_degeri"; // SessionId buraya eklenmeli
 
     if (btw.isEmpty) return;
@@ -74,10 +74,18 @@ class _CustomerAddPageState extends State<CustomerAddPage> {
           cityController.text = data['City'] ?? '';
           postalCodeController.text = data['PostCode'] ?? '';
         });
+        SnackBar(
+          content: Text('Completed'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 1),
+        );
       //  Fluttertoast.showToast(msg: "Bilgiler başarıyla yüklendi.");
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(content: Text(btw + ' not found.')),
+      }
+      else {
+        SnackBar(
+          content: Text('Not Found'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 1),
         );
       }
     } catch (e) {
