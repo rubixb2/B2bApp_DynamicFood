@@ -10,6 +10,7 @@ class SplashPage extends StatelessWidget {
     //final userInfo = await UserPreferences.getUserInfo();
     await SessionManager().init();
     final userInfo = SessionManager().sessionId;
+    SessionManager().setBaseUrl('https://apiodootest.nametech.be/Api/');
 
     if (userInfo != null) {
       final userService = UserService();

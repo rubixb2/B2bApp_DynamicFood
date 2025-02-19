@@ -46,9 +46,14 @@ class SessionManager {
     await _prefs.setString('customerName', customerName);
   }
 
+  Future<void> setBaseUrl(String url) async {
+    await _prefs.setString('baseUrl', url);
+  }
+
   // Getters
   String? get sessionId => _prefs.getString('sessionId');
   String? get userName => _prefs.getString('userName');
+  String get baseUrl => _prefs.getString('baseUrl') ?? "";
   int? get userId => _prefs.getInt('userId');
   int? get cartId => _prefs.getInt('cartId');
   int? get customerId => _prefs.getInt('customerId');

@@ -1,11 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:odoosaleapp/models/cart/CartReponseModel.dart';
-import 'package:odoosaleapp/models/order/OrderApiResoponseModel.dart';
 import 'package:odoosaleapp/models/customer/CustomerApiResponse.dart';
 
 import '../helpers/SessionManager.dart';
-import '../models/cart/CustomerDropListModel.dart';
 import '../models/customer/CountryResponseModel.dart';
 import '../models/customer/CustomersDetailResponseModel.dart';
 
@@ -13,15 +10,15 @@ import '../models/customer/CustomersDetailResponseModel.dart';
 class CustomerService {
 
   final String _baseUrl =
-      'https://apiodootest.nametech.be/Api/customers/list';
+      SessionManager().baseUrl+'customers/list';
   final String _detailUrl =
-      'https://apiodootest.nametech.be/Api/customers/detail';
+      SessionManager().baseUrl+'customers/detail';
   final String _btwControlUrl =
-      'https://apiodootest.nametech.be/Api/customers/btwControl';
+      SessionManager().baseUrl+'customers/btwControl';
   final String _countryListUrl =
-      'https://apiodootest.nametech.be/Api/customers/GetCountry';
+      SessionManager().baseUrl+'customers/GetCountry';
   final String _adorUpdateCustomerUrl =
-      'https://apiodootest.nametech.be/Api/customers/Add';
+      SessionManager().baseUrl+'customers/Add';
 
   Future<CustomerApiResponse?> fetchCustomers(
       {required String sessionId,required String searchKey}) async {

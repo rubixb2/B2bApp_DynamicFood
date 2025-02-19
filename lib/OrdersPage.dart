@@ -102,6 +102,14 @@ class _OrdersPageState extends State<OrdersPage> {
                             SizedBox(width: 10),
                             Text('Total: \€${order.amountTotal.toStringAsFixed(2)}',
                                 style: AppTextStyles.bodyTextBold),
+                            SizedBox(width: 10),
+                            Text(order.invoicestatus,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: order.invoicestatus == "invoiced"  ? Colors.green : Colors.red,
+                                fontWeight: FontWeight.bold
+                                )
+                            ),
                             Spacer(),
                             Text(
                               order.dateOrder.length>10 ? order.dateOrder.substring(0,10) : order.dateOrder,
@@ -114,28 +122,49 @@ class _OrdersPageState extends State<OrdersPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
 
-                            ElevatedButton(
-                              onPressed: order.orderCompleteStatus == false
+                            order.orderCompleteStatus == true && order.invoicestatus != null && order.invoicestatus.toLowerCase() != "invoiced" ?
+                            Row(
+                              children: [
+                                ElevatedButton(
+                                  onPressed: order.orderPdfUrl.isNotEmpty
+                                      ? () => _confirmInvoiceCreate(order.id)
+                                      : null,
+                                  child: Text('Create Invoice',style: AppTextStyles.buttonTextWhite),
+                                  style: AppButtonStyles.secondaryButton,
+                                )
+                              ],
+                            ):
+                            Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                  ElevatedButton(
+                                  onPressed: order.orderCompleteStatus == false
                                   ? () => _confirmCompleteOrder(order.id)
-                                  : null,
-                              child: Text('Complete',style: AppTextStyles.buttonTextWhite),
-                              style: AppButtonStyles.secondaryButton,
-                            ) ,
-                            ElevatedButton(
-                              onPressed: order.orderCompleteStatus == false
+                                      : null,
+                                  child: Text('Complete',style: AppTextStyles.buttonTextWhite),
+                                  style: AppButtonStyles.secondaryButton,
+                                  ) ,
+                                  SizedBox(width: 5),
+                                  ElevatedButton(
+                                  onPressed: order.orderCompleteStatus == false
                                   ? () => discount(order.id)
-                                  : null,
-                              child: Text('Discount',style: AppTextStyles.buttonTextWhite),
-                              style: AppButtonStyles.secondaryButton,
+                                      : null,
+                                  child: Text('Discount',style: AppTextStyles.buttonTextWhite),
+                                  style: AppButtonStyles.secondaryButton,
 
-                            ) ,
-                            ElevatedButton(
-                              onPressed: order.orderCompleteStatus == false
+                                  ) ,
+                                    SizedBox(width: 5),
+                                  ElevatedButton(
+                                  onPressed: order.orderCompleteStatus == false
                                   ? () => editOrder(order.cartId,order.partnerName ?? "-",order.partnerid)
-                                  : null,
-                              child: Text('Edit',style: AppTextStyles.buttonTextWhite),
-                              style: AppButtonStyles.secondaryButton,
-                            ) ,
+                                      : null,
+                                  child: Text('Edit',style: AppTextStyles.buttonTextWhite),
+                                  style: AppButtonStyles.secondaryButton,
+                                  )
+                                  ]
+                                ),
+
+
                             ElevatedButton(
                               onPressed: order.orderPdfUrl.isNotEmpty
                                   ? () => _openPdf(order.orderPdfUrl)
@@ -168,6 +197,15 @@ class _OrdersPageState extends State<OrdersPage> {
   void _openPdf(String url) {
     print('Opening PDF: $url');
     openPdf(context, url);
+  }
+
+  void openPdf(BuildContext context, String url) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PdfScreen(url: url),
+      ),
+    );
   }
 
   void _confirmCompleteOrder(int id) {
@@ -203,12 +241,12 @@ class _OrdersPageState extends State<OrdersPage> {
       final sessionId = _getSessionId();
 
       // Cart silme işlemi için servisi çağır
-      final success = await OrderService().completeOrder(
+      final pdfUrl = await OrderService().completeOrder(
         sessionId: sessionId,
         orderId: id,
       );
 
-      if (success) {
+      if (pdfUrl != null && pdfUrl.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Order completed successfully!'),
@@ -243,15 +281,6 @@ class _OrdersPageState extends State<OrdersPage> {
 
   void editOrder(int cartId,String custonerName,int customerId) {
     _confirmEdit(cartId,custonerName,customerId);
-  }
-
-  void openPdf(BuildContext context, String url) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PdfScreen(url: url),
-      ),
-    );
   }
 
   void showDiscountModal(int id) {
@@ -458,6 +487,77 @@ class _OrdersPageState extends State<OrdersPage> {
           backgroundColor: Colors.red,
           duration: Duration(seconds: 2),
         ),
+      );
+    }
+  }
+
+  void _confirmInvoiceCreate(int id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Invoice Create '),
+          content: const Text('Invoice will be created, Do you confirm?',style: AppTextStyles.buttonTextBlack),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), // İptal butonu
+              child: const Text('Cancel',style: AppTextStyles.buttonTextWhite,),
+              style: AppButtonStyles.notrButton,
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Dialog'u kapat
+                invoiceCreate(id); // Sepeti sil
+              },
+              child: const Text('Confirm', style: AppTextStyles.buttonTextWhite),
+              style: AppButtonStyles.confimButton,
+
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void invoiceCreate(int id) async {
+    try {
+      final sessionId = _getSessionId();
+
+      // Cart silme işlemi için servisi çağır
+      final invoice = await OrderService().createInvoice(
+        sessionId: sessionId,
+        orderId: id,
+      );
+
+      if (invoice != null && invoice.data.pdfUrl.isNotEmpty)
+      {
+        _initializeOrders();
+        setState(() {
+        //  Navigator.of(context).pop();
+
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('invoice created successfully!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      else
+      {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An error occured!'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed complete order: $e')),
       );
     }
   }
