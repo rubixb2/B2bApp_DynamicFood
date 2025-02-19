@@ -228,7 +228,7 @@ class _ProductPageState extends State<ProductPage> {
                 return GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 1,
+                    childAspectRatio: 0.95,
                   ),
                   itemCount: products.length,
                   itemBuilder: (context, index) {
@@ -243,7 +243,7 @@ class _ProductPageState extends State<ProductPage> {
                           children: [
                             CachedNetworkImage(
                               imageUrl: product.imageUrl,
-                              height: 120,
+                              height: 110,
                               fit: BoxFit.fitHeight,
                               placeholder: (context, url) => const Center(
                                 child: CircularProgressIndicator(),
