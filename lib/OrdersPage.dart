@@ -87,10 +87,18 @@ class _OrdersPageState extends State<OrdersPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Row(
+                          children: [
+                            Text((order.partnerName.length>50 ? order.partnerName.substring(0,50): order.partnerName),
+                                style:AppTextStyles.bodyTextBold),
+                            Spacer(),
+                            Text('Id: ' + order.id.toString(),
+                                style: AppTextStyles.bodyTextBold),
+                          ],
+                        ),
                         /*Text((order.partnerName.length>50 ? order.partnerName.substring(0,50): order.partnerName)+"-"+order.cartId.toString() +"-"+order.id.toString(),
                             style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold)),*/
-                        Text((order.partnerName.length>50 ? order.partnerName.substring(0,50): order.partnerName),
-                            style:AppTextStyles.bodyTextBold),
+
                         SizedBox(height: 5),
                         Row(
                           children: [

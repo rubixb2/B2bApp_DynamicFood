@@ -289,7 +289,8 @@ class CartService {
   Future<bool> setCustomer(
       {required String sessionId,
       required int cartId,
-      required int customerId}) async {
+      required int customerId,
+      required int priceListId}) async {
     try {
       final response = await http.post(
         Uri.parse(_updateCartUrl),
@@ -298,7 +299,8 @@ class CartService {
           'sessionId': sessionId,
           'cartId': cartId,
           'Process': 'update',
-          'customerId': customerId
+          'customerId': customerId,
+          'priceListId': priceListId == 0 ? 1 : priceListId
         }),
       );
 

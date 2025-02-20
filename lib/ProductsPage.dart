@@ -52,7 +52,7 @@ class _ProductPageState extends State<ProductPage> {
     SessionManager().setPriceListId(selectedCustomer!.priceListId);
     //CartPreferences.saveCustomerInfo(selectedCustomer!.id, selectedCustomer!.priceListId, selectedCustomer!.name);
     var res = await CartService().setCustomer(
-        sessionId: _getSessionId(), cartId: _getCartId(), customerId: selectedCustomer!.id);
+        sessionId: _getSessionId(), cartId: _getCartId(), customerId: selectedCustomer!.id,priceListId: _getPricelistId());
     if (res == true) {
       SessionManager().setCustomerId(selectedCustomer!.id);
       SessionManager().setCustomerName(selectedCustomer!.name);

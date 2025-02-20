@@ -118,8 +118,15 @@ class _InvoicesPageState extends State<InvoicesPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(invoice.partnerName.length>50 ? invoice.partnerName.substring(0,50): invoice.partnerName,
-                              style: AppTextStyles.bodyTextBold),
+                          Row(
+                            children: [
+                              Text(invoice.partnerName.length>50 ? invoice.partnerName.substring(0,50): invoice.partnerName,
+                                  style: AppTextStyles.bodyTextBold),
+                              Spacer(),
+                              Text('Id: ' + invoice.id.toString(), style: AppTextStyles.bodyTextBold,)
+                            ],
+                          ),
+                          
                           SizedBox(height: 5),
                           Row(
                             children: [
