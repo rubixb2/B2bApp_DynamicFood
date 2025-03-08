@@ -28,7 +28,7 @@ class ProductService {
         'Page': page,
         'CategoryId': categoryId,
         'CustomerId': customerId,
-        'PriceListId': priceListId,
+        'PriceListId': priceListId == 0 ? 1: priceListId
       }),
     );
 
