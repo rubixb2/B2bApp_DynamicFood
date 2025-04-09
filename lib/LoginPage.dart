@@ -18,7 +18,6 @@ class _LoginPageState extends State<LoginPage> {
 
   void handleLogin(BuildContext context, bool guest) async {
     String username = "";
-
     String password = "";
 
     if (!guest) {
