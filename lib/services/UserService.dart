@@ -3,7 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:odoosaleapp/helpers/SessionManager.dart';
 
 class UserService {
-  final String loginUrl = SessionManager().baseUrl+'Users/Login';
+  //final String loginUrl = SessionManager().baseUrl+'Users/Login';
+  final String loginUrl = SessionManager().baseUrl+'Users/Loginb2b';
   final String logoutUrl = SessionManager().baseUrl+'Users/Logout';
   final String sessionCheckUrl = SessionManager().baseUrl+'Users/GetBySession';
 
@@ -16,6 +17,7 @@ class UserService {
       body: jsonEncode({
         'Username': username,
         'Password': password,
+        'MerchantId': 1001
       }),
     );
 
