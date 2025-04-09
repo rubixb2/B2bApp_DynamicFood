@@ -18,13 +18,14 @@ class _LoginPageState extends State<LoginPage> {
 
   void handleLogin(BuildContext context, bool guest) async {
     String username = "";
+
     String password = "";
 
     if (!guest) {
       username = emailController.text;
       password = passwordController.text;
     } else {
-      username = "app@test.com";
+      username = "halil@test.be";
       password = "123";
     }
     setState(() {
