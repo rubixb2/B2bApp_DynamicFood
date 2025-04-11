@@ -112,10 +112,10 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.file_open),
             label: 'Invoices',
           ),
-          BottomNavigationBarItem(
+        /*  BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Customers',
-          ),
+          ),*/
         ],
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.grey,
@@ -125,13 +125,17 @@ class _HomePageState extends State<HomePage> {
 
   void handleLogout(BuildContext context) async {
     var sessionId = SessionManager().sessionId ?? '';
+    var customerId = SessionManager().customerId ?? 0;
     final apiService = UserService();
-    final data = await apiService.logout(sessionId);
+    final data = await apiService.logout(sessionId,customerId);
 
     if (data != null) {
       SessionManager().setSessionId('');
       SessionManager().setUserName('');
       SessionManager().setUserId(0);
+      SessionManager().setCustomerId(0);
+      SessionManager().setCustomerName('');
+      SessionManager().setPriceListId(0);
 
       Navigator.pushReplacementNamed(context, '/login');
     } else {

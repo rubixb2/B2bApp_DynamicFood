@@ -40,6 +40,9 @@ class _LoginPageState extends State<LoginPage> {
 
     if (data != null) {
       SessionManager().setSessionId(data['SessionId']);
+      SessionManager().setCustomerId(data['PartnerId']);
+      SessionManager().setCustomerName(data['PartnerName']);
+      SessionManager().setPriceListId(data['PriceListId']);
       SessionManager().setUserName(username);
       SessionManager().setUserId(data['UserId']);
 

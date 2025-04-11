@@ -479,8 +479,8 @@ class _OrdersPageState extends State<OrdersPage> {
     var res = await OrderService().orderEdit(sessionId: _getSessionId(),oldCartId: cartId,currentCartId: _getCartId());
     if (res)
     {
-      SessionManager().setCustomerName(customerName);
-      SessionManager().setCustomerId(customerId);
+    //  SessionManager().setCustomerName(customerName);
+   //   SessionManager().setCustomerId(customerId);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

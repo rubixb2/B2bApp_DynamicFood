@@ -9,7 +9,8 @@ import '../models/order/AddOrderResponseModel.dart';
 // CartService Class
 class CartService {
   final String _baseUrl = SessionManager().baseUrl+'cart/get';
-  final String _createCartUrl = SessionManager().baseUrl+'cart/create';
+  //final String _createCartUrl = SessionManager().baseUrl+'cart/create';
+  final String _createCartUrl = SessionManager().baseUrl+'cart/CreateForb2b';
   final String _addToCartUrl = SessionManager().baseUrl+'cart/add';
   final String _getCustomerListUrl =
       SessionManager().baseUrl+'customers/droplist';
@@ -38,10 +39,10 @@ class CartService {
         if (data['Control'] == 1) {
           var jsonData = data['Data'];
           final cartData = CartResponseModel.fromJson(jsonData);
-          int cid = cartData.customerId == '' ? 0 : int.parse(cartData.customerId);
-          SessionManager().setCartId(cartData.id);
-          SessionManager().setCustomerId(cid);
-          SessionManager().setCustomerName(cartData.customerName ?? "");
+         // int cid = cartData.customerId == '' ? 0 : int.parse(cartData.customerId);
+         // SessionManager().setCartId(cartData.id);
+          // SessionManager().setCustomerId(cid);
+          // SessionManager().setCustomerName(cartData.customerName ?? "");
           return cartData;
         } else {
           var msg = data['Message'];
@@ -57,12 +58,17 @@ class CartService {
   }
 
   Future<bool> createCart(
-      {required String sessionId}) async {
+      {
+        required String sessionId, required int customerId
+      }) async {
     try {
       final response = await http.post(
         Uri.parse(_createCartUrl),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'sessionId': sessionId}),
+        body: jsonEncode({
+          'sessionId': sessionId,
+          'customerId': customerId
+        }),
       );
 
       if (response.statusCode == 200) {
@@ -70,8 +76,8 @@ class CartService {
         if (data['Control'] == 1) {
           var cartId = data['Data']['cartId'];
           SessionManager().setCartId(cartId);
-          SessionManager().setCustomerName("");
-          SessionManager().setCustomerId(0);
+        //  SessionManager().setCustomerName("");
+         // SessionManager().setCustomerId(0);
           return true;
         } else {
          return false;

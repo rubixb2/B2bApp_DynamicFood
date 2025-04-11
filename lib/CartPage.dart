@@ -69,7 +69,8 @@ class _CartPageState extends State<CartPage> {
         cartFuture =
             CartService().fetchCart(sessionId: sessionId, cartId: cartId,completedCart: false);
       });
-    } else {
+    }
+    else {
       setState(() {
         cartFuture =
             CartService().fetchCart(sessionId: sessionId, cartId: cartId,completedCart: false);
@@ -481,23 +482,26 @@ class _CartPageState extends State<CartPage> {
       {
         dropListFuture = CartService().getCustomerList(sessionId: sessionId);
         SessionManager().setCartId(0);
-        SessionManager().setCustomerName('');
-        SessionManager().setCustomerId(0);
-        SessionManager().setPriceListId(0);
-        _cartId = _getCartId();
         _customerId = _getCustomerId();
+        cartService.createCart(sessionId: _getSessionId(),customerId: _customerId);
+       // SessionManager().setCustomerName('');
+        //SessionManager().setCustomerId(0);
+     //   SessionManager().setPriceListId(0);
+        _cartId = _getCartId();
+
         _customerName = _getCustomerName();
 
      /*   ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Cart deleted successfully!')),
         );*/
-        cartFuture = cartService.fetchCart(sessionId: sessionId, cartId: cartId,completedCart: false);
+
         _cartId = _getCartId();
         while(_cartId == 0)
           {
             await Future.delayed(const Duration(milliseconds: 10));
             _cartId = _getCartId();
           }
+        cartFuture = cartService.fetchCart(sessionId: sessionId, cartId: cartId,completedCart: false);
         //await Future.delayed(const Duration(seconds: 1));
         setState(() {
           _cartId = _getCartId();
@@ -563,7 +567,7 @@ class _CartPageState extends State<CartPage> {
           const SnackBar(content: Text('Order placed successfully!')),
         );
         await resetCart();
-        _showOrderModal(res.id);
+     //   _showOrderModal(res.id);
       /*  SessionManager().setCartId(0);
         SessionManager().setCustomerName('');
         SessionManager().setCustomerId(0);
@@ -586,16 +590,16 @@ class _CartPageState extends State<CartPage> {
 
   Future<void> resetCart()  async {
     SessionManager().setCartId(0);
-    SessionManager().setCustomerName('');
-    SessionManager().setCustomerId(0);
-    SessionManager().setPriceListId(0);
+  //  SessionManager().setCustomerName('');
+  //  SessionManager().setCustomerId(0);
+  //  SessionManager().setPriceListId(0);
     _cartId = _getCartId();
     _customerName = _getCustomerName();
     _customerId = _getCustomerId();
-    cartService.createCart(sessionId: _getSessionId());
+    cartService.createCart(sessionId: _getSessionId(),customerId: _customerId);
     while(_cartId == 0)
     {
-      await Future.delayed(const Duration(milliseconds: 10));
+      await Future.delayed(const Duration(milliseconds: 100));
       _cartId = _getCartId();
     }
     cartFuture = cartService.fetchCart(sessionId: _getSessionId(), cartId: _cartId,completedCart: false);
@@ -622,16 +626,16 @@ class _CartPageState extends State<CartPage> {
     _customerId = selectedCustomer!.id;
     _customerName = selectedCustomer!.name.replaceAll('\n', ' ');
 
-    SessionManager().setCustomerId(_customerId);
-    SessionManager().setCustomerName(_customerName);
-    SessionManager().setPriceListId(selectedCustomer!.priceListId);
+   // SessionManager().setCustomerId(_customerId);
+   // SessionManager().setCustomerName(_customerName);
+  //  SessionManager().setPriceListId(selectedCustomer!.priceListId);
     //CartPreferences.saveCustomerInfo(selectedCustomer!.id, selectedCustomer!.priceListId, selectedCustomer!.name);
     var res = await CartService().setCustomer(
         sessionId: _sessionId, cartId: _cartId, customerId: _customerId,priceListId: selectedCustomer!.priceListId);
     if (res == true) {
-      SessionManager().setCustomerId(_customerId);
-      SessionManager().setCustomerName(_customerName);
-      SessionManager().setPriceListId(selectedCustomer!.priceListId);
+ //     SessionManager().setCustomerId(_customerId);
+  //    SessionManager().setCustomerName(_customerName);
+  //    SessionManager().setPriceListId(selectedCustomer!.priceListId);
     }
   }
 
@@ -888,7 +892,7 @@ class _CartPageState extends State<CartPage> {
           Navigator.of(context).pop();
           _orderPdfUrl = pdfUrl;
           _orderCompleted = true;
-          _showOrderModal(id);
+          //_showOrderModal(id);
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -962,7 +966,7 @@ class _CartPageState extends State<CartPage> {
           _invoiceId = invoice.data.invoiceId;
           _invoicePdfUrl = invoice.data.pdfUrl;
           _incoiceCreated = true;
-          _showOrderModal(id);
+         // _showOrderModal(id);
           //_openAddPaymentModal(_invoiceId);
         });
 
