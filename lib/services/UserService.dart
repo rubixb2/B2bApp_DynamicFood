@@ -5,6 +5,7 @@ import 'package:odoosaleapp/helpers/SessionManager.dart';
 class UserService {
   //final String loginUrl = SessionManager().baseUrl+'Users/Login';
   final String loginUrl = SessionManager().baseUrl+'Users/LoginForb2b';
+  final int merchantId = 1001;
  // final String logoutUrl = SessionManager().baseUrl+'Users/Logout';
   final String logoutUrl = SessionManager().baseUrl+'Users/Logoutb2b';
 //  final String sessionCheckUrl = SessionManager().baseUrl+'Users/GetBySession';
@@ -19,7 +20,7 @@ class UserService {
       body: jsonEncode({
         'Username': username,
         'Password': password,
-        'MerchantId': 1001
+        'MerchantId': merchantId
       }),
     );
 

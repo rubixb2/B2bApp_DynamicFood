@@ -8,7 +8,8 @@ import '../models/order/AddOrderResponseModel.dart';
 
 // CartService Class
 class CartService {
-  final String _baseUrl = SessionManager().baseUrl+'cart/get';
+  //final String _baseUrl = SessionManager().baseUrl+'cart/get';
+  final String _baseUrl = SessionManager().baseUrl+'cart/GetForb2b';
   //final String _createCartUrl = SessionManager().baseUrl+'cart/create';
   final String _createCartUrl = SessionManager().baseUrl+'cart/CreateForb2b';
   final String _addToCartUrl = SessionManager().baseUrl+'cart/add';
@@ -31,7 +32,7 @@ class CartService {
       final response = await http.post(
         Uri.parse(_baseUrl),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'sessionId': sessionId, 'cartId': cartId,'completedCart': completedCart}),
+        body: jsonEncode({'sessionId': sessionId, 'cartId': cartId,'completedCart': completedCart,'customerId': SessionManager().customerId}),
       );
 
       if (response.statusCode == 200) {

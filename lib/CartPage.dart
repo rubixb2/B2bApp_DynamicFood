@@ -487,7 +487,7 @@ class _CartPageState extends State<CartPage> {
        // SessionManager().setCustomerName('');
         //SessionManager().setCustomerId(0);
      //   SessionManager().setPriceListId(0);
-        _cartId = _getCartId();
+        //_cartId = _getCartId();
 
         _customerName = _getCustomerName();
 
@@ -498,7 +498,7 @@ class _CartPageState extends State<CartPage> {
         _cartId = _getCartId();
         while(_cartId == 0)
           {
-            await Future.delayed(const Duration(milliseconds: 10));
+            await Future.delayed(const Duration(milliseconds: 100));
             _cartId = _getCartId();
           }
         cartFuture = cartService.fetchCart(sessionId: sessionId, cartId: cartId,completedCart: false);

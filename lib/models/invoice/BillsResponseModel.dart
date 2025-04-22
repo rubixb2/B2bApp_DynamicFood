@@ -9,7 +9,7 @@ class InvoiceResponseModel {
   final String invoiceDateDue;
   final String overdueDay;
   final String typeName;
-  final String accessUrl;
+  final String? accessUrl;
   final String invoiceOrigin;
   final double amountResidualSigned;
   final String paymentReference;

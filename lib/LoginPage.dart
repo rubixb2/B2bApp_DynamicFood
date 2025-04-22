@@ -47,7 +47,11 @@ class _LoginPageState extends State<LoginPage> {
       SessionManager().setUserId(data['UserId']);
 
       Navigator.pushReplacementNamed(context, '/home');
-    } else {
+    } else
+    {
+      setState(() {
+        isLoading = false;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login failed! Please check your credentials.')),
       );

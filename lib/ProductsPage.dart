@@ -226,9 +226,11 @@ class _ProductPageState extends State<ProductPage> {
                 final products = snapshot.data!;
 
                 return GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 250, // her hücre maksimum 250 piksel genişliğinde olacak
                     childAspectRatio: 0.95,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
                   ),
                   itemCount: products.length,
                   itemBuilder: (context, index) {
@@ -255,15 +257,14 @@ class _ProductPageState extends State<ProductPage> {
                               padding: const EdgeInsets.all(2.0),
                               child: Text(
                                 product.name,
-                                style: AppTextStyles.bodyTextBold2
+                                style: AppTextStyles.bodyTextBold2,
                               ),
                             ),
                             Padding(
-                              padding:
-                              const EdgeInsets.symmetric(horizontal: 2.0),
+                              padding: const EdgeInsets.symmetric(horizontal: 2.0),
                               child: Text(
                                 'Stock: ${product.stockCount}',
-                                style: AppTextStyles.subText
+                                style: AppTextStyles.subText,
                               ),
                             ),
                           ],
@@ -272,6 +273,7 @@ class _ProductPageState extends State<ProductPage> {
                     );
                   },
                 );
+
               },
             ),
           ),

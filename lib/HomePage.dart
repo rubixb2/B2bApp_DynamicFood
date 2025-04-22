@@ -52,7 +52,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             // MENÜ ÖĞELERİ
-            ListTile(
+           /* ListTile(
               leading: const Icon(Icons.home),
               title: const Text('Route'),
               onTap: () {
@@ -75,7 +75,7 @@ class _HomePageState extends State<HomePage> {
                 Navigator.pop(context);
               },
             ),
-            const Divider(), // Çizgi ayırıcı
+            const Divider(), // Çizgi ayırıcı*/
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Çıkış Yap'),

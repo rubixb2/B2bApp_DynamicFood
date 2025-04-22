@@ -7,9 +7,9 @@ class OrdersResponseModel {
   final String partnerName;
   final double amountTotal;
   final bool orderCompleteStatus;
-  final String orderPdfUrl;
+  final String? orderPdfUrl;
   final String invoicestatus;
-  final String invoicePdfUrl;
+  final String? invoicePdfUrl;
 
   OrdersResponseModel({
     required this.id,
@@ -32,11 +32,11 @@ class OrdersResponseModel {
       partnerid: json.containsKey('partnerid') ? json['partnerid'] : 0,
       name: json['name'],
       dateOrder: json['date_order'],
-      partnerName: json['partner_name'],
+      partnerName: json['partner_name'] ,
      // amountTotal: DateTime.parse(json['DATE']),
       amountTotal: json['amount_total'],
       orderCompleteStatus: json['order_complete_status'],
-      orderPdfUrl: json['order_pdf_url'],
+      orderPdfUrl: json['order_pdf_url'] ,
       invoicestatus: json['invoice_status'],
       invoicePdfUrl: json['invoice_pdf_url']
     );
