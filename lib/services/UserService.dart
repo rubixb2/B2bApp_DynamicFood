@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:odoosaleapp/helpers/SessionManager.dart';
 
 class UserService {
+
   //final String loginUrl = SessionManager().baseUrl+'Users/Login';
   final String loginUrl = SessionManager().baseUrl+'Users/LoginForb2b';
   final int merchantId = 1001;
