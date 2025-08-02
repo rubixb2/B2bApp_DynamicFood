@@ -297,7 +297,8 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
               child: _isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
                   : Text(
-                '${Strings.checkout} ($_cartId)',
+                //'${Strings.checkout} ($_cartId)',
+                '${Strings.checkout}',
                 style: TextStyle(fontSize: 18),
               ),
 
@@ -384,7 +385,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                       children: [
                         Expanded(child: Text(Strings.pickup)),
                         if (!canPickup)
-                          Text('Min: €${_pickupLimit.toStringAsFixed(2)}',
+                          Text('  Min: €${_pickupLimit.toStringAsFixed(2)}',
                               style: const TextStyle(fontSize: 12, color: Colors.red)),
                       ],
                     ),
@@ -407,7 +408,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                       children: [
                         Expanded(child: Text(Strings.delivery)),
                         if (!canDelivery)
-                          Text('Min: €${_deliveryLimit.toStringAsFixed(2)}',
+                          Text('  Min: €${_deliveryLimit.toStringAsFixed(2)}',
                               style: const TextStyle(fontSize: 12, color: Colors.red)),
                       ],
                     ),
@@ -464,7 +465,8 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: _pickupList.map((pickup) {
                   return RadioListTile<int>(
-                    title: Text('${Strings.address}: ${pickup.address}'),
+                   // title: Text('${Strings.address}: ${pickup.address}'),
+                    title: Text('${pickup.address}'),
                     value: pickup.id,
                     groupValue: _selectedPickupId,
                     onChanged: (value) {

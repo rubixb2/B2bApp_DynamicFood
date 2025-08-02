@@ -11,7 +11,7 @@ class InvoiceService {
   final String _baseCutomerInvoiceUrl = SessionManager().baseUrl+'b2bsale/BillList';
   final String _getPaymentMethodsUrl = SessionManager().baseUrl+'bills/PaymentLineTypes';
   final String _addpaymentUrl = SessionManager().baseUrl+'bills/addpayment';
-  final String _previewUrl = SessionManager().baseUrl+'bills/preview';
+  final String _previewUrl = SessionManager().baseUrl+'b2bsale/BillPreview';
   final String _refundUrl = SessionManager().baseUrl+'bills/refund';
 
 
@@ -140,7 +140,7 @@ class InvoiceService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['Control'] == 1) {
-          var pdfUrl = data['Date']['pdfUrl'];
+          var pdfUrl = data['Data']['pdfUrl'];
           return pdfUrl;
         } else {
           var msg = data['Message'];

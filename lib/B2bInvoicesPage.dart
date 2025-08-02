@@ -187,7 +187,8 @@ class _B2bInvoicesPageState extends State<B2bInvoicesPage> {
 
                               ElevatedButton(
                                 onPressed: (invoice.accessUrl ?? '').isNotEmpty
-                                    ? () => _openPdf(invoice.accessUrl ?? '')
+                                 //   ? () => _openPdf(invoice.accessUrl ?? '')
+                                    ? () => _prewiew(invoice.id)
                                     : () => _prewiew(invoice.id),
                                 child: Text('PDF',style: AppTextStyles.buttonTextWhite),
                                 style: AppButtonStyles.secondaryButton,

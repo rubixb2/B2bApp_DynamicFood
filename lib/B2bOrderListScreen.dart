@@ -106,10 +106,10 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
         title: Text(Strings.openPdfTitle),
         content: Text(Strings.howToViewPdf),
         actions: [
-          TextButton(
+         /* TextButton(
             onPressed: () => Navigator.pop(context, 1),
             child: Text(Strings.openInBrowser),
-          ),
+          ),*/
           TextButton(
             onPressed: () => Navigator.pop(context, 2),
             child: Text(Strings.viewInApp),
@@ -257,11 +257,10 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
                 ),
 
                 ElevatedButton.icon(
-                  onPressed: () {
-                    _openPdf(order.orderPdfUrl == null ||
-                            order.orderPdfUrl == ''
-                        ? 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-                        : order.orderPdfUrl!);
+                  onPressed: (order.orderPdfUrl == null || order.orderPdfUrl == '')
+                      ? null  // Buton pasif olur
+                      : () {
+                    _openPdf(order.orderPdfUrl!);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF4E6EF2),

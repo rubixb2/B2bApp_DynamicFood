@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:odoosaleapp/services/CartService.dart';
 import 'package:odoosaleapp/services/UserService.dart';
@@ -73,8 +75,15 @@ class _CategoriesPageState extends State<CategoriesPage> {
             itemBuilder: (context, index) {
               final category = categories[index];
               return ListTile(
-                leading: CircleAvatar(
+                leading:
+                /*CircleAvatar(
                   backgroundImage: NetworkImage(category.imageUrl),
+                ),*/
+                CircleAvatar(
+                  radius: 30,
+                  backgroundImage: MemoryImage(
+                    base64Decode(category.image), // base64 string'in sadece veri kısmı olmalı
+                  ),
                 ),
                 title: Text(category.name),
                 trailing: const Icon(Icons.chevron_right),

@@ -413,6 +413,7 @@ class CartService {
             return CategoryResponseModel(
               id: category.id,
               name: category.name,
+              image: category.image,
               imageUrl: category.imageUrl.isEmpty
                   ? 'https://picsum.photos/100?random=${category.id}'
                   : category.imageUrl,

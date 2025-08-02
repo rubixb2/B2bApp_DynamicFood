@@ -550,9 +550,15 @@ class _B2bProductPageState extends State<B2bProductPage> {
                         margin: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Column(
                           children: [
-                            CircleAvatar(
+                        /*    CircleAvatar(
                               radius: 30,
                               backgroundImage: NetworkImage(category.imageUrl),
+                            ),*/
+                            CircleAvatar(
+                              radius: 30,
+                              backgroundImage: MemoryImage(
+                                base64Decode(category.image), // base64 string'in sadece veri kısmı olmalı
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Text(

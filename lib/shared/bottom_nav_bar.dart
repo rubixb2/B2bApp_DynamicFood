@@ -25,7 +25,7 @@ class FixedBottomNavBar extends StatelessWidget {
           label: 'Cart',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.shop_two,color: Colors.black),
+          icon: Icon(Icons.shopping_bag,color: Colors.black),
           label: 'Orders',
         ),
         BottomNavigationBarItem(
