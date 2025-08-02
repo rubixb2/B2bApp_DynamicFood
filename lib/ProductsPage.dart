@@ -105,7 +105,7 @@ class _ProductPageState extends State<ProductPage> {
           searchKey: searchKey,
           limit: 20,
           page: 1,
-          categoryId: 0,
+          catId: 0,
           customerId: customerId,
           priceListId: pricelistId);
     });

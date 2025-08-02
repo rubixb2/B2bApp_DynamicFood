@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:odoosaleapp/CustomersPage.dart';
 import 'package:odoosaleapp/services/UserService.dart';
 
+import 'B2bProductPage.dart';
 import 'CartPage.dart';
 import 'InvoicesPage.dart';
 import 'OrdersPage.dart';
@@ -21,11 +22,12 @@ class _HomePageState extends State<HomePage> {
   String _userId = SessionManager().userId != null ? SessionManager().userId!.toString() : "0";
   String _userName = SessionManager().userName != null ? SessionManager().userName!.toString() : "-";
   final List<Widget> _pages = [
-    const ProductPage(),
+    //const ProductPage(),
+    const B2bProductPage(),
     const CartPage(),
     const OrdersPage(),
-    const InvoicesPage(),
-    const CustomersPage(),
+   // const InvoicesPage(),
+ //   const CustomersPage(),
   ];
 
   @override
@@ -108,10 +110,10 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.receipt),
             label: 'Orders',
           ),
-          BottomNavigationBarItem(
+     /*     BottomNavigationBarItem(
             icon: Icon(Icons.file_open),
             label: 'Invoices',
-          ),
+          ),*/
         /*  BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Customers',

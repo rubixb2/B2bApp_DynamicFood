@@ -1,45 +1,107 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:odoosaleapp/services/UserService.dart';
+import 'package:odoosaleapp/helpers/SessionManager.dart';
+import 'package:odoosaleapp/B2bMainPage.dart';
+import 'package:odoosaleapp/B2bLoginPage.dart';
 
-import 'helpers/SessionManager.dart';
-
-class SplashPage extends StatelessWidget {
+class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
 
-  void checkSession(BuildContext context) async {
-    //final userInfo = await UserPreferences.getUserInfo();
+  @override
+  State<SplashPage> createState() => _SplashPageState();
+
+
+
+}
+
+void setupFirebaseMessaging() async {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  // iOS için izin iste
+  NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+    print('✅ Bildirim izni verildi');
+  } else {
+    print('❌ Bildirim izni verilmedi');
+  }
+  // Token al
+  String? token = await messaging.getToken();
+  print("📱 Firebase Token: $token");
+
+  // Foreground bildirim alma
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('📬 Gelen mesaj: ${message.notification?.title}');
+  });
+
+  // Arka planda mesaj açıldığında
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    print('📨 Bildirim tıklanarak açıldı: ${message.data}');
+  });
+}
+
+
+
+class _SplashPageState extends State<SplashPage> {
+  @override
+  void initState() {
+    super.initState();
+    setupFirebaseMessaging();
+    _checkSessionAndNavigate();
+  }
+
+  Future<void> _checkSessionAndNavigate() async {
+    // Initialize session manager
     await SessionManager().init();
-    final userInfo = SessionManager().sessionId;
-    final customerId = SessionManager().customerId ?? 0;
-    //SessionManager().setBaseUrl('https://apiodootest.nametech.be/Api/');
-    //SessionManager().setBaseUrl('hhttps://localhost:44348/Api/');
-    //SessionManager().setBaseUrl('https://10.0.2.2:44348/Api/');
+
+    // Set your base URL (consider moving this to SessionManager.init())
     SessionManager().setBaseUrl('https://apiodootest.nametech.be:5010/Api/');
 
-    if (userInfo != null) {
-      final userService = UserService();
-      final isValidSession = await userService.validateSession(userInfo,customerId);
+    final sessionId = SessionManager().sessionId;
+    final rememberMe = SessionManager().rememberMe;
+    final customerId = SessionManager().customerId ?? 0;
 
-      if (isValidSession) {
-        SessionManager().setSessionId(userInfo);
-        Navigator.pushReplacementNamed(context, '/home');
-      } else {
-        SessionManager().clearSession();
-        // await UserPreferences.clearUserInfo();
-        Navigator.pushReplacementNamed(context, '/login');
+    if (sessionId != null && rememberMe) {
+      final userService = UserService();
+      final isValidSession = await userService.validateSession(sessionId, customerId);
+
+      if (isValidSession && mounted) {
+        // Valid session - go to MainPage
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const B2bMainPage()),
+        );
+      } else if (mounted) {
+        // Invalid session - clear and go to login
+        await SessionManager().clearSession();
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
       }
-    } else {
-      Navigator.pushReplacementNamed(context, '/login');
+    } else if (mounted) {
+      // No session or rememberMe false - go to login
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    checkSession(context);
-
     return const Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
-        child: CircularProgressIndicator(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FlutterLogo(size: 100),
+            SizedBox(height: 20),
+            CircularProgressIndicator(),
+          ],
+        ),
       ),
     );
   }

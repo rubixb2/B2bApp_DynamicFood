@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "578087390809",
+    "project_id": "b2bflutterapp",
+    "storage_bucket": "b2bflutterapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:578087390809:android:61121aeac5914d55b56b48",
+        "android_client_info": {
+          "package_name": "com.rubixb2.odoosaleapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWIjUEl8b4C7HBp-Lk62Jv3PX5yDaglwo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

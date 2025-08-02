@@ -10,7 +10,7 @@ import '../models/cart/CustomerDropListModel.dart';
 
 // CartService Class
 class OrderService {
-  final String _baseUrl = SessionManager().baseUrl+'orders/List';
+  final String _baseUrl = SessionManager().baseUrl+'B2bSale/OrderList';
   final String _completeOrderUrl = SessionManager().baseUrl+'orders/complete';
   final String _createInvoiceUrl = SessionManager().baseUrl+'orders/InvoiceCreate';
 

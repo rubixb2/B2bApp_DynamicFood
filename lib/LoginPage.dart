@@ -1,4 +1,9 @@
+import 'dart:convert';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:odoosaleapp/helpers/FlushBar.dart';
 import 'package:odoosaleapp/services/UserService.dart';
 import 'package:odoosaleapp/theme.dart';
 import 'SignUpPage.dart';
@@ -46,15 +51,49 @@ class _LoginPageState extends State<LoginPage> {
       SessionManager().setUserName(username);
       SessionManager().setUserId(data['UserId']);
 
+      await registerDeviceTokenToBackend();
+
       Navigator.pushReplacementNamed(context, '/home');
     } else
     {
       setState(() {
         isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login failed! Please check your credentials.')),
-      );
+      showCustomErrorToast(context, 'Login failed! Please check your credentials.');
+
+    }
+  }
+
+  Future<void> registerDeviceTokenToBackend() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    // 🔐 Firebase token al
+    String? token = await messaging.getToken();
+    print("📲 Login sonrası FCM Token: $token");
+
+    if (token != null) {
+      // Backend'e gönder (örnek)
+      await sendTokenToBackend(token);
+    }
+  }
+
+  Future<void> sendTokenToBackend(String token) async {
+    // Kullanıcı ID, auth token vs. burada kullanılabilir
+    final response = await http.post(
+      Uri.parse(SessionManager().baseUrl+'B2bSale/SetFcmToken'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'token': token,
+        'sessionId': SessionManager().sessionId, // opsiyonel
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      print('✅ Token backend\'e başarıyla gönderildi.');
+    } else {
+      print('❌ Token gönderilemedi: ${response.body}');
     }
   }
 

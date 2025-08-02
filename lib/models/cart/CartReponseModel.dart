@@ -1,3 +1,5 @@
+import 'package:odoosaleapp/models/cart/PickupModel.dart';
+
 import 'CartProductModel.dart';
 
 class CartResponseModel {
@@ -13,6 +15,8 @@ class CartResponseModel {
   final double takeawayDiscountAmount;
   final String? discountCode;
   final double discountAmount;
+  final double deliveryLimit;
+  final double pickupLimit;
   final String? discountDescription;
   final int paymentStatus;
   final String? warningDescription;
@@ -45,6 +49,7 @@ class CartResponseModel {
   final double cartPaid;
   final bool routed;
   final List<CartProductModel> cartProducts;
+  final List<PickupModel> pickupList;
 
   CartResponseModel({
     required this.id,
@@ -91,6 +96,9 @@ class CartResponseModel {
     required this.cartPaid,
     required this.routed,
     required this.cartProducts,
+    required this.deliveryLimit,
+    required this.pickupLimit,
+    required this.pickupList,
   });
 
   factory CartResponseModel.fromJson(Map<String, dynamic> json) {
@@ -140,8 +148,13 @@ class CartResponseModel {
       cartTotalPaid: json['CART_TOTAL_PAID'],
       cartPaid: json['CART_PAID'],
       routed: json['ROUTED'],
+      deliveryLimit: json['DELIVERY_LIMIT'] ?? 0,
+      pickupLimit: json['PICKUP_LIMIT'] ?? 0,
       cartProducts: (json['CART_PRODUCTS'] as List<dynamic>)
           .map((item) => CartProductModel.fromJson(item))
+          .toList(),
+      pickupList: (json['PICKUP_LIST'] as List<dynamic>)
+          .map((item) => PickupModel.fromJson(item))
           .toList(),
     );
   }

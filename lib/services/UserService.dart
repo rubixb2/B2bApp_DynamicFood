@@ -5,13 +5,10 @@ import 'package:odoosaleapp/helpers/SessionManager.dart';
 class UserService {
 
 
-  //final String loginUrl = SessionManager().baseUrl+'Users/Login';
-  final String loginUrl = SessionManager().baseUrl+'Users/LoginForb2b';
+  final String loginUrl = SessionManager().baseUrl+'B2bSale/Login';
   final int merchantId = 1001;
- // final String logoutUrl = SessionManager().baseUrl+'Users/Logout';
-  final String logoutUrl = SessionManager().baseUrl+'Users/Logoutb2b';
-//  final String sessionCheckUrl = SessionManager().baseUrl+'Users/GetBySession';
-  final String sessionCheckUrl = SessionManager().baseUrl+'Users/GetBySessionb2b';
+  final String logoutUrl = SessionManager().baseUrl+'B2bSale/Logout';
+  final String sessionCheckUrl = SessionManager().baseUrl+'B2bSale/GetBySession';
 
   Future<Map<String, dynamic>?> login(String username, String password) async {
     final response = await http.post(
@@ -67,7 +64,6 @@ class UserService {
     }
     return null;
   }
-
   Future<bool> validateSession(String sessionId,int customerId) async {
     final response = await http.post(
       Uri.parse(sessionCheckUrl),
