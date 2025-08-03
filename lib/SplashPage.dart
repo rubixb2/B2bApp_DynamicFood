@@ -97,7 +97,12 @@ class _SplashPageState extends State<SplashPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FlutterLogo(size: 100),
+            // 🔽 LOGO BURADA
+            Image(
+              image: AssetImage("assets/splash/logotadim.png"),
+              width: 120,
+              height: 120,
+            ),
             SizedBox(height: 20),
             CircularProgressIndicator(),
           ],
