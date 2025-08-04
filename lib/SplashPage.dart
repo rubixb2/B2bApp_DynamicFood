@@ -99,7 +99,7 @@ class _SplashPageState extends State<SplashPage> {
           children: [
             // 🔽 LOGO BURADA
             Image(
-              image: AssetImage("assets/splash/logotadim.png"),
+              image: AssetImage("assets/splash/splashlogo.png"),
               width: 120,
               height: 120,
             ),
