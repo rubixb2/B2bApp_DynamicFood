@@ -20,7 +20,7 @@ class LanguageManager {
 
   static const String _langKey = 'selectedLanguage';
 
-  AppLanguage currentLanguage = AppLanguage.english;
+  AppLanguage currentLanguage = AppLanguage.dutch;
 
   /// Uygulama açıldığında çağır
   Future<void> loadLanguage() async {

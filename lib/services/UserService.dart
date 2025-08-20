@@ -6,9 +6,10 @@ class UserService {
 
 
   final String loginUrl = SessionManager().baseUrl+'B2bSale/Login';
-  final int merchantId = 1001;
+  final int merchantId = 1;
   final String logoutUrl = SessionManager().baseUrl+'B2bSale/Logout';
   final String sessionCheckUrl = SessionManager().baseUrl+'B2bSale/GetBySession';
+  final String loginsettingsUrl = SessionManager().baseUrl+'B2bSale/GetLoginSettings';
 
   Future<Map<String, dynamic>?> login(String username, String password) async {
     final response = await http.post(
@@ -95,5 +96,27 @@ class UserService {
       }
     }
     return false;
+  }
+  Future<Map<String, dynamic>?> getLoginSettins() async {
+    final response = await http.post(
+      Uri.parse(loginsettingsUrl),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'MerchantId': merchantId,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['Control'] == 1) {
+        int cartId = 0;
+        var jsonData = data['Data'];
+
+        return jsonData;
+      }
+    }
+    return null;
   }
 }

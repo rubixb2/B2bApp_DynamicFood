@@ -15,6 +15,20 @@ class Strings {
   static String get address => _byLang('Address', 'Adres', 'Adresse', 'Adres');
   static String get pickupRequired => _byLang('Please select a pickup address', 'Lütfen bir Gel-Al adresi seçin', 'Veuillez sélectionner une adresse de retrait', 'Selecteer een afhaaladres');
 
+  // --- Login Screen Additions ---
+  static String get welcomeBack => _byLang('Welcome Back!', 'Tekrar Hoş Geldiniz!', 'Bienvenue de retour !', 'Welkom terug!');
+  static String get signInToYourAccount => _byLang('Sign in to your account', 'Hesabınıza giriş yapın', 'Connectez-vous à votre compte', 'Meld u aan bij uw account');
+  static String get emailAddressHint => _byLang('Email Address', 'E-posta Adresi', 'Adresse e-mail', 'E-mailadres');
+  static String get passwordHint => _byLang('Password', 'Şifre', 'Mot de passe', 'Wachtwoord');
+  static String get rememberMe => _byLang('Remember Me', 'Beni Hatırla', 'Se souvenir de moi', 'Onthoud mij');
+  static String get forgotPassword => _byLang('Forgot Password?', 'Şifremi Unuttum?', 'Mot de passe oublié ?', 'Wachtwoord vergeten?');
+  static String get loginButton => _byLang('Login', 'Giriş Yap', 'Se connecter', 'Inloggen');
+  static String get loginFailed => _byLang('Login Failed!', 'Giriş Başarısız!', 'Échec de la connexion !', 'Inloggen mislukt!');
+  static String get guestLoginButton => _byLang('Continue as Guest', 'Misafir Olarak Devam Et', 'Continuer en tant qu\'invité', 'Doorgaan als gast');
+  static String get dontHaveAnAccount => _byLang('Don\'t have an account?', 'Hesabın yok mu?', 'Vous n\'avez pas de compte ?', 'Heb je geen account?');
+  static String get signUpButton => _byLang('Sign Up', 'Kaydol', 'S\'inscrire', 'Aanmelden');
+  // ------------------------------
+
 
   static String get myInvoice => _byLang('My Invoice', 'Faturalarım', 'Ma Facture', 'Mijn Factuur');
   static String get logout => _byLang('Logout', 'Çıkış Yap', 'Se Déconnecter', 'Afmelden');
@@ -26,13 +40,13 @@ class Strings {
   static String get orderConfirmed => _byLang('Order confirmed', 'Sipariş onaylandı', 'Commande confirmée', 'Bestelling bevestigd');
   static String get orderCompleted => _byLang('Order completed', 'Sipariş tamamlandı', 'Commande terminée', 'Bestelling voltooid');
   static String get invoiced => _byLang('Invoiced', 'Faturalandı', 'Facturé', 'Gefactureerd');
-  static String get loginFailed => _byLang(
+/*  static String get loginFailed => _byLang(
       'Login failed! Please check your credentials.',
       'Giriş başarısız! Lütfen bilgilerinizi kontrol edin.',
       'Échec de la connexion ! Veuillez vérifier vos identifiants.',
       'Inloggen mislukt! Controleer uw gegevens.'
-  );
-
+  );*/
+/*
   static String get welcomeBack => _byLang(
       'Welcome back!',
       'Tekrar hoş geldiniz!',
@@ -80,7 +94,7 @@ class Strings {
       'Giriş Yap',
       'Connexion',
       'Inloggen'
-  );
+  );*/
 
   static String get categoriesTitle => _byLang(
       'Categories',
@@ -294,7 +308,12 @@ class Strings {
       'PDF de commande',
       'Bestelling PDF'
   );
-
+  static String get pdfViewer => _byLang(
+      'PDF Viewer',          // English
+      'PDF Görüntüleyici',   // Turkish
+      'Visionneuse PDF',     // French
+      'PDF Viewer'           // Dutch (veya Almanca'da "PDF-Anzeige" kullanılabilir)
+  );
   static String get complete => _byLang(
       'Complete',
       'Tamamlandı',

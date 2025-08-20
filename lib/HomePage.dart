@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Rubixb2'),
+        title: const Text('Tan-Tan'),
         backgroundColor: Colors.lightBlue,
       ),
       drawer: Drawer(

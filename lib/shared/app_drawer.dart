@@ -111,30 +111,6 @@ class _AppDrawerState extends State<AppDrawer> {
           const Divider(),
           ListTile(
             title: InkWell(
-              onTap: () => _setLanguage(AppLanguage.english),
-              child: Row(
-                children: [
-                  Image.network(
-                    'https://flagcdn.com/w20/gb.png',
-                    width: 24,
-                    height: 24,
-                  ),
-                  const SizedBox(width: 8),
-                  const Text('English'),
-                  const Spacer(),
-                  Radio<AppLanguage>(
-                    value: AppLanguage.english,
-                    groupValue: selectedLanguage,
-                    onChanged: (AppLanguage? value) {
-                      if (value != null) _setLanguage(value);
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          ListTile(
-            title: InkWell(
               onTap: () => _setLanguage(AppLanguage.dutch),
               child: Row(
                 children: [
@@ -157,6 +133,31 @@ class _AppDrawerState extends State<AppDrawer> {
               ),
             ),
           ),
+          ListTile(
+            title: InkWell(
+              onTap: () => _setLanguage(AppLanguage.english),
+              child: Row(
+                children: [
+                  Image.network(
+                    'https://flagcdn.com/w20/gb.png',
+                    width: 24,
+                    height: 24,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text('English'),
+                  const Spacer(),
+                  Radio<AppLanguage>(
+                    value: AppLanguage.english,
+                    groupValue: selectedLanguage,
+                    onChanged: (AppLanguage? value) {
+                      if (value != null) _setLanguage(value);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+
           ListTile(
             title: InkWell(
               onTap: () => _setLanguage(AppLanguage.french),

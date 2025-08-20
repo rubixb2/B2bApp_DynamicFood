@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:odoosaleapp/helpers/Strings.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:printing/printing.dart';
@@ -51,7 +52,7 @@ class _PdfScreenState extends State<PdfScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("PDF Görüntüleyici"),
+        title: Text(Strings.pdfViewer),
         actions: [
           IconButton(
             icon: Icon(Icons.print),

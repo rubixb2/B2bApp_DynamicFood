@@ -50,7 +50,7 @@ class _B2bInvoicesPageState extends State<B2bInvoicesPage> {
   void initState() {
     super.initState();
     _initializeInvoices();
-    _fetchPaymentMethods();
+   // _fetchPaymentMethods();
     //ordersFuture = fetchOrders();
   }
 

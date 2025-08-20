@@ -98,18 +98,19 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
 
       return;
     }
+    _viewInApp(pdfUrl);
 
-    // Kullanıcıya seçenek sunalım: Tarayıcıda aç veya uygulama içinde göster
+/*    // Kullanıcıya seçenek sunalım: Tarayıcıda aç veya uygulama içinde göster
     final result = await showDialog<int>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(Strings.openPdfTitle),
         content: Text(Strings.howToViewPdf),
         actions: [
-         /* TextButton(
+         *//* TextButton(
             onPressed: () => Navigator.pop(context, 1),
             child: Text(Strings.openInBrowser),
-          ),*/
+          ),*//*
           TextButton(
             onPressed: () => Navigator.pop(context, 2),
             child: Text(Strings.viewInApp),
@@ -128,7 +129,7 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
     } else if (result == 2) {
       // Uygulama içinde göster
       _viewInApp(pdfUrl);
-    }
+    }*/
   }
 
   Future<void> _launchInBrowser(String url) async {

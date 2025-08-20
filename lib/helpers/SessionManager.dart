@@ -45,6 +45,9 @@ class SessionManager {
   Future<void> setBaseUrl(String url) async {
     await _prefs?.setString('baseUrl', url);
   }
+  Future<void> setdeleteAccountBtn(bool val) async {
+    await _prefs?.setBool('deleteAccountBtn', val);
+  }
 
   // Getters
   String? get sessionId => _prefs?.getString('sessionId');
@@ -55,6 +58,7 @@ class SessionManager {
   int? get cartId => _prefs?.getInt('cartId');
   int? get customerId => _prefs?.getInt('customerId');
   int? get priceListId => _prefs?.getInt('priceListId');
+  bool? get deleteAccountBtn => _prefs?.getBool('deleteAccountBtn');
   String? get customerName => _prefs?.getString('customerName');
 
   // Clear all session data

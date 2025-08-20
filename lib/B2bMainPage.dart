@@ -55,7 +55,7 @@ class _B2bMainPageState extends State<B2bMainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('RubixB2b')),
+      appBar: AppBar(title: const Text('Tan-Tan')),
       drawer: AppDrawer(onNavItemSelected: _onItemTapped),
       body: _pages[_currentIndex],
       bottomNavigationBar: FixedBottomNavBar(
