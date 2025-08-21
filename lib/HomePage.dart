@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:odoosaleapp/CustomersPage.dart';
 import 'package:odoosaleapp/services/UserService.dart';
 
+import 'B2bProductPage.dart';
 import 'CartPage.dart';
 import 'InvoicesPage.dart';
 import 'OrdersPage.dart';
@@ -21,18 +22,19 @@ class _HomePageState extends State<HomePage> {
   String _userId = SessionManager().userId != null ? SessionManager().userId!.toString() : "0";
   String _userName = SessionManager().userName != null ? SessionManager().userName!.toString() : "-";
   final List<Widget> _pages = [
-    const ProductPage(),
+    //const ProductPage(),
+    const B2bProductPage(),
     const CartPage(),
     const OrdersPage(),
-    const InvoicesPage(),
-    const CustomersPage(),
+   // const InvoicesPage(),
+ //   const CustomersPage(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Rubixb2'),
+        title: const Text('Tan-Tan'),
         backgroundColor: Colors.lightBlue,
       ),
       drawer: Drawer(
@@ -52,7 +54,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             // MENÜ ÖĞELERİ
-            ListTile(
+           /* ListTile(
               leading: const Icon(Icons.home),
               title: const Text('Route'),
               onTap: () {
@@ -75,7 +77,7 @@ class _HomePageState extends State<HomePage> {
                 Navigator.pop(context);
               },
             ),
-            const Divider(), // Çizgi ayırıcı
+            const Divider(), // Çizgi ayırıcı*/
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Çıkış Yap'),
@@ -108,14 +110,14 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.receipt),
             label: 'Orders',
           ),
-          BottomNavigationBarItem(
+     /*     BottomNavigationBarItem(
             icon: Icon(Icons.file_open),
             label: 'Invoices',
-          ),
-          BottomNavigationBarItem(
+          ),*/
+        /*  BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Customers',
-          ),
+          ),*/
         ],
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.grey,
@@ -125,13 +127,17 @@ class _HomePageState extends State<HomePage> {
 
   void handleLogout(BuildContext context) async {
     var sessionId = SessionManager().sessionId ?? '';
+    var customerId = SessionManager().customerId ?? 0;
     final apiService = UserService();
-    final data = await apiService.logout(sessionId);
+    final data = await apiService.logout(sessionId,customerId);
 
     if (data != null) {
       SessionManager().setSessionId('');
       SessionManager().setUserName('');
       SessionManager().setUserId(0);
+      SessionManager().setCustomerId(0);
+      SessionManager().setCustomerName('');
+      SessionManager().setPriceListId(0);
 
       Navigator.pushReplacementNamed(context, '/login');
     } else {

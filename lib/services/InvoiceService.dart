@@ -8,9 +8,10 @@ import '../helpers/SessionManager.dart';
 // CartService Class
 class InvoiceService {
   final String _baseUrl = SessionManager().baseUrl+'bills/List';
+  final String _baseCutomerInvoiceUrl = SessionManager().baseUrl+'b2bsale/BillList';
   final String _getPaymentMethodsUrl = SessionManager().baseUrl+'bills/PaymentLineTypes';
   final String _addpaymentUrl = SessionManager().baseUrl+'bills/addpayment';
-  final String _previewUrl = SessionManager().baseUrl+'bills/preview';
+  final String _previewUrl = SessionManager().baseUrl+'b2bsale/BillPreview';
   final String _refundUrl = SessionManager().baseUrl+'bills/refund';
 
 
@@ -41,6 +42,38 @@ class InvoiceService {
       return null;
     }
   }
+
+  Future<InvoiceApiResponseModel?> fetchCustomerInvoices(
+      {
+        required String sessionId,required String SearchKey,required int customerId
+      }
+      ) async {
+    try {
+      final response = await http.post(
+        Uri.parse(_baseCutomerInvoiceUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'sessionId': sessionId,"SearchKey":SearchKey,"CustomerId":customerId}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['Control'] == 1) {
+          var jsonData = data['Data'];
+          final cartData = InvoiceApiResponseModel.fromJson(jsonData);
+          return cartData;
+        } else {
+          var msg = data['Message'];
+          throw Exception(msg);
+        }
+      } else {
+        throw Exception('Failed to load cart data');
+      }
+    } catch (e) {
+      print('Error fetching cart: $e');
+      return null;
+    }
+  }
+
   Future<PaymentLineTypeResponseModel?> fetchPaymentMethods(
       {required String sessionId}) async {
     try {
@@ -107,7 +140,7 @@ class InvoiceService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['Control'] == 1) {
-          var pdfUrl = data['Date']['pdfUrl'];
+          var pdfUrl = data['Data']['pdfUrl'];
           return pdfUrl;
         } else {
           var msg = data['Message'];

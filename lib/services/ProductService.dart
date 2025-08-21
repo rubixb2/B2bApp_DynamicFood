@@ -5,14 +5,14 @@ import '../helpers/SessionManager.dart';
 import '../models/product/ProductsResponseModel.dart';
 
 class ProductService {
-  final String apiUrl = SessionManager().baseUrl+'Products/List';
+  final String apiUrl = SessionManager().baseUrl+'B2bSale/productList';
 
   Future<List<ProductsResponseModel>> fetchProducts({
     required String sessionId,
     required String searchKey,
     required int limit,
     required int page,
-    required int categoryId,
+    required int catId,
     required int customerId,
     required int priceListId,
   }) async {
@@ -26,7 +26,7 @@ class ProductService {
         'SearchKey': searchKey,
         'Limit': limit,
         'Page': page,
-        'CategoryId': categoryId,
+        'catId': catId,
         'CustomerId': customerId,
         'PriceListId': priceListId == 0 ? 1: priceListId
       }),

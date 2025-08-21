@@ -157,7 +157,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
 
-                              ElevatedButton(
+                            /*  ElevatedButton(
                                 onPressed: invoice.paymentState.toLowerCase() != "paid"
                                     ? () => _openAddPaymentModal(invoice.id)
                                     : null,
@@ -169,11 +169,11 @@ class _InvoicesPageState extends State<InvoicesPage> {
                                     () => refund(invoice.id),
                                 child: Text('Refund',style: AppTextStyles.buttonTextWhite),
                                 style: AppButtonStyles.secondaryButton,
-                              ) ,
+                              ) ,*/
 
                               ElevatedButton(
-                                onPressed: invoice.accessUrl.isNotEmpty
-                                    ? () => _openPdf(invoice.accessUrl)
+                                onPressed: (invoice.accessUrl ?? '').isNotEmpty
+                                    ? () => _openPdf(invoice.accessUrl ?? '')
                                     : () => _prewiew(invoice.id),
                                 child: Text('PDF',style: AppTextStyles.buttonTextWhite),
                                 style: AppButtonStyles.secondaryButton,

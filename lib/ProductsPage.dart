@@ -47,23 +47,23 @@ class _ProductPageState extends State<ProductPage> {
 
   void handleSetCustomer() async {
 
-    SessionManager().setCustomerId(selectedCustomer!.id);
-    SessionManager().setCustomerName(selectedCustomer!.name);
-    SessionManager().setPriceListId(selectedCustomer!.priceListId);
+    //SessionManager().setCustomerId(selectedCustomer!.id);
+    //SessionManager().setCustomerName(selectedCustomer!.name);
+    //SessionManager().setPriceListId(selectedCustomer!.priceListId);
     //CartPreferences.saveCustomerInfo(selectedCustomer!.id, selectedCustomer!.priceListId, selectedCustomer!.name);
     var res = await CartService().setCustomer(
         sessionId: _getSessionId(), cartId: _getCartId(), customerId: selectedCustomer!.id,priceListId: _getPricelistId());
     if (res == true) {
-      SessionManager().setCustomerId(selectedCustomer!.id);
-      SessionManager().setCustomerName(selectedCustomer!.name);
-      SessionManager().setPriceListId(selectedCustomer!.priceListId);
+    //  SessionManager().setCustomerId(selectedCustomer!.id);
+     // SessionManager().setCustomerName(selectedCustomer!.name);
+     // SessionManager().setPriceListId(selectedCustomer!.priceListId);
      // _initializeProducts();
     }
     else
       {
-        SessionManager().setCustomerId(0);
-        SessionManager().setCustomerName("");
-        SessionManager().setPriceListId(0);
+      //  SessionManager().setCustomerId(0);
+       // SessionManager().setCustomerName("");
+       // SessionManager().setPriceListId(0);
       }
   }
 
@@ -105,7 +105,7 @@ class _ProductPageState extends State<ProductPage> {
           searchKey: searchKey,
           limit: 20,
           page: 1,
-          categoryId: 0,
+          catId: 0,
           customerId: customerId,
           priceListId: pricelistId);
     });
@@ -226,9 +226,11 @@ class _ProductPageState extends State<ProductPage> {
                 final products = snapshot.data!;
 
                 return GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 250, // her hücre maksimum 250 piksel genişliğinde olacak
                     childAspectRatio: 0.95,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
                   ),
                   itemCount: products.length,
                   itemBuilder: (context, index) {
@@ -255,15 +257,14 @@ class _ProductPageState extends State<ProductPage> {
                               padding: const EdgeInsets.all(2.0),
                               child: Text(
                                 product.name,
-                                style: AppTextStyles.bodyTextBold2
+                                style: AppTextStyles.bodyTextBold2,
                               ),
                             ),
                             Padding(
-                              padding:
-                              const EdgeInsets.symmetric(horizontal: 2.0),
+                              padding: const EdgeInsets.symmetric(horizontal: 2.0),
                               child: Text(
                                 'Stock: ${product.stockCount}',
-                                style: AppTextStyles.subText
+                                style: AppTextStyles.subText,
                               ),
                             ),
                           ],
@@ -272,6 +273,7 @@ class _ProductPageState extends State<ProductPage> {
                     );
                   },
                 );
+
               },
             ),
           ),

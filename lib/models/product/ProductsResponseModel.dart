@@ -12,6 +12,7 @@ class ProductsResponseModel {
   final String vatPriceText;
   final double taxedPrice;
   final String taxedPriceText;
+  final String description;
   final int palletCount;
 
   ProductsResponseModel({
@@ -29,6 +30,7 @@ class ProductsResponseModel {
     required this.taxedPrice,
     required this.taxedPriceText,
     required this.palletCount,
+    required this.description,
   });
 
   factory ProductsResponseModel.fromJson(Map<String, dynamic> json) {
@@ -47,6 +49,7 @@ class ProductsResponseModel {
       taxedPrice: json['taxed_price'],
       taxedPriceText: json['taxed_price_text'],
       palletCount: json['pallet_count'],
+      description: json['description'],
     );
   }
 }

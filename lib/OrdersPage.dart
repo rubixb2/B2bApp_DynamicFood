@@ -133,11 +133,11 @@ class _OrdersPageState extends State<OrdersPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
 
-                            order.orderCompleteStatus == true && order.invoicestatus != null && order.invoicestatus.toLowerCase() != "invoiced" ?
+                        /*    order.orderCompleteStatus == true && order.invoicestatus != null && order.invoicestatus.toLowerCase() != "invoiced" ?
                             Row(
                               children: [
                                 ElevatedButton(
-                                  onPressed: order.orderPdfUrl.isNotEmpty
+                                  onPressed: (order.orderPdfUrl ?? '').isNotEmpty
                                       ? () => _confirmInvoiceCreate(order.id)
                                       : null,
                                   child: Text('Create Invoice',style: AppTextStyles.buttonTextWhite),
@@ -173,12 +173,12 @@ class _OrdersPageState extends State<OrdersPage> {
                                   style: AppButtonStyles.secondaryButton,
                                   )
                                   ]
-                                ),
+                                ),*/
 
 
                             ElevatedButton(
-                              onPressed: order.orderPdfUrl.isNotEmpty
-                                  ? () => _openPdf(order.orderPdfUrl)
+                              onPressed: (order.orderPdfUrl ?? '').isNotEmpty
+                                  ? () => _openPdf(order.orderPdfUrl ?? '')
                                   : null,
                               child: Text('PDF',style: AppTextStyles.buttonTextWhite),
                               style: AppButtonStyles.secondaryButton,
@@ -479,8 +479,8 @@ class _OrdersPageState extends State<OrdersPage> {
     var res = await OrderService().orderEdit(sessionId: _getSessionId(),oldCartId: cartId,currentCartId: _getCartId());
     if (res)
     {
-      SessionManager().setCustomerName(customerName);
-      SessionManager().setCustomerId(customerId);
+    //  SessionManager().setCustomerName(customerName);
+   //   SessionManager().setCustomerId(customerId);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
