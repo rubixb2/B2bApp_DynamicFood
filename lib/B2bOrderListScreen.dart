@@ -329,13 +329,13 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
 
   Widget _buildStatusStepper(OrdersResponseModel order) {
     final steps = [
-      _buildStep(Strings.orderPlaced, true),
+      _buildStep(Strings.orderPlaced, true),/*
       _buildStep(Strings.orderConfirmed, order.orderCompleteStatus),
-      _buildStep(Strings.orderCompleted, order.orderCompleteStatus),
+      _buildStep(Strings.orderCompleted, order.orderCompleteStatus),*/
       _buildStep(Strings.invoiced, order.orderCompleteStatus),
 
 /*
-      _buildStep('Order placed', true),
+      _buildStep('Order placed', true),fluu
       _buildStep('Order confirmed'),
       //   _buildStep('Order shipped', order.orderCompleteStatus),
       _buildStep('Order completed', order.orderCompleteStatus),
