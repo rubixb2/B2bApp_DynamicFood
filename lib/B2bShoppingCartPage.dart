@@ -72,6 +72,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     });
   }
 
+
   double _calculateItemsTotal(List<CartProductModel> cartProducts) {
     return cartProducts.fold(0.0, (sum, item) {
       final price = item.price ?? 0.0;
