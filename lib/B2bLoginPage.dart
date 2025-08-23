@@ -72,7 +72,10 @@ class _LoginScreenState extends State<LoginScreen> {
       SessionManager().setPriceListId(data['PriceListId']);
       SessionManager().setUserName(username);
       SessionManager().setUserId(data['UserId']);
-      SessionManager().setRememberme(_rememberMe);
+      if (guest) {
+        SessionManager().setRememberme(false);
+      }
+
 
       await registerDeviceTokenToBackend();
 

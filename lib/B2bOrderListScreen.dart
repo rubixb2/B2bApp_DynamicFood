@@ -91,45 +91,51 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
     }
   }
 
-  Future<void> _openPdf(String pdfUrl) async {
-    // Eğer URL geçerli değilse veya boşsa
-    if (pdfUrl.isEmpty) {
-      showCustomErrorToast(context, Strings.pdfUrlNotAvailable);
+  Future<void> _previewOrder(int id) async {
+    /*   setState(() {
+      isLoading = true;
+    });*/
 
-      return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final sessionId = prefs.getString('sessionId') ?? '';
+      String baseurl = await prefs.getString('baseUrl') ?? '';
+
+      // sipariş oluşturma işlemleri
+      final orderPayload = {
+        "sessionId": sessionId,
+        "orderId": id
+      };
+
+      final orderResponse = await http.post(
+        Uri.parse(baseurl + "b2bsale/orderPreview"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(orderPayload),
+      );
+
+      final orderResult = jsonDecode(orderResponse.body);
+      if (orderResult['Control'] == 1) {
+        final pdfUrl = orderResult['Data']['pdfurl'];
+        _viewInApp(pdfUrl);
+
+      }
+      else
+        {
+          showCustomErrorToast(context, '${Strings.generalError}');
+        }
+    } catch (e) {
+      print('Hata: $e');
+      showCustomErrorToast(context, '${Strings.generalError}: ${e}');
+    } finally {
+      /*  setState(() {
+        isLoading = false;
+      });*/
     }
-    _viewInApp(pdfUrl);
+  }
 
-/*    // Kullanıcıya seçenek sunalım: Tarayıcıda aç veya uygulama içinde göster
-    final result = await showDialog<int>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(Strings.openPdfTitle),
-        content: Text(Strings.howToViewPdf),
-        actions: [
-         *//* TextButton(
-            onPressed: () => Navigator.pop(context, 1),
-            child: Text(Strings.openInBrowser),
-          ),*//*
-          TextButton(
-            onPressed: () => Navigator.pop(context, 2),
-            child: Text(Strings.viewInApp),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, 0),
-            child: Text(Strings.cancel),
-          ),
-        ],
-      ),
-    );
-
-    if (result == 1) {
-      // Tarayıcıda aç
-      _launchInBrowser(pdfUrl);
-    } else if (result == 2) {
-      // Uygulama içinde göster
-      _viewInApp(pdfUrl);
-    }*/
+  Future<void> _openPdf(int id) async {
+    // Eğer URL geçerli değilse veya boşsa
+    _previewOrder(id);
   }
 
   Future<void> _launchInBrowser(String url) async {
@@ -259,9 +265,11 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
 
                 ElevatedButton.icon(
                   onPressed: (order.orderPdfUrl == null || order.orderPdfUrl == '')
-                      ? null  // Buton pasif olur
+                      ? () {
+                    _openPdf(order.id);
+                  }  // Buton pasif olur
                       : () {
-                    _openPdf(order.orderPdfUrl!);
+                    _openPdf(order.id);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF4E6EF2),

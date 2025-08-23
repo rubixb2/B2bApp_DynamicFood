@@ -133,16 +133,27 @@ class _B2bInvoicesPageState extends State<B2bInvoicesPage> {
                         children: [
                           Row(
                             children: [
-                              Text(invoice.partnerName.length>50 ? invoice.partnerName.substring(0,50): invoice.partnerName,
+                              Text(invoice.name.toString(),
                                   style: AppTextStyles.bodyTextBold),
                               Spacer(),
-                              Text('Id: ' + invoice.id.toString(), style: AppTextStyles.bodyTextBold,)
+
+                              Text(
+                                '${Strings.totalLabel}: \€${invoice.amountTotal.toStringAsFixed(2)}',
+                                style: AppTextStyles.bodyTextBold,
+                              ),
+                             // Text('Id: ' + invoice.name.toString(), style: AppTextStyles.bodyTextBold,)
                             ],
                           ),
                           
                           SizedBox(height: 5),
                           Row(
                             children: [
+                              Text(
+                                invoice.invoiceDate.length>10 ? invoice.invoiceDate.substring(0,10) : invoice.invoiceDate,
+                                style: AppTextStyles.bodyTextBold,
+                              ),
+
+                              Spacer(),
                               Text(
                                 invoice.paymentState,
                                 style: TextStyle(
@@ -152,25 +163,17 @@ class _B2bInvoicesPageState extends State<B2bInvoicesPage> {
                                 ),
                               ),
                               SizedBox(width: 8),
-                              Text(
-                                '${Strings.totalLabel}: \€${invoice.amountTotal.toStringAsFixed(2)}',
-                                style: AppTextStyles.bodyTextBold,
-                              ),
-                              SizedBox(width: 8),
                               Text(invoice.overdueDay,
                                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color:  Colors.red,)),
-                              Spacer(),
-                              Text(
-                                invoice.invoiceDate.length>10 ? invoice.invoiceDate.substring(0,10) : invoice.invoiceDate,
-                                style: AppTextStyles.bodyTextBold,
-                              ),
+
+
                             ],
                           ),
                           SizedBox(height: 5),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-
+                            Spacer(),
                             /*  ElevatedButton(
                                 onPressed: invoice.paymentState.toLowerCase() != "paid"
                                     ? () => _openAddPaymentModal(invoice.id)

@@ -118,7 +118,7 @@ class _B2bProductPageState extends State<B2bProductPage> {
       return  result;
     } catch (e) {
       debugPrint('Error fetching carousel items: $e');
-      showCustomErrorToast(context, '${Strings.errorFetchingCarousel}: $e');
+     // showCustomErrorToast(context, '${Strings.errorFetchingCarousel}: $e');
       // Fallback olarak default veri dönebilirsiniz
       return [];
     }
@@ -554,12 +554,13 @@ class _B2bProductPageState extends State<B2bProductPage> {
                               radius: 30,
                               backgroundImage: NetworkImage(category.imageUrl),
                             ),*/
-                            CircleAvatar(
+                            _buildCategoryImageWidget(category.image,context),
+                          /*  CircleAvatar(
                               radius: 30,
                               backgroundImage: MemoryImage(
                                 base64Decode(category.image), // base64 string'in sadece veri kısmı olmalı
                               ),
-                            ),
+                            ),*/
                             const SizedBox(height: 4),
                             Text(
                               category.name,
@@ -622,6 +623,63 @@ class _B2bProductPageState extends State<B2bProductPage> {
     }
   }
 
+  Widget _buildCategoryImageWidget(String? imageSource, BuildContext context) {
+    // imageSource null veya boşsa varsayılan resim kullanılır
+    final effectiveImageSource = (imageSource == null || imageSource.isEmpty)
+        ? 'https://fastly.picsum.photos/id/799/400/200.jpg'
+        : imageSource;
 
+    // Base64 kontrolü
+    final isBase64 = effectiveImageSource.startsWith('data:image') ||
+        (effectiveImageSource.length > 100 && !effectiveImageSource.contains('http'));
+
+    if (isBase64) {
+      try {
+        // Base64 verisinin başındaki meta verileri (örneğin "data:image/jpeg;base64,") temizlemek gerekebilir.
+        final cleanBase64 = effectiveImageSource.split(',').last;
+        return CircleAvatar(
+          radius: 30,
+          backgroundImage: MemoryImage(
+            base64Decode(cleanBase64),
+          ),
+        );
+      } catch (e) {
+        debugPrint('Base64 decode error: $e');
+        // showCustomErrorToast(context, '${Strings.base64DecodeError}: $e');
+        return CircleAvatar(
+          radius: 30,
+          backgroundColor: Colors.grey[200],
+          child: const Icon(Icons.error, color: Colors.red),
+        );
+      }
+    } else {
+      // else bloğu: Network resmini bir CircleAvatar içinde gösterir
+      return CircleAvatar(
+        radius: 30,
+        backgroundColor: Colors.grey[200],
+        child: ClipOval(
+          child: Image.network(
+            effectiveImageSource,
+            fit: BoxFit.cover,
+            width: 60,  // CircleAvatar'ın yarıçapının iki katı
+            height: 60, // CircleAvatar'ın yarıçapının iki katı
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Center(
+                child: CircularProgressIndicator(
+                  value: loadingProgress.expectedTotalBytes != null
+                      ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
+                      : null,
+                ),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) =>
+            const Icon(Icons.broken_image, color: Colors.grey),
+          ),
+        ),
+      );
+    }
+  }
 
 }

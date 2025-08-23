@@ -90,7 +90,8 @@ class _AppDrawerState extends State<AppDrawer> {
         children: [
           DrawerHeader(
             decoration: const BoxDecoration(color: Colors.blue),
-            child: Text(Strings.menu),
+            //child: Text(Strings.menu),
+            child:  Text(SessionManager().customerId.toString()),
           ),
           ListTile(
             leading: const Icon(Icons.shopping_bag),
