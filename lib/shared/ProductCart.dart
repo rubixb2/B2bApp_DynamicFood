@@ -185,7 +185,7 @@ class _ProductCardState extends State<ProductCard> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.remove_circle_outline, size: 30),
+                            icon: const Icon(Icons.remove_circle_outline, size: 34),
                             onPressed: () {
                               setState(() {
                                 if (quantity > 1) quantity--;
@@ -201,11 +201,11 @@ class _ProductCardState extends State<ProductCard> {
                             ),
                             child: Text(
                               quantity.toString(),
-                              style: const TextStyle(fontSize: 14),
+                              style: const TextStyle(fontSize: 16),
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.add_circle_outline_outlined, size: 30),
+                            icon: const Icon(Icons.add_circle_outline_outlined, size: 34),
                             onPressed: () {
                               setState(() {
                                 quantity++;

@@ -14,7 +14,7 @@ class Strings {
   static String get choosePickupAddress => _byLang('Select Pickup Address', 'Gel-Al Adresi Seçin', 'Sélectionnez l\'adresse de retrait', 'Kies afhaaladres');
   static String get address => _byLang('Address', 'Adres', 'Adresse', 'Adres');
   static String get pickupRequired => _byLang('Please select a pickup address', 'Lütfen bir Gel-Al adresi seçin', 'Veuillez sélectionner une adresse de retrait', 'Selecteer een afhaaladres');
-
+  static String get update => _byLang('Update', 'Güncelle', 'Mettre à jour', 'Bijwerken');
   // --- Login Screen Additions ---
   static String get welcomeBack => _byLang('Welcome Back!', 'Tekrar Hoş Geldiniz!', 'Bienvenue de retour !', 'Welkom terug!');
   static String get signInToYourAccount => _byLang('Sign in to your account', 'Hesabınıza giriş yapın', 'Connectez-vous à votre compte', 'Meld u aan bij uw account');

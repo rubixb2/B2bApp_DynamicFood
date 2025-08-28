@@ -134,7 +134,7 @@ class _ProductDetailPageState extends State<B2bProductDetailPage> {
 
                           const Spacer(),
                           IconButton(
-                            icon: const Icon(Icons.remove),
+                            icon: const Icon(Icons.remove_circle_outline, size: 34),
                             onPressed: () {
                               if (_quantity > 1) {
                                 setState(() {
@@ -158,7 +158,7 @@ class _ProductDetailPageState extends State<B2bProductDetailPage> {
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.add),
+                            icon: const Icon(Icons.add_circle_outline, size: 34),
                             onPressed: () {
                               setState(() {
                                 _quantity++;

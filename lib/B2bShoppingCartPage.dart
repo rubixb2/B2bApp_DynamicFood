@@ -10,6 +10,7 @@ import 'package:odoosaleapp/services/CartService.dart';
 import 'package:odoosaleapp/helpers/SessionManager.dart';
 import 'package:odoosaleapp/models/cart/CartProductModel.dart';
 import 'package:odoosaleapp/shared/CartState.dart';
+import 'package:odoosaleapp/shared/ProductDetailModal.dart';
 import 'package:provider/provider.dart';
 
 import 'helpers/Strings.dart';
@@ -162,91 +163,113 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   }
 
   Widget _buildCartItem(CartProductModel product) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                image: DecorationImage(
-                  image: NetworkImage(product.imageUrl ?? 'https://via.placeholder.com/80'),
-                  fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: () {
+        // Ürün detay modalını açmak için bir fonksiyon çağrılacak.
+        // Bu fonksiyon, bu widget'ın bulunduğu sınıf içinde tanımlanmalıdır.
+        _showProductDetailModal(product);
+      },
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 16),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  image: DecorationImage(
+                    image: NetworkImage(product.imageUrl ?? 'https://via.placeholder.com/80'),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.productName ?? "",
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '€${product.price?.toStringAsFixed(2) ?? "0.00"}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.green,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove_circle_outline),
-                        iconSize: 30.0, // Buton boyutunu büyüttük
-                        onPressed: () {
-                          if ((product.boxQuantity ?? 0) > 1) {
-                            _updateItemQuantity(product.id!, (product.boxQuantity ?? 0) - 1);
-                          }
-                        },
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.productName ?? "",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
-                      Text(
-                        '${product.boxQuantity ?? 0}',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(
+                          '${product.boxQuantity.toInt() ?? 0} * ',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.add_circle_outline),
-                        iconSize: 30.0, // Buton boyutunu büyüttük
-                        onPressed: () {
-                          _updateItemQuantity(product.id!, (product.boxQuantity ?? 0) + 1);
-                        },
-                      ),
-                    ],
-                  ),
-                  Text(
-                    'Toplam: €${((product.price ?? 0) * (product.boxQuantity ?? 0)).toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
+                        Text(
+                          '€${product.price?.toStringAsFixed(2) ?? "0.00"}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+
+                    const SizedBox(height: 4),
+
+                   /* Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove_circle_outline),
+                          iconSize: 30.0,
+                          onPressed: () {
+                            if ((product.boxQuantity ?? 0) > 1) {
+                              _updateItemQuantity(product.id!, (product.boxQuantity ?? 0) - 1);
+                            }
+                          },
+                        ),
+                        Text(
+                          '${product.boxQuantity ?? 0}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.add_circle_outline),
+                          iconSize: 30.0,
+                          onPressed: () {
+                            _updateItemQuantity(product.id!, (product.boxQuantity ?? 0) + 1);
+                          },
+                        ),
+                      ],
+                    ),*/
+                    Text(
+                      'Toplam: €${((product.price ?? 0) * (product.boxQuantity ?? 0)).toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () => _removeItem(product.id),
-            ),
-          ],
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () => _removeItem(product.id),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+
+
 
   /*Widget _buildCartItem(CartProductModel product) {
     return Card(
@@ -615,5 +638,20 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     }
   }
 
-
+  void _showProductDetailModal(CartProductModel product) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return ProductDetailModal(
+          product: product,
+          onUpdate: (productId, newQuantity) {
+            // Modal'daki "Güncelle" butonuna basıldığında tetiklenir.
+            _updateItemQuantity(productId, newQuantity.toDouble());
+            Navigator.of(context).pop(); // Modalı kapat
+          },
+        );
+      },
+    );
+  }
 }
