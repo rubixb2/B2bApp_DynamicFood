@@ -59,6 +59,9 @@ class _ProductCardState extends State<ProductCard> {
           widget.product.id,
           quantity,
         );
+        setState(() {
+          quantity = 1;
+        });
        // widget.onAddToCart();
         showCustomToast(context, Strings.productAddedToCart);
         _updateCartQuantity();
