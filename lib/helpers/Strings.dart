@@ -40,6 +40,36 @@ class Strings {
   static String get orderConfirmed => _byLang('Order confirmed', 'Sipariş onaylandı', 'Commande confirmée', 'Bestelling bevestigd');
   static String get orderCompleted => _byLang('Order completed', 'Sipariş tamamlandı', 'Commande terminée', 'Bestelling voltooid');
   static String get invoiced => _byLang('Invoiced', 'Faturalandı', 'Facturé', 'Gefactureerd');
+
+  // ... diğer strings
+
+  static String get deleteAccount => _byLang(
+      'Delete Account',
+      'Hesabımı Sil',
+      'Supprimer le compte',
+      'Account verwijderen'
+  );
+
+  static String get deleteAccountConfirm => _byLang(
+      'Are you sure you want to delete your account? This action cannot be undone.',
+      'Hesabınızı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+      'Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.',
+      'Weet u zeker dat u uw account wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.'
+  );
+
+  static String get deleteAccountSuccess => _byLang(
+      'Account deleted successfully.',
+      'Hesabınız başarıyla silindi.',
+      'Compte supprimé avec succès.',
+      'Account succesvol verwijderd.'
+  );
+
+  static String get deleteAccountFailed => _byLang(
+      'Failed to delete account. Please try again.',
+      'Hesap silme başarısız oldu. Lütfen tekrar deneyin.',
+      'Échec de la suppression du compte. Veuillez réessayer.',
+      'Het verwijderen van het account is mislukt. Probeer het opnieuw.'
+  );
 /*  static String get loginFailed => _byLang(
       'Login failed! Please check your credentials.',
       'Giriş başarısız! Lütfen bilgilerinizi kontrol edin.',
@@ -471,6 +501,12 @@ class Strings {
       'Votre panier est vide !',
       'Uw winkelwagen is leeg!'
   );
+  static String get cart => _byLang(
+      'Cart',
+      'Sepet',
+      'Panier',
+      'Winkelwagen'
+  );
 
   static String get subtotal => _byLang(
       'Subtotal',
@@ -526,6 +562,87 @@ class Strings {
       'Sepete Ekle',
       'Ajouter au panier',
       'In winkelwagen'
+  );
+
+  // SignUpScreen strings
+  static String get createAccount => _byLang(
+      'Create Account',
+      'Hesap Oluştur',
+      'Créer un compte',
+      'Account aanmaken'
+  );
+
+  static String get signUpToGetStarted => _byLang(
+      'Sign up to get started',
+      'Başlamak için kaydolun',
+      'Inscrivez-vous pour commencer',
+      'Meld u aan om te beginnen'
+  );
+
+
+
+  static String get confirmPasswordHint => _byLang(
+      'Confirm Password',
+      'Parolayı Onayla',
+      'Confirmer le mot de passe',
+      'Wachtwoord bevestigen'
+  );
+
+
+  static String get alreadyHaveAnAccount => _byLang(
+      'Already have an account?',
+      'Zaten bir hesabınız var mı?',
+      'Vous avez déjà un compte ?',
+      'Heeft u al een account?'
+  );
+
+  static String get signUpSuccess => _byLang(
+      'Registration successful! Please log in.',
+      'Kayıt başarılı! Lütfen giriş yapın.',
+      'Inscription réussie ! Veuillez vous connecter.',
+      'Registratie succesvol! Log alstublieft in.'
+  );
+
+  static String get signUpFailed => _byLang(
+      'Registration failed. Please try again.',
+      'Kayıt başarısız oldu. Lütfen tekrar deneyin.',
+      'Échec de l\'inscription. Veuillez réessayer.',
+      'Registratie mislukt. Probeer het opnieuw.'
+  );
+
+  static String get emailRequired => _byLang(
+      'Please enter an email address.',
+      'Lütfen bir e-posta adresi girin.',
+      'Veuillez entrer une adresse e-mail.',
+      'Voer een e-mailadres in.'
+  );
+
+  static String get emailInvalid => _byLang(
+      'Please enter a valid email address.',
+      'Lütfen geçerli bir e-posta adresi girin.',
+      'Veuillez entrer une adresse e-mail valide.',
+      'Voer een geldig e-mailadres in.'
+  );
+
+  static String get passwordRequired => _byLang(
+      'Please enter a password.',
+      'Lütfen bir parola girin.',
+      'Veuillez entrer un mot de passe.',
+      'Voer een wachtwoord in.'
+  );
+
+  static String get passwordTooShort => _byLang(
+      'Password must be at least 6 characters long.',
+      'Parola en az 6 karakter olmalıdır.',
+      'Le mot de passe doit contenir au moins 6 caractères.',
+      'Het wachtwoord moet minstens 6 tekens lang zijn.'
+  );
+
+  static String get passwordsDoNotMatch => _byLang(
+      'Passwords do not match.',
+      'Parolalar eşleşmiyor.',
+      'Les mots de passe ne correspondent pas.',
+      'Wachtwoorden komen niet overeen.'
   );
 
 

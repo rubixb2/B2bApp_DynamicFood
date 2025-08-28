@@ -13,6 +13,7 @@ import '../models/product/CategoryResponseModel.dart';
 class CartService {
   //final String _baseUrl = SessionManager().baseUrl+'cart/get';
   final String _baseUrl = SessionManager().baseUrl+'B2bSale/GetCart';
+  final String _cartCuntUrl = SessionManager().baseUrl+'B2bSale/GetCartDetail';
   final String _cartLimitControl = SessionManager().baseUrl+'B2bSale/CartLimitControl';
   final String _categoryUrl = SessionManager().baseUrl+'B2bSale/categorylist';
   final String _carouselUrl = SessionManager().baseUrl+'B2bSale/GetCarouselData';
@@ -46,10 +47,6 @@ class CartService {
         if (data['Control'] == 1) {
           var jsonData = data['Data'];
           final cartData = CartResponseModel.fromJson(jsonData);
-         // int cid = cartData.customerId == '' ? 0 : int.parse(cartData.customerId);
-         // SessionManager().setCartId(cartData.id);
-          // SessionManager().setCustomerId(cid);
-          // SessionManager().setCustomerName(cartData.customerName ?? "");
           return cartData;
         } else {
           var msg = data['Message'];
@@ -61,6 +58,40 @@ class CartService {
     } catch (e) {
       print('Error fetching cart: $e');
       return null;
+    }
+  }
+  Future<List<CartCountResponseModel>?> fetchCartCount(
+      {required String sessionId, required int cartId, required bool completedCart}) async {
+    List<CartCountResponseModel> cartList = [];
+    try {
+      final response = await http.post(
+        Uri.parse(_cartCuntUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'sessionId': sessionId, 'cartId': cartId,'completedCart': completedCart,'customerId': SessionManager().customerId}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['Control'] == 1) {
+          var jsonData = data['Data'];
+          if (jsonData is List) {
+            // Listenin her bir elemanını dön
+            for (var item in jsonData) {
+              // Her bir elemanı model'e dönüştür ve listeye ekle
+              cartList.add(CartCountResponseModel.fromJson(item));
+            }
+          }
+          return cartList;
+        } else {
+          var msg = data['Message'];
+          return cartList;
+        }
+      } else {
+      ; return cartList;
+      }
+    } catch (e) {
+      print('Error fetching cart: $e');
+      return cartList;
     }
   }
 

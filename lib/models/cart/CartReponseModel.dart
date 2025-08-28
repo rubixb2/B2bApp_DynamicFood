@@ -159,3 +159,23 @@ class CartResponseModel {
     );
   }
 }
+
+
+class CartCountResponseModel {
+  final int productId;
+  final double count;
+
+  CartCountResponseModel({
+    required this.productId,
+    required this.count,
+
+  });
+
+  factory CartCountResponseModel.fromJson(Map<String, dynamic> json) {
+    return CartCountResponseModel(
+      productId: json['PRODUCT_ID'],
+      count: json['COUNT'],
+
+    );
+  }
+}

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:odoosaleapp/services/CartService.dart';
 import 'package:odoosaleapp/models/product/ProductsResponseModel.dart';
+import 'package:odoosaleapp/shared/CartState.dart';
+import 'package:provider/provider.dart';
 
 import 'helpers/FlushBar.dart';
 import 'helpers/SessionManager.dart';
@@ -73,13 +75,22 @@ class _ProductDetailPageState extends State<B2bProductDetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Fiyat ve başlık
-                      Text(
-                        widget.product.taxedPriceText,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
+                      Row(
+                        children: [
+                          Text( '${widget.product.taxedPriceText}',
+                            style: const TextStyle(
+                                fontSize: 18,
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Spacer(),
+                          Text( 'pcs- ${widget.product.unitPriceText}',
+                            style: const TextStyle(
+                                fontSize: 18,
+                                color: Colors.green,
+                                fontWeight: FontWeight.normal),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -93,12 +104,12 @@ class _ProductDetailPageState extends State<B2bProductDetailPage> {
                       const SizedBox(height: 8),
 
                       // Stok bilgisi
-                      Text(
+                    /*  Text(
                         '${Strings.stock}: ${widget.product.stockCount} lbs',
                         style: TextStyle(
                           color: widget.product.stockCount > 0 ? Colors.grey : Colors.red,
                         ),
-                      ),
+                      ),*/
 
                       const SizedBox(height: 10),
 
@@ -200,16 +211,21 @@ class _ProductDetailPageState extends State<B2bProductDetailPage> {
 
   Future<void> _addToCart() async {
     try {
-      final response = await _cartService.addToCart(
+    /*  final response = await _cartService.addToCart(
         sessionId: SessionManager().sessionId ?? '',
         cartId: SessionManager().cartId ?? 0,
         productId: widget.product.id,
         pieceQty: 0,
-        boxQty: _quantity,
-      );
+        boxQty: ç,
+      );*/
 
-      if (response) {
-
+    //  if (response)
+      if (true)
+      {
+        Provider.of<CartState>(context, listen: false).addToCart(
+          widget.product.id,
+          _quantity,
+        );
         showCustomToast(context, Strings.productAdded);
 
       } else {

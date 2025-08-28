@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:odoosaleapp/helpers/FlushBar.dart';
 import 'package:odoosaleapp/services/UserService.dart';
 
+import 'B2bSignUpPage.dart';
 import 'helpers/SessionManager.dart';
 import 'B2bMainPage.dart';
 import 'helpers/Strings.dart';
@@ -307,8 +308,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         Text(Strings.dontHaveAnAccount),
                         TextButton(
                           onPressed: () {
-                            // TODO: Implement sign up navigation
-                            print('Sign Up clicked!');
+                            // Navigate to the new SignUpScreen
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (context) => SignUpScreen()),
+                            ).then((email) {
+                              if (email != null && email is String) {
+                                emailController.text = email;
+                              }
+                            });
                           },
                           child: Text(
                             Strings.signUpButton,

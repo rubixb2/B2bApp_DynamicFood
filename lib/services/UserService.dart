@@ -8,6 +8,7 @@ class UserService {
   final String loginUrl = SessionManager().baseUrl+'B2bSale/Login';
   final int merchantId = 1;
   final String logoutUrl = SessionManager().baseUrl+'B2bSale/Logout';
+  final String deleteUserUrl = SessionManager().baseUrl+'B2bSale/deleteUser';
   final String sessionCheckUrl = SessionManager().baseUrl+'B2bSale/GetBySession';
   final String loginsettingsUrl = SessionManager().baseUrl+'B2bSale/GetLoginSettings';
 
@@ -47,6 +48,27 @@ class UserService {
   Future<Map<String, dynamic>?> logout(String sessionId,int customerId) async {
     final response = await http.post(
       Uri.parse(logoutUrl),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'sessionId': sessionId,
+        'customerId' : customerId
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      if (data['Control'] == 1) {
+        return data;
+      }
+    }
+    return null;
+  }
+  Future<Map<String, dynamic>?> deleteUser(String sessionId,int customerId) async {
+    final response = await http.post(
+      Uri.parse(deleteUserUrl),
       headers: {
         'Content-Type': 'application/json',
       },

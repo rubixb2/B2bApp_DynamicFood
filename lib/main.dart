@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:odoosaleapp/shared/CartState.dart';
 import 'SplashPage.dart';
 import 'helpers/LanguageManager.dart';
 import 'helpers/SessionManager.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:provider/provider.dart';
 
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -16,7 +18,13 @@ Future<void> main() async {
   await SessionManager().init(); // Initialize first
   await LanguageManager().loadLanguage();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  runApp(const MyApp());
+  //runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => CartState(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

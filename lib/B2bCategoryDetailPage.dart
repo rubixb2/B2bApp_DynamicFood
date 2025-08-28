@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:odoosaleapp/services/CartService.dart';
 import 'package:odoosaleapp/services/ProductService.dart';
 import 'package:odoosaleapp/shared/ProductCart.dart';
 
 import 'helpers/FlushBar.dart';
 import 'helpers/SessionManager.dart';
 import 'helpers/Strings.dart';
+import 'models/cart/CartReponseModel.dart';
 import 'models/product/ProductsResponseModel.dart';
 
 class CategoryDetailPage extends StatefulWidget {
@@ -19,15 +21,18 @@ class CategoryDetailPage extends StatefulWidget {
 class _CategoryDetailPageState extends State<CategoryDetailPage> {
   late Future<List<ProductsResponseModel>> _productsFuture;
   final ProductService _productService = ProductService();
+  final CartService _cartService = CartService();
   List<ProductsResponseModel> _allProducts = [];
   List<ProductsResponseModel> _filteredProducts = [];
   TextEditingController _searchController = TextEditingController();
+  List<CartCountResponseModel> _cartCounts = []; // Sepet verileri
 
   @override
   void initState() {
     super.initState();
     _productsFuture = _fetchProducts(categoryId: widget.categoryId);
     _searchController.addListener(_filterProducts);
+    _loadCartCounts();
   }
 
   @override
@@ -35,6 +40,28 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
     _searchController.dispose();
     super.dispose();
   }
+  Future<void> _loadCartCounts() async {
+    try {
+      final sessionId = SessionManager().sessionId ?? '';
+      final cartId = SessionManager().cartId ?? 0;
+
+      final result = await _cartService.fetchCartCount(
+        sessionId: sessionId,
+        cartId: cartId,
+        completedCart: false,
+      );
+
+      if (mounted && result != null) {
+        setState(() {
+          _cartCounts = result;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading cart counts: $e');
+      // Hata durumunda _cartCounts boş kalacaktır.
+    }
+  }
+
 
   Future<List<ProductsResponseModel>> _fetchProducts({int categoryId = 0}) async {
     try {
@@ -125,7 +152,13 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                   itemCount: _filteredProducts.length,
                   itemBuilder: (context, index) {
                     final product = _filteredProducts[index];
-                    return ProductCard(product: product);
+                     return ProductCard(
+                      product: product,
+                      cartCounts: _cartCounts,
+                       onAddToCart: () { // Callback'i burada tanımlıyoruz
+                         _loadCartCounts(); // Sepet verilerini yeniden yükle
+                       },// Yeni: Sepet verisini buraya ekle
+                    );
                   },
                 );
               },

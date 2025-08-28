@@ -7,7 +7,9 @@ import 'package:odoosaleapp/services/ProductCacheService.dart';
 import 'package:odoosaleapp/services/ProductService.dart';
 import 'package:odoosaleapp/helpers/SessionManager.dart';
 import 'package:odoosaleapp/models/product/ProductsResponseModel.dart';
+import 'package:odoosaleapp/shared/CartState.dart';
 import 'package:odoosaleapp/shared/ProductCart.dart';
+import 'package:provider/provider.dart';
 
 import 'B2bCategoriesPage.dart';
 import 'B2bCategoryDetailPage.dart';
@@ -15,6 +17,7 @@ import 'B2bProductDetailPage.dart';
 import 'B2bShoppingCartPage.dart';
 import 'helpers/FlushBar.dart';
 import 'helpers/Strings.dart';
+import 'models/cart/CartReponseModel.dart';
 import 'models/home/CarouselResponseModel.dart';
 import 'models/product/CategoryResponseModel.dart';
 
@@ -44,6 +47,7 @@ class _B2bProductPageState extends State<B2bProductPage> {
   late Future<List<CarouselResponseModel>> _carouselFuture;
   final ProductService _productService = ProductService();
   final CartService _cartService = CartService();
+  List<CartCountResponseModel> _cartCounts = []; // Sepet verileri
 
   List<ProductsResponseModel> _cachedProducts = []; // Önbellek eklendi
 
@@ -54,10 +58,55 @@ class _B2bProductPageState extends State<B2bProductPage> {
     _loadCategories();
     _loadCarousel();
     _startCarouselTimer();
+    _loadCartCounts();
+    Provider.of<CartState>(context, listen: false).fetchCartCounts();
     /*_carouselFuture = _fetchCarouselItems();
     _loadProducts();
     _categoriesFuture = _fetchCategories();
     _startCarouselTimer();*/
+  }
+  // Yeni Metot: Sepet verilerini API'den çeker
+  Future<void> _loadCartCounts() async {
+    try {
+      final sessionId = SessionManager().sessionId ?? '';
+      final cartId = SessionManager().cartId ?? 0;
+
+      final result = await _cartService.fetchCartCount(
+        sessionId: sessionId,
+        cartId: cartId,
+        completedCart: false,
+      );
+     /* if (result?.isEmpty ?? true) {
+        // Örnek ürünleri sepette varmış gibi ekliyoruz.
+        // Gerçek uygulamada bu kısmı statik verilerle doldurabilirsiniz.
+
+        // Örnek 1: Ürün ID: 123, Adet: 2
+        result?.add(CartCountResponseModel(
+          productId: 13,
+          count: 2,
+        ));
+
+        // Örnek 2: Ürün ID: 456, Adet: 5
+        result?.add(CartCountResponseModel(
+          productId: 22,
+          count: 5,
+        ));
+
+        // Örnek 3: Ürün ID: 789, Adet: 1
+        result?.add(CartCountResponseModel(
+          productId: 789,
+          count: 1,
+        ));
+      }*/
+      if (mounted && result != null) {
+        setState(() {
+          _cartCounts = result;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading cart counts: $e');
+      // Hata durumunda _cartCounts boş kalacaktır.
+    }
   }
 
  /* Future<void> _loadProducts() async {
@@ -182,8 +231,6 @@ class _B2bProductPageState extends State<B2bProductPage> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -261,7 +308,11 @@ class _B2bProductPageState extends State<B2bProductPage> {
                       ),
                       delegate: SliverChildBuilderDelegate(
                             (context, index) {
-                          return ProductCard(product: products[index]);
+                          return ProductCard(product: products[index],
+                            cartCounts: _cartCounts,
+                            onAddToCart: () { // Callback'i burada tanımlıyoruz
+                              _loadCartCounts(); // Sepet verilerini yeniden yükle
+                            },);
                         },
                         childCount: products.length,
                       ),
@@ -550,7 +601,7 @@ class _B2bProductPageState extends State<B2bProductPage> {
                         margin: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Column(
                           children: [
-                        /*    CircleAvatar(
+                        /*    CircleAvatar(ƒ√
                               radius: 30,
                               backgroundImage: NetworkImage(category.imageUrl),
                             ),*/

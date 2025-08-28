@@ -7,7 +7,9 @@ class ProductsResponseModel {
   final int categId;
   final double stockCount;
   final double listPrice;
+  final double unitPrice;
   final String listPriceText;
+  final String unitPriceText;
   final double vatPrice;
   final String vatPriceText;
   final double taxedPrice;
@@ -24,7 +26,9 @@ class ProductsResponseModel {
     required this.categId,
     required this.stockCount,
     required this.listPrice,
+    required this.unitPrice,
     required this.listPriceText,
+    required this.unitPriceText,
     required this.vatPrice,
     required this.vatPriceText,
     required this.taxedPrice,
@@ -43,7 +47,9 @@ class ProductsResponseModel {
       categId: json['categ_id'],
       stockCount: json['stock_count'],
       listPrice: json['list_price'],
+      unitPrice: json['unit_price'],
       listPriceText: json['list_price_text'],
+      unitPriceText: json['unit_price_text'],
       vatPrice: json['vat_price'],
       vatPriceText: json['vat_price_text'],
       taxedPrice: json['taxed_price'],

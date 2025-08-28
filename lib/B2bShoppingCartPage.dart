@@ -9,6 +9,8 @@ import 'package:odoosaleapp/models/cart/PickupModel.dart';
 import 'package:odoosaleapp/services/CartService.dart';
 import 'package:odoosaleapp/helpers/SessionManager.dart';
 import 'package:odoosaleapp/models/cart/CartProductModel.dart';
+import 'package:odoosaleapp/shared/CartState.dart';
+import 'package:provider/provider.dart';
 
 import 'helpers/Strings.dart';
 
@@ -192,6 +194,93 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
+                    '€${product.price?.toStringAsFixed(2) ?? "0.00"}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.green,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove_circle_outline),
+                        iconSize: 30.0, // Buton boyutunu büyüttük
+                        onPressed: () {
+                          if ((product.boxQuantity ?? 0) > 1) {
+                            _updateItemQuantity(product.id!, (product.boxQuantity ?? 0) - 1);
+                          }
+                        },
+                      ),
+                      Text(
+                        '${product.boxQuantity ?? 0}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle_outline),
+                        iconSize: 30.0, // Buton boyutunu büyüttük
+                        onPressed: () {
+                          _updateItemQuantity(product.id!, (product.boxQuantity ?? 0) + 1);
+                        },
+                      ),
+                    ],
+                  ),
+                  Text(
+                    'Toplam: €${((product.price ?? 0) * (product.boxQuantity ?? 0)).toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () => _removeItem(product.id),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /*Widget _buildCartItem(CartProductModel product) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                image: DecorationImage(
+                  image: NetworkImage(product.imageUrl ?? 'https://via.placeholder.com/80'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.productName ?? "",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
                     '€${product.price?.toStringAsFixed(2) ?? "0.00"} x ${product.boxQuantity ?? 0}',
                     style: const TextStyle(
                       fontSize: 14,
@@ -217,7 +306,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
         ),
       ),
     );
-  }
+  }*/
 
   Widget _buildOrderSummary(double itemsTotal, double discount, double total) {
     return Container(
@@ -340,6 +429,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
       );
 
       if (success) {
+        await Provider.of<CartState>(context, listen: false).fetchCartCounts();
         showCustomToast(context, Strings.productRemovedFromCart);
 
         _loadCart();
@@ -502,7 +592,28 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     );
   }
 
+  Future<void> _updateItemQuantity(int productId, double newQuantity) async {
+    setState(() => _isLoading = true);
+    try {
+      final response = await _cartService.updateProduct(
+        sessionId: SessionManager().sessionId ?? '',
+        cartId: SessionManager().cartId ?? 0,
+        cartProductId: productId,
+        boxQuantity: double.parse(newQuantity.toString()),
+        pieceQuantity: 0
+      );
 
+      if (response) {
+        _loadCart();
+      } else {
+        showCustomErrorToast(context, Strings.generalError);
+      }
+    } catch (e) {
+      showCustomErrorToast(context, '${Strings.generalError}: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
 
 
 }
