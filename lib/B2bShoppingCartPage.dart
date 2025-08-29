@@ -249,7 +249,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                       ],
                     ),*/
                     Text(
-                      'Toplam: €${((product.price ?? 0) * (product.boxQuantity ?? 0)).toStringAsFixed(2)}',
+                      '${Strings.totalLabel}: €${((product.price ?? 0) * (product.boxQuantity ?? 0)).toStringAsFixed(2)}',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,

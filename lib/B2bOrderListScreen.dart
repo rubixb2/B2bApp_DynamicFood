@@ -1,10 +1,7 @@
 import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:http/http.dart' as http;
-import 'package:odoosaleapp/B2bMainPage.dart';
 import 'package:odoosaleapp/helpers/SessionManager.dart';
 import 'package:odoosaleapp/models/order/OrderApiResoponseModel.dart';
 import 'package:odoosaleapp/services/OrderService.dart';
@@ -12,13 +9,11 @@ import 'package:odoosaleapp/theme.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import 'helpers/FlushBar.dart';
+import 'helpers/PdfViewerPage.dart';
 import 'helpers/Strings.dart';
 import 'models/order/OrdersResponseModel.dart';
 import 'package:intl/intl.dart';
-
-//import 'package:open_file/open_file.dart';
 
 class B2bOrderListScreen extends StatefulWidget {
   const B2bOrderListScreen({Key? key}) : super(key: key);
@@ -31,6 +26,7 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
   final OrderService _orderService = OrderService();
   late Future<OrderApiResponseModel?> _ordersFuture;
   final SessionManager _sessionManager = SessionManager();
+  bool _isPdfDownloading = false;
 
   @override
   void initState() {
@@ -43,19 +39,14 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
       sessionId: _sessionManager.sessionId ?? "",
     );
   }
-  Future<void> _repeatOrder(int id) async {
- /*   setState(() {
-      isLoading = true;
-    });*/
 
+  Future<void> _repeatOrder(int id) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final sessionId = prefs.getString('sessionId') ?? '';
       final cartId = prefs.getInt('cartId') ?? 0;
-      final customerId = prefs.getInt('customerId') ?? 0;
       String baseurl = await prefs.getString('baseUrl') ?? '';
 
-      // sipariş oluşturma işlemleri
       final orderPayload = {
         "sessionId": sessionId,
         "orderId": id,
@@ -71,40 +62,23 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
       final orderResult = jsonDecode(orderResponse.body);
       if (orderResult['Control'] == 1) {
         showCustomToast(context, Strings.productsAddedToCart);
-
-        // Navigate to shopping cart (index 1) after a short delay
-        await Future.delayed(const Duration(milliseconds: 1500));
-
-     /*   if (mounted) {
-          setState(() {
-            B2bMainPage(). = 1; // Shopping cart is at index 1
-          });
-        }*/
       }
     } catch (e) {
       print('Hata: $e');
       showCustomErrorToast(context, '${Strings.generalError}: ${e}');
-    } finally {
-    /*  setState(() {
-        isLoading = false;
-      });*/
     }
   }
 
   Future<void> _previewOrder(int id) async {
-    /*   setState(() {
-      isLoading = true;
-    });*/
-
+    // Yükleme durumu doğrudan _openPdf içinde ayarlandığı için burayı değiştirmedik.
     try {
       final prefs = await SharedPreferences.getInstance();
       final sessionId = prefs.getString('sessionId') ?? '';
       String baseurl = await prefs.getString('baseUrl') ?? '';
 
-      // sipariş oluşturma işlemleri
       final orderPayload = {
         "sessionId": sessionId,
-        "orderId": id
+        "orderId": id,
       };
 
       final orderResponse = await http.post(
@@ -116,123 +90,109 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
       final orderResult = jsonDecode(orderResponse.body);
       if (orderResult['Control'] == 1) {
         final pdfUrl = orderResult['Data']['pdfurl'];
-        _viewInApp(pdfUrl);
-
+        await _viewInApp(pdfUrl);
+      } else {
+        showCustomErrorToast(context, '${Strings.generalError}');
       }
-      else
-        {
-          showCustomErrorToast(context, '${Strings.generalError}');
-        }
     } catch (e) {
       print('Hata: $e');
       showCustomErrorToast(context, '${Strings.generalError}: ${e}');
     } finally {
-      /*  setState(() {
-        isLoading = false;
-      });*/
+      // İşlem bittiğinde yükleme durumunu kapat
+      if (mounted) {
+        setState(() {
+          _isPdfDownloading = false;
+        });
+      }
     }
   }
 
   Future<void> _openPdf(int id) async {
-    // Eğer URL geçerli değilse veya boşsa
-    _previewOrder(id);
-  }
-
-  Future<void> _launchInBrowser(String url) async {
-    if (!await launchUrl(Uri.parse(url),
-        mode: LaunchMode.externalApplication)) {
-      showCustomErrorToast(context, Strings.couldNotLaunchUrl);
+    // Yükleme zaten devam ediyorsa tekrar başlamayı engelle
+    if (_isPdfDownloading) {
+      return;
     }
+
+    // Yükleme durumunu başlat ve _previewOrder'ı çağır
+    setState(() {
+      _isPdfDownloading = true;
+    });
+
+    await _previewOrder(id);
   }
 
   Future<void> _viewInApp(String pdfUrl) async {
     try {
-      // PDF'i indir ve yerel dosya olarak kaydet
       final tempDir = await getTemporaryDirectory();
       final filePath =
           '${tempDir.path}/order_${DateTime.now().millisecondsSinceEpoch}.pdf';
 
+      await Dio().download(pdfUrl, filePath);
       showCustomToast(context, Strings.pdfDownloadStarted);
 
-
-      await Dio().download(pdfUrl, filePath);
-
-      // PDF'i görüntüle
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Scaffold(
-            appBar: AppBar(title: Text(Strings.orderPdf)),
-
-            body: PDFView(
-              filePath: filePath,
-              enableSwipe: true,
-              swipeHorizontal: false,
-              autoSpacing: true,
-              pageFling: true,
-              onError: (error) {
-                showCustomErrorToast(context, '${Strings.error}: $error');
-
-              },
-              onPageError: (page, error) {
-                showCustomErrorToast(context, '${Strings.errorOnPage}: $page - $error');
-
-              },
-            ),
+      if (mounted) {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PdfViewerPage(filePath: filePath),
           ),
-        ),
-      );
+        );
+      }
     } catch (e) {
       showCustomErrorToast(context, '${Strings.error}: $e');
-
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      /*  appBar: AppBar(
-        title: const Text('My Orders'),
-        centerTitle: true,
-      ),*/
-      body: FutureBuilder<OrderApiResponseModel?>(
-        future: _ordersFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Stack(
+        children: [
+          FutureBuilder<OrderApiResponseModel?>(
+            future: _ordersFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    '${Strings.generalError}:  ${snapshot.error}',
+                    style: AppTextStyles.list2,
+                  ),
+                );
+              }
+              if (!snapshot.hasData || snapshot.data!.orders.isEmpty) {
+                return Center(child: Text(Strings.noOrdersFound));
+              }
 
-          if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                '${Strings.generalError}:  ${snapshot.error}',
-                style: AppTextStyles.list2,
-              ),
-            );
-          }
+              final orders = snapshot.data!.orders;
 
-          if (!snapshot.hasData || snapshot.data!.orders.isEmpty) {
-            return  Center(child: Text(Strings.noOrdersFound));
-          }
-
-          final orders = snapshot.data!.orders;
-
-          return RefreshIndicator(
-            onRefresh: () async {
-              setState(() {
-                _loadOrders();
-              });
+              return RefreshIndicator(
+                onRefresh: () async {
+                  setState(() {
+                    _loadOrders();
+                  });
+                },
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: orders.length,
+                  itemBuilder: (context, index) {
+                    final order = orders[index];
+                    return _buildOrderCard(order);
+                  },
+                ),
+              );
             },
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: orders.length,
-              itemBuilder: (context, index) {
-                final order = orders[index];
-                return _buildOrderCard(order);
-              },
+          ),
+          if (_isPdfDownloading)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
             ),
-          );
-        },
+        ],
       ),
     );
   }
@@ -240,10 +200,6 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
   Widget _buildOrderCard(OrdersResponseModel order) {
     final dateFormat = DateFormat('MMMM dd yyyy');
     final formattedDate = dateFormat.format(DateTime.parse(order.dateOrder));
-    final status = order.orderCompleteStatus ? Strings.complete : Strings.draft;
-
-    final statusColor =
-        order.orderCompleteStatus ? Colors.green : Colors.orange;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -258,28 +214,26 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
                 Text(
                   '${Strings.orderNumber} #${order.name}',
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-
                 ElevatedButton.icon(
-                  onPressed: (order.orderPdfUrl == null || order.orderPdfUrl == '')
-                      ? () {
-                    _openPdf(order.id);
-                  }  // Buton pasif olur
+                  onPressed: _isPdfDownloading
+                      ? null // Yükleniyorsa butonu pasif yap
                       : () {
                     _openPdf(order.id);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF4E6EF2),
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    backgroundColor: const Color(0xFF4E6EF2),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  icon: Icon(Icons.picture_as_pdf, color: Colors.white),
-                  label: Text(
+                  icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
+                  label: const Text(
                     "Pdf",
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
@@ -291,17 +245,12 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
               '${Strings.placedOn} $formattedDate',
               style: TextStyle(color: Colors.grey[600]),
             ),
-
             const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                /*  Text(
-                  'Items: ${order.cartId}', // Burada gerçek item sayısı olmalı, modelinizi güncelleyebilirsiniz
-                  style: const TextStyle(fontSize: 16),
-                ),*/
                 Text(
-                  '\€${order.amountTotal.toStringAsFixed(2)}',
+                  '€${order.amountTotal.toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -312,18 +261,18 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
                     _repeatOrder(order.id);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFAE6EF2),
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    backgroundColor: const Color(0xFFAE6EF2),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  icon: Icon(Icons.repeat, color: Colors.white),
+                  icon: const Icon(Icons.repeat, color: Colors.white),
                   label: Text(
                     Strings.repeat,
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                    style: const TextStyle(fontSize: 16, color: Colors.white),
                   ),
-
                 ),
               ],
             ),
@@ -337,19 +286,9 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
 
   Widget _buildStatusStepper(OrdersResponseModel order) {
     final steps = [
-      _buildStep(Strings.orderPlaced, true),/*
-      _buildStep(Strings.orderConfirmed, order.orderCompleteStatus),
-      _buildStep(Strings.orderCompleted, order.orderCompleteStatus),*/
+      _buildStep(Strings.orderPlaced, true),
       _buildStep(Strings.invoiced, order.orderCompleteStatus),
-
-/*
-      _buildStep('Order placed', true),fluu
-      _buildStep('Order confirmed'),
-      //   _buildStep('Order shipped', order.orderCompleteStatus),
-      _buildStep('Order completed', order.orderCompleteStatus),
-      _buildStep('Invoiced', order.orderCompleteStatus),*/
     ];
-
     return Column(
       children: [
         Row(
@@ -388,5 +327,3 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
     );
   }
 }
-
-

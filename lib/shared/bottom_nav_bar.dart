@@ -31,7 +31,7 @@ class FixedBottomNavBar extends StatelessWidget {
       items: [
         BottomNavigationBarItem(
           icon: const Icon(Icons.home),
-          label: Strings.generalError,
+          label: Strings.home,
         ),
         BottomNavigationBarItem(
           icon: Consumer<CartState>(

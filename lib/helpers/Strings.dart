@@ -563,6 +563,12 @@ class Strings {
       'Ajouter au panier',
       'In winkelwagen'
   );
+  static String get home => _byLang(
+      'Home',
+      'Ana Sayfa',
+      'Accueil',
+      'Home'
+  );
 
   // SignUpScreen strings
   static String get createAccount => _byLang(

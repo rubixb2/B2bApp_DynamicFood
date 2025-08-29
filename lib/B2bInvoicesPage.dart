@@ -25,6 +25,7 @@ class _B2bInvoicesPageState extends State<B2bInvoicesPage> {
   late Future<PaymentLineTypeResponseModel?> dropListFuture = Future.value();
   final TextEditingController searchController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _isPdfLoading = false; // Yeni durum değişkeni eklendi
   //String? _selectedMethod;
   String _amount = '';
   double amount = 0;
@@ -75,173 +76,199 @@ class _B2bInvoicesPageState extends State<B2bInvoicesPage> {
     }
 
   }
+  // _B2bInvoicesPageState sınıfı içinde
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       /* appBar: AppBar(title: Text('Invoices')),*/
-        body: Column(children: [
-          Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            controller: searchController,
-            onChanged: (value) {
-              _initializeInvoices(searchKey: value);
-            },
-            decoration: InputDecoration(
-              labelText: Strings.searchInvoiceLabel,
-              hintText: Strings.searchInvoiceHint,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              prefixIcon: const Icon(Icons.search),
-            ),
-          ),
-        ),
-          Expanded(child:   FutureBuilder<InvoiceApiResponseModel?>(
-            future: invoicesFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Text(
-                    '${Strings.generalError}:  ${snapshot.error}',
-                    style: AppTextStyles.list2,
-                  ),
-                );
-
-              } else if (!snapshot.hasData) {
-                return Center(
-                  child: Text(
-                    Strings.noInvoiceFound,
-                    style: AppTextStyles.list2,
-                  ),
-                );
-              }
-              final invoices = snapshot.data!.bills;
-              return ListView.builder(
-                itemCount: invoices.length,
-                itemBuilder: (context, index) {
-                  final invoice = invoices[index];
-                  return Card(
-                    margin: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                    elevation: 4,
-                    child: Padding(
-                      padding: EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(invoice.name.toString(),
-                                  style: AppTextStyles.bodyTextBold),
-                              Spacer(),
-
-                              Text(
-                                '${Strings.totalLabel}: \€${invoice.amountTotal.toStringAsFixed(2)}',
-                                style: AppTextStyles.bodyTextBold,
-                              ),
-                             // Text('Id: ' + invoice.name.toString(), style: AppTextStyles.bodyTextBold,)
-                            ],
-                          ),
-                          
-                          SizedBox(height: 5),
-                          Row(
-                            children: [
-                              Text(
-                                invoice.invoiceDate.length>10 ? invoice.invoiceDate.substring(0,10) : invoice.invoiceDate,
-                                style: AppTextStyles.bodyTextBold,
-                              ),
-
-                              Spacer(),
-                              Text(
-                                invoice.paymentState,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: invoice.paymentState.toLowerCase() == "paid" ? Colors.green : Colors.red,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              Text(invoice.overdueDay,
-                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color:  Colors.red,)),
-
-
-                            ],
-                          ),
-                          SizedBox(height: 5),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                            Spacer(),
-                            /*  ElevatedButton(
-                                onPressed: invoice.paymentState.toLowerCase() != "paid"
-                                    ? () => _openAddPaymentModal(invoice.id)
-                                    : null,
-                                child: Text('Add Payment',style: AppTextStyles.buttonTextWhite),
-                                style: AppButtonStyles.secondaryButton,
-                              ) ,
-                              ElevatedButton(
-                                onPressed:
-                                    () => refund(invoice.id),
-                                child: Text('Refund',style: AppTextStyles.buttonTextWhite),
-                                style: AppButtonStyles.secondaryButton,
-                              ) ,*/
-
-                              ElevatedButton(
-                                onPressed: (invoice.accessUrl ?? '').isNotEmpty
-                                 //   ? () => _openPdf(invoice.accessUrl ?? '')
-                                    ? () => _prewiew(invoice.id)
-                                    : () => _prewiew(invoice.id),
-                                child: Text('PDF',style: AppTextStyles.buttonTextWhite),
-                                style: AppButtonStyles.secondaryButton,
-                              ),
-                              /*ElevatedButton(
-                            onPressed: order.invoicePdfUrl.isNotEmpty
-                                ? () => openPdf(order.invoicePdfUrl)
-                                : null,
-                            child: Text('Invoice PDF'),
-                          ),*/
-                            ],
-                          ),
-                        ],
-                      ),
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: searchController,
+                  onChanged: (value) {
+                    _initializeInvoices(searchKey: value);
+                  },
+                  decoration: InputDecoration(
+                    labelText: Strings.searchInvoiceLabel,
+                    hintText: Strings.searchInvoiceHint,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                  );
-                },
-              );
-            },
+                    prefixIcon: const Icon(Icons.search),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: FutureBuilder<InvoiceApiResponseModel?>(
+                  future: invoicesFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          '${Strings.generalError}:  ${snapshot.error}',
+                          style: AppTextStyles.list2,
+                        ),
+                      );
+                    } else if (!snapshot.hasData || snapshot.data!.bills.isEmpty) {
+                      return Center(
+                        child: Text(
+                          Strings.noInvoiceFound,
+                          style: AppTextStyles.list2,
+                        ),
+                      );
+                    }
+                    final invoices = snapshot.data!.bills;
+                    return ListView.builder(
+                      itemCount: invoices.length,
+                      itemBuilder: (context, index) {
+                        final invoice = invoices[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 6),
+                          elevation: 4,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(invoice.name.toString(),
+                                        style: AppTextStyles.bodyTextBold),
+                                    const Spacer(),
+                                    Text(
+                                      '${Strings.totalLabel}: €${invoice.amountTotal.toStringAsFixed(2)}',
+                                      style: AppTextStyles.bodyTextBold,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 5),
+                                Row(
+                                  children: [
+                                    Text(
+                                      invoice.invoiceDate.length > 10
+                                          ? invoice.invoiceDate.substring(0, 10)
+                                          : invoice.invoiceDate,
+                                      style: AppTextStyles.bodyTextBold,
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      invoice.paymentState,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: invoice.paymentState.toLowerCase() == "paid"
+                                            ? Colors.green
+                                            : Colors.red,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(invoice.overdueDay,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.red,
+                                        )),
+                                  ],
+                                ),
+                                const SizedBox(height: 5),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Spacer(),
+                                    ElevatedButton(
+                                      onPressed: () => _prewiew(invoice.id),
+                                      child: Text('PDF',
+                                          style: AppTextStyles.buttonTextWhite),
+                                      style: AppButtonStyles.secondaryButton,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-          )
+          if (_isPdfLoading)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
         ],
-        )
+      ),
     );
   }
 
-  void _openPdf(String url) {
-    // Burada PDF açma işlemi yapılabilir (Örneğin: launch(url) kullanarak)
-    print('Opening PDF: $url');
-    // url = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
-    openPdf(context, url);
-  }
   Future<void> _prewiew(int id) async {
+    if (_isPdfLoading) return;
 
-    var url = await InvoiceService().preview(sessionId: _getSessionId(), invoiceId: id);
+    setState(() {
+      _isPdfLoading = true; // Start loading
+    });
 
-    if(url != null)
-      {
-        openPdf(context, url);
-      }
-    else
-      {
+    try {
+      var url = await InvoiceService().preview(
+        sessionId: _getSessionId(),
+        invoiceId: id,
+      );
+
+      if (url != null) {
+        // Navigate to the PDF viewer and wait for it to be popped (closed)
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PdfScreen(url: url),
+          ),
+        );
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('An error occured.'),
+          const SnackBar(
+            content: Text('An error occurred.'),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 2),
           ),
         );
       }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('An error occurred: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } finally {
+      // This block runs after the 'try' or 'catch' block, regardless of outcome.
+      // It's the perfect place to stop the loading indicator.
+      if (mounted) {
+        setState(() {
+          _isPdfLoading = false;
+        });
+      }
+    }
+  }
+
+  void openPdf(BuildContext context, String url) {
+    // We'll remove the setState call here because _prewiew handles the state.
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PdfScreen(url: url),
+      ),
+    );
   }
 
   void completeOrder(int id) {
@@ -251,15 +278,6 @@ class _B2bInvoicesPageState extends State<B2bInvoicesPage> {
 
   void refund(int invoiceId) {
     _confirmRefund(invoiceId);
-  }
-
-  void openPdf(BuildContext context, String url) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PdfScreen(url: url),
-      ),
-    );
   }
 
   Future<void> _makePayment() async {

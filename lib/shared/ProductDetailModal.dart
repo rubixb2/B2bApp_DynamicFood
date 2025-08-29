@@ -74,7 +74,7 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Fiyat: €${widget.product.price?.toStringAsFixed(2) ?? "0.00"}',
+                        '€${widget.product.price?.toStringAsFixed(2) ?? "0.00"}',
                         style: const TextStyle(
                           fontSize: 16,
                           color: Colors.green,

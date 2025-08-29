@@ -21,10 +21,7 @@ class CartState extends ChangeNotifier {
     ) ?? [];
 
     // Eğer liste boşsa örnek veri ekle (isteğe bağlı)
-    if (_cartCounts.isEmpty) {
-      _cartCounts.add(CartCountResponseModel(productId: 123, count: 2));
-      _cartCounts.add(CartCountResponseModel(productId: 456, count: 5));
-    }
+
 
     notifyListeners(); // Dinleyen widget'ları uyar
   }

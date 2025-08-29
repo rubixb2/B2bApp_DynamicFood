@@ -158,15 +158,15 @@ class _ProductCardState extends State<ProductCard> {
                           Text(
                             '${widget.product.taxedPriceText}',
                             style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 14,
                                 color: Colors.green,
                                 fontWeight: FontWeight.bold),
                           ),
                           Spacer(),
                           Text(
-                            'pcs- ${widget.product.unitPriceText}',
+                            ' ${widget.product.unitPriceText}',
                             style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 14,
                                 color: Colors.green,
                                 fontWeight: FontWeight.normal),
                           ),

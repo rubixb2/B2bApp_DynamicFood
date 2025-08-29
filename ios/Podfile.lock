@@ -141,7 +141,7 @@ SPEC CHECKSUMS:
   FirebaseMessaging: 88950ba9485052891ebe26f6c43a52bb62248952
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
-  flutter_pdfview: 54e283d5851b0b247b3cc57877d35f1a05a204de
+  flutter_pdfview: 32bf27bda6fd85b9dd2c09628a824df5081246cf
   GoogleDataTransport: 6c09b596d841063d76d4288cc2d2f42cc36e1e2a
   GoogleUtilities: ea963c370a38a8069cc5f7ba4ca849a60b6d7d15
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
