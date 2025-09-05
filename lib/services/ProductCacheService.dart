@@ -19,7 +19,7 @@ class ProductCacheService {
   DateTime? _categoriesCacheTime;
   DateTime? _carouselCacheTime;
 
-  final Duration cacheDuration = Duration(hours: 3);
+  final Duration cacheDuration = Duration(hours: 1);
 
   bool get isProductsCacheValid {
     if (_productsCacheTime == null) return false;

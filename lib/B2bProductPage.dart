@@ -42,30 +42,37 @@ class _B2bProductPageState extends State<B2bProductPage> {
   final ProductCacheService _cache = ProductCacheService();
   int _currentCarouselIndex = 0;
   final cs.CarouselSliderController _carouselController = cs.CarouselSliderController();
+  late Future<void> _dataFuture; // FutureBuilder için tek bir Future
   late Future<List<ProductsResponseModel>> _productsFuture;
   late Future<List<CategoryResponseModel>> _categoriesFuture;
   late Future<List<CarouselResponseModel>> _carouselFuture;
   final ProductService _productService = ProductService();
   final CartService _cartService = CartService();
-  List<CartCountResponseModel> _cartCounts = []; // Sepet verileri
+  TextEditingController _searchController = TextEditingController();
+  List<ProductsResponseModel> _allProducts = [];
+  List<ProductsResponseModel> _filteredProducts = [];
+  List<CartCountResponseModel> _cartCounts = [];
 
-  List<ProductsResponseModel> _cachedProducts = []; // Önbellek eklendi
 
   @override
   void initState() {
     super.initState();
-    _loadProducts();
-    _loadCategories();
-    _loadCarousel();
-    _startCarouselTimer();
-    _loadCartCounts();
+    _dataFuture = _loadInitialData(); // Tüm verileri tek bir Future'da yükle
+    _searchController.addListener(_filterProducts);
     Provider.of<CartState>(context, listen: false).fetchCartCounts();
-    /*_carouselFuture = _fetchCarouselItems();
-    _loadProducts();
-    _categoriesFuture = _fetchCategories();
-    _startCarouselTimer();*/
   }
-  // Yeni Metot: Sepet verilerini API'den çeker
+
+  // Yeni Metot: Tüm başlangıç verilerini bir kerede yükler
+  Future<void> _loadInitialData() async {
+    await Future.wait([
+      _loadProducts(),
+      _loadCategories(),
+      _loadCarousel(),
+      _loadCartCounts(),
+    ]);
+    _startCarouselTimer();
+  }
+
   Future<void> _loadCartCounts() async {
     try {
       final sessionId = SessionManager().sessionId ?? '';
@@ -76,28 +83,7 @@ class _B2bProductPageState extends State<B2bProductPage> {
         cartId: cartId,
         completedCart: false,
       );
-     /* if (result?.isEmpty ?? true) {
-        // Örnek ürünleri sepette varmış gibi ekliyoruz.
-        // Gerçek uygulamada bu kısmı statik verilerle doldurabilirsiniz.
 
-        // Örnek 1: Ürün ID: 123, Adet: 2
-        result?.add(CartCountResponseModel(
-          productId: 13,
-          count: 2,
-        ));
-
-        // Örnek 2: Ürün ID: 456, Adet: 5
-        result?.add(CartCountResponseModel(
-          productId: 22,
-          count: 5,
-        ));
-
-        // Örnek 3: Ürün ID: 789, Adet: 1
-        result?.add(CartCountResponseModel(
-          productId: 789,
-          count: 1,
-        ));
-      }*/
       if (mounted && result != null) {
         setState(() {
           _cartCounts = result;
@@ -105,77 +91,87 @@ class _B2bProductPageState extends State<B2bProductPage> {
       }
     } catch (e) {
       debugPrint('Error loading cart counts: $e');
-      // Hata durumunda _cartCounts boş kalacaktır.
     }
   }
 
- /* Future<void> _loadProducts() async {
-    _productsFuture = _fetchProducts();
-    _productsFuture.then((products) {
-      if (mounted) {
-        setState(() {
-          _cachedProducts = products;
-
-        });
-      }
+  void _filterProducts() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredProducts = _allProducts.where((product) {
+        return product.name?.toLowerCase().contains(query) ?? false;
+      }).toList();
     });
-  }*/
+  }
 
+  Future<void> _loadProducts() async {
+    if (_cache.isProductsCacheValid && _cache.cachedProducts.isNotEmpty) {
+      _allProducts = _cache.cachedProducts;
+    } else {
+      try {
+        final sessionId = SessionManager().sessionId ?? "";
+        final customerId = SessionManager().customerId ?? 0;
+        _allProducts = await _productService.fetchProducts(
+          sessionId: sessionId,
+          searchKey: '',
+          limit: 10,
+          page: 1,
+          catId: 0,
+          customerId: customerId,
+          priceListId: 1,
+        );
+        _cache.cacheProducts(_allProducts);
+      } catch (e) {
+        debugPrint('Error fetching products: $e');
+        if (mounted) {
+          showCustomErrorToast(context, '${Strings.errorFetchingProducts}: $e');
+        }
+        _allProducts = [];
+      }
+    }
+    // İlk yüklemede tüm ürünleri filtreli listeye at
+    _filteredProducts = List.from(_allProducts);
+  }
 
-  Future<List<ProductsResponseModel>> _fetchProducts({int categoryId = 0}) async {
-    try {
-      final sessionId = SessionManager().sessionId ?? "";
-      final customerId = SessionManager().customerId ?? 0;
-      var result = await _productService.fetchProducts(
-        sessionId: sessionId,
-        searchKey: '',
-        limit: 10,
-        page: 1,
-        catId: categoryId,
-        customerId: customerId,
-        priceListId: 1,
-      );
-      _cache.cacheProducts(result);
-      return result;
-    } catch (e) {
-      debugPrint('Error fetching products: $e');
-      showCustomErrorToast(context, '${Strings.errorFetchingProducts}: $e');
-      return [];
+  Future<void> _loadCategories() async {
+    if (_cache.isCategoriesCacheValid && _cache.cachedCategories.isNotEmpty) {
+      _categoriesFuture = Future.value(_cache.cachedCategories);
+    } else {
+      try {
+        var result = await _cartService.fetchCategories(
+          sessionId: SessionManager().sessionId ?? '',
+        );
+        _cache.cacheCategories(result);
+        _categoriesFuture = Future.value(result);
+      } catch (e) {
+        debugPrint('Error fetching categories: $e');
+        if (mounted) {
+          showCustomErrorToast(context, '${Strings.genericError}: $e');
+        }
+        _categoriesFuture = Future.value([]);
+      }
     }
   }
 
-  Future<List<CategoryResponseModel>> _fetchCategories() async {
-    try {
-      var result = await _cartService.fetchCategories(
-        sessionId: SessionManager().sessionId ?? '',
-      );
-      _cache.cacheCategories(result);
-      return result;
-    } catch (e) {
-      debugPrint('Error: $e');
-      showCustomErrorToast(context, '${Strings.genericError}: $e');
-      return [];
-    }
-  }
-
-  Future<List<CarouselResponseModel>> _fetchCarouselItems() async {
-    try {
-      var result = await _cartService.fetchCarouselItems(
-        sessionId: SessionManager().sessionId ?? '',
-      );
-      _cache.cacheCarousel(result);
-      return  result;
-    } catch (e) {
-      debugPrint('Error fetching carousel items: $e');
-     // showCustomErrorToast(context, '${Strings.errorFetchingCarousel}: $e');
-      // Fallback olarak default veri dönebilirsiniz
-      return [];
+  Future<void> _loadCarousel() async {
+    if (_cache.isCarouselCacheValid && _cache.cachedCarouselItems.isNotEmpty) {
+      _carouselFuture = Future.value(_cache.cachedCarouselItems);
+    } else {
+      try {
+        var result = await _cartService.fetchCarouselItems(
+          sessionId: SessionManager().sessionId ?? '',
+        );
+        _cache.cacheCarousel(result);
+        _carouselFuture = Future.value(result);
+      } catch (e) {
+        debugPrint('Error fetching carousel items: $e');
+        _carouselFuture = Future.value([]);
+      }
     }
   }
 
   void _startCarouselTimer() {
     Future.delayed(const Duration(seconds: 5), () {
-      if (!mounted) return; // Widget hala mounted mı kontrolü
+      if (!mounted) return;
 
       _carouselFuture.then((carouselItems) {
         if (carouselItems.isNotEmpty) {
@@ -186,208 +182,124 @@ class _B2bProductPageState extends State<B2bProductPage> {
             curve: Curves.easeInOut,
           );
         }
-        _startCarouselTimer(); // Timer'ı yeniden başlat
+        _startCarouselTimer();
       });
     });
-  }
-
-  void _loadCarousel() {
-    if (_cache.isCarouselCacheValid && _cache.cachedCarouselItems.isNotEmpty) {
-      _carouselFuture = Future.value(_cache.cachedCarouselItems);
-    } else {
-      _carouselFuture = _fetchCarouselItems();
-    }
-  }
-
-  void _loadProducts() {
-    if (_cache.isProductsCacheValid && _cache.cachedProducts.isNotEmpty) {
-      _productsFuture = Future.value(_cache.cachedProducts);
-
-    } else {
-      _productsFuture = _fetchProducts();
-      _productsFuture.then((products) {
-        if (mounted) {
-          setState(() {
-            _cache.cacheProducts(products);
-          });
-        }
-      });
-    }
-  }
-
-
-  void _loadCategories() {
-    if (_cache.isCategoriesCacheValid && _cache.cachedCategories.isNotEmpty) {
-      _categoriesFuture = Future.value(_cache.cachedCategories);
-    } else {
-      _categoriesFuture = _fetchCategories();
-      _categoriesFuture.then((categories) {
-        if (mounted) {
-          setState(() {
-            _cache.cacheCategories(categories);
-          });
-        }
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Builder(
-        builder: (context) {
-          return CustomScrollView(
-            slivers: [
-              // Carousel Section
-              SliverToBoxAdapter(
-                child: _buildCarousel(),
-              ),
+      resizeToAvoidBottomInset: true, // 👈 önemli satır
+      body: FutureBuilder<void>(
+        future: _dataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-              // Categories Section
-              SliverToBoxAdapter(
-                child: _buildCategoriesSection(),
-              ),
-              SliverToBoxAdapter(
+          if (snapshot.hasError) {
+            return Center(
+              child: Text('${Strings.genericError}: ${snapshot.error}'),
+            );
+          }
+
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom, // 👈 klavye açılınca içerik yukarı kayar
+            ),
+            child: CustomScrollView(
+              slivers: [
+                // Carousel Section
+                SliverToBoxAdapter(
+                  child: _buildCarousel(),
+                ),
+
+                // Categories Section
+                SliverToBoxAdapter(
+                  child: _buildCategoriesSection(),
+                ),
+
+                // Search Box Section
+                SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          Strings.productsTitle,
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: Strings.searchProductsHint,
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
+                      ),
+                    ),
+                  ),
+                ),
 
-                      ],
+                // Products Header
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    child: Text(
+                      Strings.productsTitle,
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+
+                // Products Section
+                SliverPadding(
+                  padding: const EdgeInsets.only(bottom: 0),
+                  sliver: _filteredProducts.isEmpty
+                      ? SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: Text(Strings.noProductsAvailable),
                     ),
                   )
-              ),
-
-              // Products Section
-              SliverPadding(
-                padding: const EdgeInsets.only(bottom:0),
-                sliver: FutureBuilder<List<ProductsResponseModel>>(
-                  future: _productsFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState != ConnectionState.done) {
-                      return SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    }
-
-                    if (snapshot.hasError) {
-                      return SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: Center(
-                          child: Text('${Strings.genericError}: ${snapshot.error}'),
-                        ),
-
-                      );
-                    }
-
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: Center(
-                          child: Text(Strings.noProductsAvailable),
-                        ),
-
-                      );
-                    }
-
-                    final products = snapshot.data!;
-                    final crossAxisCount = MediaQuery.of(context).size.width > 600 ? 3 : 2;
-
-                    return SliverGrid(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        childAspectRatio: 0.58,
-                        crossAxisSpacing: 8,
-                        mainAxisSpacing: 8,
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                          return ProductCard(product: products[index],
-                            cartCounts: _cartCounts,
-                            onAddToCart: () { // Callback'i burada tanımlıyoruz
-                              _loadCartCounts(); // Sepet verilerini yeniden yükle
-                            },);
-                        },
-                        childCount: products.length,
-                      ),
-                    );
-                  },
+                      : SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                      childAspectRatio: 0.58,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                        return ProductCard(
+                          product: _filteredProducts[index],
+                          cartCounts: _cartCounts,
+                          onAddToCart: () {
+                            _loadCartCounts();
+                          },
+                        );
+                      },
+                      childCount: _filteredProducts.length,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         },
       ),
     );
   }
 
+
   Widget _buildCarousel() {
     return FutureBuilder<List<CarouselResponseModel>>(
       future: _carouselFuture,
       builder: (context, snapshot) {
-        // Yükleniyor durumu
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return SizedBox(
-            height: 230,
-            child: Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-              ),
-            ),
-          );
+          return SizedBox(height: 230, child: Center(child: CircularProgressIndicator()));
         }
-
-        // Hata durumu
-        if (snapshot.hasError) {
-          return SizedBox(
-            height: 230,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, color: Colors.red, size: 40),
-                  SizedBox(height: 10),
-                  Text(
-                    Strings.carouselFailed,
-                    style: TextStyle(color: Colors.red),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _carouselFuture = _fetchCarouselItems();
-                      });
-                    },
-                    child: Text(Strings.tryAgain),
-
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        // Veri yok durumu
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return SizedBox(
-            height: 230,
-            child: Center(
-                child: Text(
-                  Strings.noCarouselContent,
-                  style: TextStyle(color: Colors.grey),
-                ),
-
-            ),
-          );
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return SizedBox.shrink(); // Hata veya veri yoksa boş bir kutu döndür
         }
 
         final carouselItems = snapshot.data!;
-
         return SizedBox(
           height: 230,
           child: Column(
@@ -400,16 +312,11 @@ class _B2bProductPageState extends State<B2bProductPage> {
                     final item = carouselItems[index];
                     return GestureDetector(
                       onTap: () async {
-                        if (item.is_product== true) {
-                          // Ürün detayına git
-                          final products = await _cache.cachedProducts;
-
-                          final product = products.firstWhere(
-                                (p) => p.id == item.id,
-                            //orElse: () => null,
+                        if (item.is_product == true) {
+                          final product = _allProducts.firstWhere(
+                                (p) => p.id == item.id, // orElse ile hata almayı engeller
                           );
-
-                          if (product != null) {
+                          if (product.id != null) {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -420,7 +327,6 @@ class _B2bProductPageState extends State<B2bProductPage> {
                             );
                           }
                         } else {
-                          // Kategori detayına git
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -483,7 +389,7 @@ class _B2bProductPageState extends State<B2bProductPage> {
                                     item.subtitle,
                                     style: TextStyle(
                                       color: item.subtitleColor ?? Colors.white,
-                                      fontSize: (item.subtitleSize?? 16).toDouble(),
+                                      fontSize: (item.subtitleSize ?? 16).toDouble(),
                                       shadows: [
                                         Shadow(
                                           blurRadius: 4,
@@ -508,7 +414,7 @@ class _B2bProductPageState extends State<B2bProductPage> {
                     autoPlayCurve: Curves.fastOutSlowIn,
                     enlargeCenterPage: true,
                     viewportFraction: 1.0,
-                    aspectRatio: 16/9,
+                    aspectRatio: 16 / 9,
                     onPageChanged: (index, reason) {
                       setState(() {
                         _currentCarouselIndex = index;
@@ -527,9 +433,7 @@ class _B2bProductPageState extends State<B2bProductPage> {
                     margin: EdgeInsets.symmetric(horizontal: 4),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: _currentCarouselIndex == index
-                          ? Colors.blue
-                          : Colors.grey.withOpacity(0.4),
+                      color: _currentCarouselIndex == index ? Colors.blue : Colors.grey.withOpacity(0.4),
                     ),
                   );
                 }),
@@ -545,16 +449,14 @@ class _B2bProductPageState extends State<B2bProductPage> {
     return FutureBuilder<List<CategoryResponseModel>>(
       future: _categoriesFuture,
       builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const SizedBox(height: 80, child: Center(child: CircularProgressIndicator()));
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(height: 140, child: Center(child: CircularProgressIndicator()));
         }
-
-        if (snapshot.hasError || !snapshot.hasData) {
-          return const SizedBox(height: 80, child: Center(child: Text('Error loading categories')));
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return SizedBox.shrink(); // Hata veya veri yoksa boş bir kutu döndür
         }
 
         final categories = snapshot.data!;
-
         return SizedBox(
           height: 140,
           child: Column(
@@ -568,7 +470,6 @@ class _B2bProductPageState extends State<B2bProductPage> {
                       Strings.categoriesTitle,
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-
                     IconButton(
                       icon: const Icon(Icons.arrow_forward),
                       onPressed: () {
@@ -601,17 +502,7 @@ class _B2bProductPageState extends State<B2bProductPage> {
                         margin: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Column(
                           children: [
-                        /*    CircleAvatar(ƒ√
-                              radius: 30,
-                              backgroundImage: NetworkImage(category.imageUrl),
-                            ),*/
-                            _buildCategoryImageWidget(category.image,context),
-                          /*  CircleAvatar(
-                              radius: 30,
-                              backgroundImage: MemoryImage(
-                                base64Decode(category.image), // base64 string'in sadece veri kısmı olmalı
-                              ),
-                            ),*/
+                            _buildCategoryImageWidget(category.image, context),
                             const SizedBox(height: 4),
                             Text(
                               category.name,
@@ -634,23 +525,20 @@ class _B2bProductPageState extends State<B2bProductPage> {
     );
   }
 
+  // Resim oluşturma widget'ları
   Widget _buildImageWidget(String imageSource) {
-    // Base64 kontrolü (basit bir regex ile
-    imageSource = imageSource == null || imageSource == "" ? 'https://fastly.picsum.photos/id/799/400/200.jpg' : imageSource;
-    final isBase64 = imageSource.startsWith('data:image') ||
-        (imageSource.length > 100 && !imageSource.contains('http'));
+    imageSource = (imageSource == null || imageSource.isEmpty) ? 'https://fastly.picsum.photos/id/799/400/200.jpg' : imageSource;
+    final isBase64 = imageSource.startsWith('data:image') || (imageSource.length > 100 && !imageSource.contains('http'));
 
     if (isBase64) {
       try {
         return Image.memory(
           base64Decode(imageSource.split(',').last),
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) =>
-              Container(color: Colors.grey[200]),
+          errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey[200]),
         );
       } catch (e) {
         debugPrint('Base64 decode error: $e');
-        showCustomErrorToast(context, '${Strings.base64DecodeError}: $e');
         return Container(color: Colors.grey[200]);
       }
     } else {
@@ -661,32 +549,21 @@ class _B2bProductPageState extends State<B2bProductPage> {
           if (loadingProgress == null) return child;
           return Center(
             child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                  loadingProgress.expectedTotalBytes!
-                  : null,
+              value: loadingProgress.expectedTotalBytes != null ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes! : null,
             ),
           );
         },
-        errorBuilder: (context, error, stackTrace) =>
-            Container(color: Colors.grey[200]),
+        errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey[200]),
       );
     }
   }
 
   Widget _buildCategoryImageWidget(String? imageSource, BuildContext context) {
-    // imageSource null veya boşsa varsayılan resim kullanılır
-    final effectiveImageSource = (imageSource == null || imageSource.isEmpty)
-        ? 'https://fastly.picsum.photos/id/799/400/200.jpg'
-        : imageSource;
-
-    // Base64 kontrolü
-    final isBase64 = effectiveImageSource.startsWith('data:image') ||
-        (effectiveImageSource.length > 100 && !effectiveImageSource.contains('http'));
+    final effectiveImageSource = (imageSource == null || imageSource.isEmpty) ? 'https://fastly.picsum.photos/id/799/400/200.jpg' : imageSource;
+    final isBase64 = effectiveImageSource.startsWith('data:image') || (effectiveImageSource.length > 100 && !effectiveImageSource.contains('http'));
 
     if (isBase64) {
       try {
-        // Base64 verisinin başındaki meta verileri (örneğin "data:image/jpeg;base64,") temizlemek gerekebilir.
         final cleanBase64 = effectiveImageSource.split(',').last;
         return CircleAvatar(
           radius: 30,
@@ -696,7 +573,6 @@ class _B2bProductPageState extends State<B2bProductPage> {
         );
       } catch (e) {
         debugPrint('Base64 decode error: $e');
-        // showCustomErrorToast(context, '${Strings.base64DecodeError}: $e');
         return CircleAvatar(
           radius: 30,
           backgroundColor: Colors.grey[200],
@@ -704,7 +580,6 @@ class _B2bProductPageState extends State<B2bProductPage> {
         );
       }
     } else {
-      // else bloğu: Network resmini bir CircleAvatar içinde gösterir
       return CircleAvatar(
         radius: 30,
         backgroundColor: Colors.grey[200],
@@ -712,21 +587,17 @@ class _B2bProductPageState extends State<B2bProductPage> {
           child: Image.network(
             effectiveImageSource,
             fit: BoxFit.cover,
-            width: 60,  // CircleAvatar'ın yarıçapının iki katı
-            height: 60, // CircleAvatar'ın yarıçapının iki katı
+            width: 60,
+            height: 60,
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) return child;
               return Center(
                 child: CircularProgressIndicator(
-                  value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                      : null,
+                  value: loadingProgress.expectedTotalBytes != null ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes! : null,
                 ),
               );
             },
-            errorBuilder: (context, error, stackTrace) =>
-            const Icon(Icons.broken_image, color: Colors.grey),
+            errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, color: Colors.grey),
           ),
         ),
       );

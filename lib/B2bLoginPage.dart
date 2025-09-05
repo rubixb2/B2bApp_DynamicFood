@@ -37,10 +37,9 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    _rememberMe = SessionManager().rememberMe;
     loginSettings();
   }
-
-
 
   void handleLogin(BuildContext context, bool guest) async {
     String username = "";
@@ -75,6 +74,9 @@ class _LoginScreenState extends State<LoginScreen> {
       SessionManager().setUserId(data['UserId']);
       if (guest) {
         SessionManager().setRememberme(false);
+      }
+      else{
+        SessionManager().setRememberme(_rememberMe);
       }
 
 
