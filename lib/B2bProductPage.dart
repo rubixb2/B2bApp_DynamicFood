@@ -53,10 +53,36 @@ class _B2bProductPageState extends State<B2bProductPage> {
   List<ProductsResponseModel> _filteredProducts = [];
   List<CartCountResponseModel> _cartCounts = [];
 
+  final _scrollController = ScrollController();
+  final _searchFocusNode = FocusNode();
+  final _textFieldKey = GlobalKey();
+
 
   @override
   void initState() {
     super.initState();
+    _searchFocusNode.addListener(() {
+      if (_searchFocusNode.hasFocus) {
+        // 🔼 Klavye açıldığında TextField görünür olsun
+        Future.delayed(const Duration(milliseconds: 300), () {
+          final ctx = _textFieldKey.currentContext;
+          if (ctx != null) {
+            Scrollable.ensureVisible(
+              ctx,
+              duration: Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          }
+        });
+      } else {
+        // 🔽 Klavye kapandığında sayfa başa dönsün
+        _scrollController.animateTo(
+          0, // en üst
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
     _dataFuture = _loadInitialData(); // Tüm verileri tek bir Future'da yükle
     _searchController.addListener(_filterProducts);
     Provider.of<CartState>(context, listen: false).fetchCartCounts();
@@ -190,7 +216,7 @@ class _B2bProductPageState extends State<B2bProductPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true, // 👈 önemli satır
+      resizeToAvoidBottomInset: true, // 👈 önemli
       body: FutureBuilder<void>(
         future: _dataFuture,
         builder: (context, snapshot) {
@@ -204,11 +230,11 @@ class _B2bProductPageState extends State<B2bProductPage> {
             );
           }
 
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom, // 👈 klavye açılınca içerik yukarı kayar
-            ),
+          return MediaQuery.removeViewInsets( // 👈 kilit çözüm
+            removeBottom: true,
+            context: context,
             child: CustomScrollView(
+              controller: _scrollController,
               slivers: [
                 // Carousel Section
                 SliverToBoxAdapter(
@@ -225,6 +251,8 @@ class _B2bProductPageState extends State<B2bProductPage> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                     child: TextField(
+                      key: _textFieldKey,
+                      focusNode: _searchFocusNode,
                       controller: _searchController,
                       decoration: InputDecoration(
                         hintText: Strings.searchProductsHint,
@@ -250,7 +278,7 @@ class _B2bProductPageState extends State<B2bProductPage> {
 
                 // Products Section
                 SliverPadding(
-                  padding: const EdgeInsets.only(bottom: 0),
+                  padding: const EdgeInsets.only(bottom: 16.0),
                   sliver: _filteredProducts.isEmpty
                       ? SliverFillRemaining(
                     hasScrollBody: false,
