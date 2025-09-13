@@ -107,6 +107,10 @@ class SessionManager {
     await _prefs?.setString('b2bCurrency', currency);
   }
 
+  Future<void> setB2bOrderRepeatButton(int value) async {
+    await _prefs?.setInt('b2bOrderRepeatButton', value);
+  }
+
   // Getters
   String? get sessionId => _prefs?.getString('sessionId');
   bool get rememberMe => _prefs?.getBool('rememberme') ?? false;
@@ -131,6 +135,7 @@ class SessionManager {
   double get b2bPickupLimit => _prefs?.getDouble('b2bPickupLimit') ?? 0.0;
   String get b2bCurrency => _prefs?.getString('b2bCurrency') ?? '€';
   String get b2bCustomerAddress => _prefs?.getString('b2bCustomerAddress') ?? 'Müşteri Adresi Belirtilmemiş';
+  int get b2bOrderRepeatButton => _prefs?.getInt('b2bOrderRepeatButton') ?? 1;
 
   // Setter'lar
   Future<void> setB2bCustomerAddress(String address) async {

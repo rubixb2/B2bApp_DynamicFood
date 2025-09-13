@@ -391,11 +391,13 @@ class _SplashPageState extends State<SplashPage> {
         double pickupLimit = (data['B2bPickupLimit'] ?? 0.0).toDouble();
         String currency = data['B2bCurrency'] ?? '€';
         String customerAddress = data['B2bCustomerAddress'] ?? 'Müşteri Adresi Belirtilmemiş';
+        int orderRepeatButton = data['B2bOrderRepeatButton'] ?? 0;
 
         await SessionManager().setB2bDeliveryLimit(deliveryLimit);
         await SessionManager().setB2bPickupLimit(pickupLimit);
         await SessionManager().setB2bCurrency(currency);
         await SessionManager().setB2bCustomerAddress(customerAddress);
+        await SessionManager().setB2bOrderRepeatButton(orderRepeatButton);
 
         // Pickup listesini de kaydet
         if (data['PickupList'] != null) {

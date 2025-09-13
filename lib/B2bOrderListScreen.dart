@@ -256,24 +256,26 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    _repeatOrder(order.id);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFAE6EF2),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                // B2bOrderRepeatButton ayarına göre repeat butonunu göster/gizle
+                if (SessionManager().b2bOrderRepeatButton == 1)
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      _repeatOrder(order.id);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFAE6EF2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    icon: const Icon(Icons.repeat, color: Colors.white),
+                    label: Text(
+                      Strings.repeat,
+                      style: const TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ),
-                  icon: const Icon(Icons.repeat, color: Colors.white),
-                  label: Text(
-                    Strings.repeat,
-                    style: const TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: 4),
