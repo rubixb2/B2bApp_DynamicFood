@@ -2,10 +2,15 @@ import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:odoosaleapp/services/UserService.dart';
+import 'package:odoosaleapp/services/VersionService.dart';
 import 'package:odoosaleapp/helpers/SessionManager.dart';
+import 'package:odoosaleapp/helpers/Strings.dart';
+import 'package:odoosaleapp/helpers/LanguageManager.dart';
 import 'package:odoosaleapp/B2bMainPage.dart';
 import 'package:odoosaleapp/B2bLoginPage.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -67,6 +72,40 @@ class _SplashPageState extends State<SplashPage> {
 
   Future<void> _initializeApp() async {
     try {
+      // Önce dil ayarını yükle
+      await _initializeLanguage();
+      
+      // Sonra version check yap
+      final versionResult = await _checkVersion();
+      if (versionResult == null) {
+        // Version check başarısız, hata mesajı göster ve çık
+        print('❌ Version check başarısız');
+        await _showVersionCheckErrorDialog();
+        return;
+      }
+
+      // Control 1 değilse ilerleme
+      if (versionResult.control != 1) {
+        print('❌ Version check control değeri 1 değil: ${versionResult.control}');
+        await _showVersionCheckErrorDialog();
+        return;
+      }
+
+      // MenuApi URL'ini SessionManager'a set et
+      if (versionResult.data?.menuApi != null) {
+        SessionManager().setBaseUrl(versionResult.data!.menuApi!);
+        print('✅ MenuApi URL set edildi: ${versionResult.data!.menuApi}');
+      }
+
+      // ForceVersion kontrolü
+      if (versionResult.data?.forceVersion == true) {
+        print('🔄 Force update gerekli');
+        await _showForceUpdateDialog(versionResult.data?.description);
+        return; // Dialog'da kullanıcı uygulamayı kapatacak
+      }
+
+      // ForceVersion false ise normal akışa devam et
+      print('✅ Version check başarılı, normal akışa devam ediliyor');
       await loginSettings();
       await _checkSessionAndNavigate();
     } catch (e) {
@@ -80,7 +119,191 @@ class _SplashPageState extends State<SplashPage> {
     }
   }
 
+  // 📌 Dil Ayarını Initialize Et
+  Future<void> _initializeLanguage() async {
+    try {
+      print('🔄 Dil ayarı yükleniyor...');
+      final languageManager = LanguageManager();
+      
+      // SharedPreferences'tan dil ayarını yükle
+      await languageManager.loadLanguage();
+      
+      // Eğer dil ayarı yoksa default olarak Dutch yap
+      if (languageManager.currentLanguage == AppLanguage.dutch) {
+        print('✅ Default dil: Dutch');
+      } else {
+        print('✅ Yüklenen dil: ${languageManager.currentLanguage}');
+      }
+    } catch (e) {
+      print('❌ Dil ayarı yükleme hatası: $e');
+      // Hata durumunda default olarak Dutch kullan
+      LanguageManager().currentLanguage = AppLanguage.dutch;
+    }
+  }
 
+  // 📌 Version Check Fonksiyonu
+  Future<dynamic> _checkVersion() async {
+    try {
+      print('🔄 Version check başlatılıyor...');
+      final versionService = VersionService();
+      var key = await versionService.getAppKey();
+      var os = versionService.getOsSystem();
+      var version =await versionService.getAppVersion();
+      final result = await versionService.checkVersion(
+        appKey: key,
+        osSystem: os,
+        version: version,
+      );
+
+      if (result != null && result.control == 1) {
+        print('✅ Version check başarılı');
+        print('📋 Version: ${result.version}');
+        print('📋 ForceVersion: ${result.data?.forceVersion}');
+        print('📋 MenuApi: ${result.data?.menuApi}');
+        return result;
+      } else {
+        print('❌ Version check başarısız: ${result?.message}');
+        return null;
+      }
+    } catch (e) {
+      print('❌ Version check hatası: $e');
+      return null;
+    }
+  }
+
+  // 📌 Version Check Error Dialog
+  Future<void> _showVersionCheckErrorDialog() async {
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false, // Kullanıcı dialog'u kapatamaz
+      builder: (BuildContext context) {
+        return WillPopScope(
+          onWillPop: () async => false, // Geri tuşu çalışmaz
+          child: AlertDialog(
+            title: Text(
+              Strings.versionCheckError,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
+            ),
+            content: Text(
+              Strings.versionCheckFailed,
+              style: const TextStyle(fontSize: 16),
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () => _exitApp(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(Strings.exitButton),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // 📌 Force Update Dialog
+  Future<void> _showForceUpdateDialog(String? description) async {
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false, // Kullanıcı dialog'u kapatamaz
+      builder: (BuildContext context) {
+        return WillPopScope(
+          onWillPop: () async => false, // Geri tuşu çalışmaz
+          child: AlertDialog(
+            title: Text(
+              Strings.updateRequired,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  Strings.appUpdateMessage,
+                  style: const TextStyle(fontSize: 16),
+                ),
+                if (description != null && description.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    Strings.description + ':',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () => _launchAppStore(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(Strings.updateButton),
+              ),
+              ElevatedButton(
+                onPressed: () => _exitApp(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(Strings.exitButton),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // 📌 App Store'a yönlendirme
+  Future<void> _launchAppStore() async {
+    try {
+      // Android için Google Play Store
+      const androidUrl = 'https://play.google.com/store/apps/details?id=com.nametech.odoo.lezza';
+      // iOS için App Store
+      const iosUrl = 'https://apps.apple.com/app/id123456789'; // Gerçek App Store URL'i ile değiştirin
+      
+      final url = Uri.parse(androidUrl); // Platform kontrolü eklenebilir
+      
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        print('❌ App Store açılamadı');
+        _exitApp();
+      }
+    } catch (e) {
+      print('❌ App Store launch hatası: $e');
+      _exitApp();
+    }
+  }
+
+  // 📌 Uygulamayı kapatma
+  void _exitApp() {
+    // Flutter'da uygulamayı kapatmak için
+    // SystemNavigator.pop() kullanılır
+    SystemNavigator.pop();
+  }
 
   Future<void> _checkSessionAndNavigate() async {
     try {
@@ -91,7 +314,7 @@ class _SplashPageState extends State<SplashPage> {
       print('✅ SessionManager başlatıldı');
 
       // Set your base URL (consider moving this to SessionManager.init())
-      SessionManager().setBaseUrl('https://apiodootest.nametech.be:5010/Api/');
+     // SessionManager().setBaseUrl('https://apiodootest.nametech.be:5010/Api/');
 
       final sessionId = SessionManager().sessionId;
       final rememberMe = SessionManager().rememberMe;

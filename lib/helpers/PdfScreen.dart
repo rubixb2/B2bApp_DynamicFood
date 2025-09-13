@@ -5,6 +5,7 @@ import 'package:odoosaleapp/helpers/Strings.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:printing/printing.dart';
+import 'package:share_plus/share_plus.dart';
 
 class PdfScreen extends StatefulWidget {
   final String url;
@@ -48,6 +49,38 @@ class _PdfScreenState extends State<PdfScreen> {
     }
   }
 
+  // 📌 Paylaş Fonksiyonu
+  void _sharePdf() async {
+    try {
+      if (localFilePath != null) {
+        final file = File(localFilePath!);
+        if (await file.exists()) {
+          await Share.shareXFiles(
+            [XFile(localFilePath!)],
+            text: 'PDF Dosyası',
+          );
+        } else {
+          _showErrorSnackBar('PDF dosyası bulunamadı');
+        }
+      } else {
+        _showErrorSnackBar('PDF henüz yüklenmedi');
+      }
+    } catch (e) {
+      _showErrorSnackBar('Paylaşım hatası: $e');
+    }
+  }
+
+  // Hata mesajı gösterme
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,6 +90,12 @@ class _PdfScreenState extends State<PdfScreen> {
           IconButton(
             icon: Icon(Icons.print),
             onPressed: printPdf, // Yazdırma butonu
+            tooltip: 'Yazdır',
+          ),
+          IconButton(
+            icon: Icon(Icons.share),
+            onPressed: _sharePdf, // Paylaş butonu
+            tooltip: 'Paylaş',
           ),
         ],
       ),

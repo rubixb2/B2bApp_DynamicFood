@@ -46,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
     String username = "";
     String password = "";
     // Ensure baseUrl is set before any API calls
-    SessionManager().setBaseUrl('https://apiodootest.nametech.be:5010/Api/');
+   // SessionManager().setBaseUrl('https://apiodootest.nametech.be:5010/Api/');
 
     if (!guest) {
       username = emailController.text;

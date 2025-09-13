@@ -771,6 +771,56 @@ class Strings {
       'Resterend'
   );
 
+  // Version Check strings
+  static String get updateRequired => _byLang(
+      'Update Required',
+      'Güncelleme Gerekli',
+      'Mise à jour requise',
+      'Update vereist'
+  );
+
+  static String get appUpdateMessage => _byLang(
+      'You need to use the latest version of the application.',
+      'Uygulamanın güncel versiyonunu kullanmanız gerekiyor.',
+      'Vous devez utiliser la dernière version de l\'application.',
+      'U moet de nieuwste versie van de applicatie gebruiken.'
+  );
+
+  static String get updateButton => _byLang(
+      'Update',
+      'Güncelle',
+      'Mettre à jour',
+      'Bijwerken'
+  );
+
+  static String get exitButton => _byLang(
+      'Exit',
+      'Çıkış',
+      'Quitter',
+      'Afsluiten'
+  );
+
+  static String get versionCheckFailed => _byLang(
+      'Version check failed. Please try again.',
+      'Versiyon kontrolü başarısız. Lütfen tekrar deneyin.',
+      'Échec de la vérification de version. Veuillez réessayer.',
+      'Versiecontrole mislukt. Probeer het opnieuw.'
+  );
+
+  static String get versionCheckError => _byLang(
+      'Version check error',
+      'Versiyon kontrolü hatası',
+      'Erreur de vérification de version',
+      'Versiecontrole fout'
+  );
+
+  static String get description => _byLang(
+      'Description',
+      'Açıklama',
+      'Description',
+      'Beschrijving'
+  );
+
 
 
   static String _byLang(String en, String tr, String fr, String nl) {

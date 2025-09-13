@@ -75,7 +75,8 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 
   // Minimum limit kontrolü
   bool _isMinimumLimitMetCheckOut() {
-    if (!_isDeliveryChoiceEnabledCheckOut) return true;
+    if (!_isDeliveryChoiceEnabledCheckOut)
+      return true;
 
     double requiredLimit = 0;
     if (_selectedDeliveryType == 'delivery' && _deliveryLimit > 0) {
@@ -256,10 +257,53 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                 height: 80,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  image: DecorationImage(
-                    image: NetworkImage(product.imageUrl ?? 'https://via.placeholder.com/80'),
-                    fit: BoxFit.cover,
-                  ),
+                  color: Colors.grey[200],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: product.imageUrl != null && product.imageUrl!.isNotEmpty
+                      ? Image.network(
+                          product.imageUrl!,
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: 80,
+                              height: 80,
+                              color: Colors.grey[200],
+                              child: const Icon(
+                                Icons.image_not_supported,
+                                color: Colors.grey,
+                                size: 40,
+                              ),
+                            );
+                          },
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              width: 80,
+                              height: 80,
+                              color: Colors.grey[200],
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      : Container(
+                          width: 80,
+                          height: 80,
+                          color: Colors.grey[200],
+                          child: const Icon(
+                            Icons.image_not_supported,
+                            color: Colors.grey,
+                            size: 40,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -507,7 +551,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                 ),
               ),
             //  onPressed: _isLoading ? null : _checkout,
-              onPressed: (_isLoading || !_isMinimumLimitMetCheckOut()) ? null : (_isDeliveryChoiceEnabledCheckOut ? _showDeliveryTypeModal : _checkout),
+              onPressed: (_isLoading || !_isMinimumLimitMet()) ? null : (_isDeliveryChoiceEnabledCheckOut ? _showDeliveryTypeModal : _checkout),
               child: _isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
                   : Text(
