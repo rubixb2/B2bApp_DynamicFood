@@ -112,6 +112,10 @@ class UserService {
         }
         // var userId = data['Data']['UserId'];
         SessionManager().setCartId(cartId);
+        
+        // B2bCustomerAddress değerini kaydet
+        String customerAddress = data['Data']['B2bCustomerAddress'] ?? 'Müşteri Adresi Belirtilmemiş';
+        SessionManager().setB2bCustomerAddress(customerAddress);
 
         // await CartPreferences.saveCartInfo(cartId);
         return true;

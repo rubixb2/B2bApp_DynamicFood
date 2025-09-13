@@ -27,7 +27,7 @@ class CartService {
   final String _discountCartUrl =
       SessionManager().baseUrl+'cart/CartDiscount';
   final String _updateCartUrl =
-      SessionManager().baseUrl+'B2bSale/Update';
+      SessionManager().baseUrl+'B2bSale/UpdateCart';
   final String _deleteProductUrl =
       SessionManager().baseUrl+'B2bSale/DeleteProduct';
   final String _addOrderUrl = SessionManager().baseUrl+'orders/add';

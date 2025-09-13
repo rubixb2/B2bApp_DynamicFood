@@ -31,6 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String guestUser = "";
   String guestPass = "";
   bool signUp = false;
+  int b2bChooseDeliveryType = 0;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
@@ -72,6 +73,11 @@ class _LoginScreenState extends State<LoginScreen> {
       SessionManager().setPriceListId(data['PriceListId']);
       SessionManager().setUserName(username);
       SessionManager().setUserId(data['UserId']);
+      
+      // B2bCustomerAddress değerini kaydet
+      String customerAddress = data['B2bCustomerAddress'] ?? 'Müşteri Adresi Belirtilmemiş';
+      SessionManager().setB2bCustomerAddress(customerAddress);
+      
       if (guest) {
         SessionManager().setRememberme(false);
       }
@@ -109,33 +115,78 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> loginSettings() async {
-    setState(() {
-      isLoading = true;
-    });
-    final apiService = UserService();
-    final data = await apiService.getLoginSettins();
-    if (data != null) {
-
-      guestLogin = data['B2bGuestLoginBtn'] ?? true; // Default to false if null
-      forgetPass = data['B2bForgetPassBtn'] ?? true; // Default to false if null
-      signUp = data['B2bSignupBtn'] ?? true; // Default to false if null
-      deleteAccountt = data['B2bDeleteAccountBtn'] ?? true;
-      guestUser = data['B2bGuestUser'] ?? "";
-      guestPass = data['B2bGuestPass'] ?? "";
-      SessionManager().setdeleteAccountBtn(deleteAccountt);
-
+    try {
+      print('🔄 Login sayfası - Login settings başlatılıyor...');
       setState(() {
-        isLoading = false;
+        isLoading = true;
       });
+      
+      final apiService = UserService();
+      final data = await apiService.getLoginSettins();
 
-    } else
-    {
+      await SessionManager().setSelectedWarehouseId(0);
+      await SessionManager().setSelectedDeliveryType(null);
+      await SessionManager().setSelectedWarehouseName("");
+      await SessionManager().setB2bChooseDeliveryType(0);
+      await SessionManager().setB2bChooseDeliveryTypeCheckOut(0);
+      
+      if (data != null) {
+        print('✅ Login sayfası - Login settings başarıyla alındı');
+        
+        // Önce mevcut login settings verilerini temizle
+        await SessionManager().clearLoginSettings();
+        
+        guestLogin = data['B2bGuestLoginBtn'] ?? true;
+        forgetPass = data['B2bForgetPassBtn'] ?? true;
+        signUp = data['B2bSignupBtn'] ?? true;
+        deleteAccountt = data['B2bDeleteAccountBtn'] ?? true;
+        guestUser = data['B2bGuestUser'] ?? "";
+        guestPass = data['B2bGuestPass'] ?? "";
+        b2bChooseDeliveryType = data['B2bChooseDeliveryType'] ?? 0;
+        int b2bChooseDeliveryTypeCheckOut = data['B2bChooseDeliveryTypeCheckOut'] ?? 0;
+        int b2bDeleteCartVal = data['B2bDeleteCartVal'] ?? 0;
+        
+        await SessionManager().setdeleteAccountBtn(deleteAccountt);
+        await SessionManager().setB2bChooseDeliveryType(b2bChooseDeliveryType);
+        await SessionManager().setB2bChooseDeliveryTypeCheckOut(b2bChooseDeliveryTypeCheckOut);
+        await SessionManager().setB2bDeleteCartVal(b2bDeleteCartVal);
+
+
+
+
+        // Yeni parametreleri kaydet
+        double deliveryLimit = (data['B2bDeliveryLimit'] ?? 0.0).toDouble();
+        double pickupLimit = (data['B2bPickupLimit'] ?? 0.0).toDouble();
+        String currency = data['B2bCurrency'] ?? '€';
+        String customerAddress = data['B2bCustomerAddress'] ?? 'Müşteri Adresi Belirtilmemiş';
+        
+        await SessionManager().setB2bDeliveryLimit(deliveryLimit);
+        await SessionManager().setB2bPickupLimit(pickupLimit);
+        await SessionManager().setB2bCurrency(currency);
+        await SessionManager().setB2bCustomerAddress(customerAddress);
+        
+        // Pickup listesini de kaydet
+        if (data['PickupList'] != null) {
+          await SessionManager().setPickupList(jsonEncode(data['PickupList']));
+        }
+
+        print('✅ Login sayfası - Tüm ayarlar kaydedildi');
+        setState(() {
+          isLoading = false;
+        });
+
+      } else {
+        print('❌ Login sayfası - Login settings null döndü');
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('❌ Login sayfası - Login settings hatası: $e');
       setState(() {
         isLoading = false;
       });
     }
-
-
   }
 
   Future<void> sendTokenToBackend(String token) async {

@@ -15,6 +15,7 @@ class ProductService {
     required int catId,
     required int customerId,
     required int priceListId,
+    int warehouseId = 0,
   }) async {
     final response = await http.post(
       Uri.parse(apiUrl),
@@ -28,7 +29,8 @@ class ProductService {
         'Page': page,
         'catId': catId,
         'CustomerId': customerId,
-        'PriceListId': priceListId == 0 ? 1: priceListId
+        'PriceListId': priceListId == 0 ? 1: priceListId,
+        'WarehouseId': warehouseId
       }),
     );
 

@@ -33,12 +33,81 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   List<PickupModel> _pickupList = [];
   String? _selectedDeliveryType; // null by default
   int? _selectedPickupId;
+  bool _isDeliveryChoiceEnabled = false;
+  bool _isDeliveryChoiceEnabledCheckOut = false;
+  String _currency = '€';
 
 
   @override
   void initState() {
     super.initState();
+    _checkDeliveryChoiceSettings();
     _loadCart();
+  }
+
+  // Teslimat türü seçimi ayarlarını kontrol et
+  void _checkDeliveryChoiceSettings() {
+    _isDeliveryChoiceEnabled = SessionManager().b2bChooseDeliveryType == 1;
+    _isDeliveryChoiceEnabledCheckOut = SessionManager().b2bChooseDeliveryTypeCheckOut == 1;
+    _currency = SessionManager().b2bCurrency;
+    
+    if (_isDeliveryChoiceEnabled) {
+      _selectedDeliveryType = SessionManager().selectedDeliveryType;
+      _selectedPickupId = SessionManager().selectedWarehouseId;
+      _deliveryLimit = SessionManager().b2bDeliveryLimit;
+      _pickupLimit = SessionManager().b2bPickupLimit;
+    }
+  }
+
+  // Minimum limit kontrolü
+  bool _isMinimumLimitMet() {
+    if (!_isDeliveryChoiceEnabled) return true;
+    
+    double requiredLimit = 0;
+    if (_selectedDeliveryType == 'delivery' && _deliveryLimit > 0) {
+      requiredLimit = _deliveryLimit;
+    } else if (_selectedDeliveryType == 'pickup' && _pickupLimit > 0) {
+      requiredLimit = _pickupLimit;
+    }
+    
+    return _cartTotal >= requiredLimit;
+  }
+
+  // Minimum limit kontrolü
+  bool _isMinimumLimitMetCheckOut() {
+    if (!_isDeliveryChoiceEnabledCheckOut) return true;
+
+    double requiredLimit = 0;
+    if (_selectedDeliveryType == 'delivery' && _deliveryLimit > 0) {
+      requiredLimit = _deliveryLimit;
+    } else if (_selectedDeliveryType == 'pickup' && _pickupLimit > 0) {
+      requiredLimit = _pickupLimit;
+    }
+
+    return _cartTotal >= requiredLimit;
+  }
+
+  // Minimum limit mesajı
+  String _getMinimumLimitMessage() {
+    if (!_isDeliveryChoiceEnabled) return '';
+    
+    double requiredLimit = 0;
+    String deliveryTypeText = '';
+    
+    if (_selectedDeliveryType == 'delivery' && _deliveryLimit > 0) {
+      requiredLimit = _deliveryLimit;
+      deliveryTypeText = Strings.deliveryToAddress;
+    } else if (_selectedDeliveryType == 'pickup' && _pickupLimit > 0) {
+      requiredLimit = _pickupLimit;
+      deliveryTypeText = Strings.pickupFromStore;
+    }
+    
+    if (requiredLimit > 0 && _cartTotal < requiredLimit) {
+      double remaining = requiredLimit - _cartTotal;
+      return '${Strings.minimumOrderWarning} $deliveryTypeText: ${requiredLimit.toStringAsFixed(2)} $_currency (${Strings.remaining}: ${remaining.toStringAsFixed(2)} $_currency)';
+    }
+    
+    return '';
   }
 
 /*  Future<void> _checkCartLimitAndContinue() async {
@@ -65,6 +134,12 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 
 
   void _loadCart() {
+    debugPrint('🛒 _loadCart çağrıldı');
+    debugPrint('🛒 SessionId: ${SessionManager().sessionId}');
+    debugPrint('🛒 CartId: ${SessionManager().cartId}');
+    debugPrint('🛒 SelectedDeliveryType: ${SessionManager().selectedDeliveryType}');
+    debugPrint('🛒 SelectedWarehouseId: ${SessionManager().selectedWarehouseId}');
+    
     setState(() {
       _cartFuture = _cartService.fetchCart(
         sessionId: SessionManager().sessionId ?? '',
@@ -395,18 +470,44 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
             ],
           ),
           const SizedBox(height: 16),
+          // Minimum limit uyarısı göster
+          if (!_isMinimumLimitMet() && _getMinimumLimitMessage().isNotEmpty)
+            Container(
+              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                border: Border.all(color: Colors.orange),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning, color: Colors.orange, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _getMinimumLimitMessage(),
+                      style: TextStyle(
+                        color: Colors.orange.shade700,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: Colors.orange,
+                backgroundColor: _isMinimumLimitMet() ? Colors.orange : Colors.grey,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
             //  onPressed: _isLoading ? null : _checkout,
-              onPressed: _isLoading ? null : _showDeliveryTypeModal,
+              onPressed: (_isLoading || !_isMinimumLimitMetCheckOut()) ? null : (_isDeliveryChoiceEnabledCheckOut ? _showDeliveryTypeModal : _checkout),
               child: _isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
                   : Text(

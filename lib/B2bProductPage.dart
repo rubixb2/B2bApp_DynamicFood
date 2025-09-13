@@ -18,6 +18,7 @@ import 'B2bShoppingCartPage.dart';
 import 'helpers/FlushBar.dart';
 import 'helpers/Strings.dart';
 import 'models/cart/CartReponseModel.dart';
+import 'models/cart/PickupModel.dart';
 import 'models/home/CarouselResponseModel.dart';
 import 'models/product/CategoryResponseModel.dart';
 
@@ -52,6 +53,14 @@ class _B2bProductPageState extends State<B2bProductPage> {
   List<ProductsResponseModel> _allProducts = [];
   List<ProductsResponseModel> _filteredProducts = [];
   List<CartCountResponseModel> _cartCounts = [];
+  
+  // Teslimat türü seçimi için değişkenler
+  String? _selectedDeliveryType;
+  int? _selectedWarehouseId;
+  List<PickupModel> _pickupList = [];
+  double _deliveryLimit = 0;
+  double _pickupLimit = 0;
+  bool _isDeliveryChoiceEnabled = false;
 
   final _scrollController = ScrollController();
   final _searchFocusNode = FocusNode();
@@ -83,9 +92,58 @@ class _B2bProductPageState extends State<B2bProductPage> {
         );
       }
     });
+    
+    // Teslimat türü seçimi ayarlarını kontrol et
+    _checkDeliveryChoiceSettings();
+    
     _dataFuture = _loadInitialData(); // Tüm verileri tek bir Future'da yükle
     _searchController.addListener(_filterProducts);
     Provider.of<CartState>(context, listen: false).fetchCartCounts();
+  }
+
+  // Teslimat türü seçimi ayarlarını kontrol et
+  void _checkDeliveryChoiceSettings() {
+    _isDeliveryChoiceEnabled = SessionManager().b2bChooseDeliveryType == 1;
+    print('🔍 B2bChooseDeliveryType: ${SessionManager().b2bChooseDeliveryType}');
+    print('🔍 _isDeliveryChoiceEnabled: $_isDeliveryChoiceEnabled');
+    
+    if (_isDeliveryChoiceEnabled) {
+      // Daha önce seçilmiş teslimat türü ve depo bilgilerini al (null olabilir)
+      _selectedDeliveryType = SessionManager().selectedDeliveryType;
+      _selectedWarehouseId = SessionManager().selectedWarehouseId;
+      
+      // Pickup listesini al
+      _loadPickupList();
+      
+      // Debug: Mevcut değerleri kontrol et
+      debugPrint('🔍 _selectedDeliveryType: $_selectedDeliveryType');
+      debugPrint('🔍 _selectedWarehouseId: $_selectedWarehouseId');
+      
+      // Teslimat türü seçimi zorla - her uygulama açılışında
+      /*_selectedDeliveryType = null;
+      _selectedWarehouseId = null;*/
+      
+      // İlk kullanımda teslimat türü seçimi modalını göster
+      if (_selectedDeliveryType == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _showDeliveryTypeModal();
+        });
+      }
+    }
+  }
+
+  // Pickup listesini yükle
+  void _loadPickupList() {
+    try {
+      final pickupListJson = SessionManager().pickupListJson;
+      if (pickupListJson != null && pickupListJson.isNotEmpty) {
+        final List<dynamic> pickupData = jsonDecode(pickupListJson);
+        _pickupList = pickupData.map((item) => PickupModel.fromJson(item)).toList();
+      }
+    } catch (e) {
+      debugPrint('Pickup list yüklenirken hata: $e');
+      _pickupList = [];
+    }
   }
 
   // Yeni Metot: Tüm başlangıç verilerini bir kerede yükler
@@ -130,12 +188,30 @@ class _B2bProductPageState extends State<B2bProductPage> {
   }
 
   Future<void> _loadProducts() async {
+    // Teslimat türü seçimi aktifse ve seçim yapılmamışsa ürünleri yükleme
+    if (_isDeliveryChoiceEnabled && _selectedDeliveryType == null) {
+      _allProducts = [];
+      _filteredProducts = [];
+      return;
+    }
+
     if (_cache.isProductsCacheValid && _cache.cachedProducts.isNotEmpty) {
       _allProducts = _cache.cachedProducts;
     } else {
       try {
         final sessionId = SessionManager().sessionId ?? "";
         final customerId = SessionManager().customerId ?? 0;
+        
+        // Teslimat türüne göre warehouseId belirle
+        int warehouseId = 0;
+        if (_isDeliveryChoiceEnabled) {
+          if (_selectedDeliveryType == 'pickup' && _selectedWarehouseId != null) {
+            warehouseId = _selectedWarehouseId!;
+          } else if (_selectedDeliveryType == 'delivery') {
+            warehouseId = 0;
+          }
+        }
+        
         _allProducts = await _productService.fetchProducts(
           sessionId: sessionId,
           searchKey: '',
@@ -144,6 +220,7 @@ class _B2bProductPageState extends State<B2bProductPage> {
           catId: 0,
           customerId: customerId,
           priceListId: 1,
+          warehouseId: warehouseId, // Warehouse ID'yi ekle
         );
         _cache.cacheProducts(_allProducts);
       } catch (e) {
@@ -217,6 +294,7 @@ class _B2bProductPageState extends State<B2bProductPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true, // 👈 önemli
+      appBar: _isDeliveryChoiceEnabled ? _buildAppBar() : null,
       body: FutureBuilder<void>(
         future: _dataFuture,
         builder: (context, snapshot) {
@@ -228,6 +306,11 @@ class _B2bProductPageState extends State<B2bProductPage> {
             return Center(
               child: Text('${Strings.genericError}: ${snapshot.error}'),
             );
+          }
+
+          // Teslimat türü seçimi aktifse ve seçim yapılmamışsa uyarı göster
+          if (_isDeliveryChoiceEnabled && _selectedDeliveryType == null) {
+            return _buildDeliverySelectionRequired();
           }
 
           return MediaQuery.removeViewInsets( // 👈 kilit çözüm
@@ -632,4 +715,397 @@ class _B2bProductPageState extends State<B2bProductPage> {
     }
   }
 
+  // AppBar oluştur
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: Text(Strings.productsTitle),
+      backgroundColor: Colors.white,
+      foregroundColor: Colors.black,
+      elevation: 1,
+      actions: [
+        IconButton(
+          icon: Icon(
+            _selectedDeliveryType == 'delivery' 
+                ? Icons.local_shipping 
+                : _selectedDeliveryType == 'pickup' 
+                    ? Icons.store 
+                    : Icons.settings,
+            color: _selectedDeliveryType != null ? Colors.orange : Colors.grey,
+          ),
+          onPressed: () => _showDeliveryTypeModal(),
+          tooltip: _selectedDeliveryType == null 
+              ? Strings.selectDeliveryTypeTooltip 
+              : _selectedDeliveryType == 'delivery' 
+                  ? Strings.deliveryToAddressTooltip 
+                  : Strings.pickupFromStoreTooltip,
+        ),
+      ],
+    );
+  }
+
+  // Teslimat seçimi gerekli uyarısı
+  Widget _buildDeliverySelectionRequired() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.local_shipping,
+              size: 80,
+              color: Colors.grey,
+            ),
+            SizedBox(height: 20),
+            Text(
+              Strings.deliveryTypeSelectionRequired,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 10),
+            Text(
+              Strings.selectDeliveryTypeFirst,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () => _showDeliveryTypeModal(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              ),
+              child: Text(
+                Strings.selectDeliveryType,
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Teslimat türü seçimi modalı
+  Future<void> _showDeliveryTypeModal() async {
+    String? tempSelectedDeliveryType = _selectedDeliveryType; // Mevcut seçimi göster
+    int? tempSelectedWarehouseId = _selectedWarehouseId; // Mevcut depo seçimini göster
+    
+    // Debug: Modal açılırken değerleri kontrol et
+    debugPrint('🔍 Modal açılıyor - tempSelectedDeliveryType: $tempSelectedDeliveryType');
+    debugPrint('🔍 Modal açılıyor - tempSelectedWarehouseId: $tempSelectedWarehouseId');
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            bool canPickup = _pickupLimit == 0 || true; // Şimdilik limit kontrolü yapmıyoruz
+            bool canDelivery = _deliveryLimit == 0 || true;
+
+            bool isConfirmEnabled = tempSelectedDeliveryType != null;
+
+            if (tempSelectedDeliveryType == 'pickup' && _pickupList.isNotEmpty) {
+              isConfirmEnabled = tempSelectedWarehouseId != null;
+            }
+
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              title: Text(Strings.chooseDeliveryTypeTitle),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RadioListTile<String>(
+                    title: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(Strings.deliveryToAddress),
+                        if (SessionManager().b2bDeliveryLimit > 0)
+                          Text(
+                            '${Strings.minimumOrderWarning}: ${SessionManager().b2bDeliveryLimit.toStringAsFixed(2)} ${SessionManager().b2bCurrency}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                      ],
+                    ),
+                    value: 'delivery',
+                    groupValue: tempSelectedDeliveryType,
+                    onChanged: canDelivery
+                        ? (value) {
+                            setState(() {
+                              tempSelectedDeliveryType = value!;
+                              // Adrese teslim seçilince depo seçimini sıfırla
+                              tempSelectedWarehouseId = null;
+                            });
+                          }
+                        : null,
+                  ),
+                  RadioListTile<String>(
+                    title: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(Strings.pickupFromStore),
+                        if (SessionManager().b2bPickupLimit > 0)
+                          Text(
+                            '${Strings.minimumOrderWarning}: ${SessionManager().b2bPickupLimit.toStringAsFixed(2)} ${SessionManager().b2bCurrency}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                      ],
+                    ),
+                    value: 'pickup',
+                    groupValue: tempSelectedDeliveryType,
+                    onChanged: canPickup
+                        ? (value) async {
+                            setState(() {
+                              tempSelectedDeliveryType = value!;
+                            });
+
+                            if (_pickupList.isNotEmpty) {
+                              await _showPickupAddressModal(setState, (selectedWarehouseId) {
+                                tempSelectedWarehouseId = selectedWarehouseId;
+                              });
+                            }
+                          }
+                        : null,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    if (mounted) Navigator.of(context).pop();
+                  },
+                  child: Text(Strings.cancel),
+                ),
+                ElevatedButton(
+                  onPressed: isConfirmEnabled
+                      ? () async {
+                          // Modalı kapat
+                          if (mounted) Navigator.of(context).pop();
+                          
+                          // Sepet silme koşullarını kontrol et
+                          bool shouldClearCart = false;
+                          
+                          // B2bDeleteCartVal ayarını kontrol et (1 ise sepet silme aktif, 0 ise pasif)
+                          if (SessionManager().b2bDeleteCartVal == 1) {
+                            if (_selectedDeliveryType != null && _selectedDeliveryType != tempSelectedDeliveryType) {
+                              // 1. Adrese teslimden gel al'a geçiş - sepet silinir
+                              if (_selectedDeliveryType == 'delivery' && tempSelectedDeliveryType == 'pickup') {
+                                shouldClearCart = true;
+                              }
+                            }
+                            
+                            // 2. Mevcut depo değişikliği - sepet silinir
+                            if (_selectedDeliveryType == 'pickup' && tempSelectedDeliveryType == 'pickup' &&
+                                _selectedWarehouseId != null && _selectedWarehouseId != tempSelectedWarehouseId) {
+                              shouldClearCart = true;
+                            }
+                          }
+
+                          // Sepeti temizle (gerekirse)
+                          if (shouldClearCart) {
+                            await _clearCart();
+                            await _loadCart(); // Sepet durumunu güncelle
+                          }
+
+                          // Seçimleri kaydet - sadece seçim yapıldıysa
+                          if (tempSelectedDeliveryType != null) {
+                            _selectedDeliveryType = tempSelectedDeliveryType;
+                            // Adrese teslim seçilirse depo seçimini sıfırla
+                            if (tempSelectedDeliveryType == 'delivery') {
+                              _selectedWarehouseId = null;
+                            } else {
+                              _selectedWarehouseId = tempSelectedWarehouseId;
+                            }
+                          }
+
+                          // Session'a kaydet
+                          await SessionManager().setSelectedDeliveryType(_selectedDeliveryType);
+                          await SessionManager().setSelectedWarehouseId(_selectedWarehouseId);
+                          
+                          // Seçili depo adını da kaydet
+                          if (_selectedDeliveryType == 'pickup' && _selectedWarehouseId != null) {
+                            final selectedWarehouse = _pickupList.firstWhere(
+                              (warehouse) => warehouse.id == _selectedWarehouseId,
+                              orElse: () => PickupModel(id: 0, name: null, address: ''),
+                            );
+                            await SessionManager().setSelectedWarehouseName(selectedWarehouse.name ?? selectedWarehouse.address);
+                          } else {
+                            await SessionManager().setSelectedWarehouseName(null);
+                          }
+                          
+                          // Ürünleri yeniden yükle
+                          if (mounted) {
+                            _reloadProducts();
+                          }
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    disabledBackgroundColor: Colors.grey,
+                  ),
+                  child: Text(Strings.confirm, style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Depo seçimi modalı
+  Future<void> _showPickupAddressModal(
+      void Function(void Function()) updateParent,
+      Function(int?) onWarehouseSelected) async {
+    int? tempWarehouseId = _selectedWarehouseId; // Mevcut seçimi başlangıç değeri olarak al
+    
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              title: Text(Strings.selectStore),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: _pickupList.map((pickup) {
+                  return RadioListTile<int>(
+                    title: Text('${pickup.name ?? pickup.address}'),
+                    value: pickup.id,
+                    groupValue: tempWarehouseId, // Temp değeri kullan
+                    onChanged: (value) {
+                      setState(() => tempWarehouseId = value);
+                      onWarehouseSelected(value);
+                      updateParent(() {}); // parent modal'ı güncelle
+                    },
+                  );
+                }).toList(),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(Strings.cancel),
+                ),
+                ElevatedButton(
+                  onPressed: tempWarehouseId == null
+                      ? null
+                      : () {
+                    Navigator.of(context).pop(); // sadece adres modalı kapanır
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    disabledBackgroundColor: Colors.grey,
+                  ),
+                  child: Text(Strings.confirm, style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Sepet temizleme uyarısı
+  Future<bool> _showCartClearWarning() async {
+    if (!mounted) return false;
+    
+    bool? result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          title: Text(Strings.warning),
+          content: Text(Strings.cartWillBeCleared),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      if (mounted) Navigator.of(context).pop(false);
+                    },
+                    child: Text(Strings.cancel),
+                  ),
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      // Sepeti temizle
+                      await _clearCart();
+                      if (mounted) Navigator.of(context).pop(true);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                    child: Text(Strings.clearCartAndContinue, style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+    return result ?? false;
+  }
+
+  // Sepeti temizle
+  Future<void> _clearCart() async {
+    try {
+      final sessionId = SessionManager().sessionId ?? '';
+      final cartId = SessionManager().cartId ?? 0;
+      
+      await _cartService.deleteCart(
+        sessionId: sessionId,
+        cartId: cartId,
+      );
+      
+      // Cart state'i güncelle
+      await Provider.of<CartState>(context, listen: false).fetchCartCounts();
+      
+      if (mounted) {
+        showCustomToast(context, Strings.cartCleared);
+      }
+    } catch (e) {
+      debugPrint('Error clearing cart: $e');
+      if (mounted) {
+        showCustomErrorToast(context, '${Strings.generalError}: $e');
+      }
+    }
+
+  }
+
+  // Sepet durumunu yükle
+  Future<void> _loadCart() async {
+    try {
+      await _cartService.createCart(sessionId: SessionManager().sessionId ?? "", customerId: SessionManager().customerId ?? 0);
+      await Provider.of<CartState>(context, listen: false).fetchCartCounts();
+    } catch (e) {
+      debugPrint('Error loading cart: $e');
+    }
+  }
+
+  // Ürünleri yeniden yükle
+  void _reloadProducts() {
+    setState(() {
+      _dataFuture = _loadInitialData();
+    });
+  }
 }

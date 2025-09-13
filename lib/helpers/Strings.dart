@@ -651,6 +651,126 @@ class Strings {
       'Wachtwoorden komen niet overeen.'
   );
 
+  // Teslimat türü seçimi için yeni string'ler
+  static String get deliveryTypeSelectionRequired => _byLang(
+      'Delivery Type Selection Required',
+      'Teslimat Türü Seçimi Gerekli',
+      'Sélection du type de livraison requise',
+      'Leveringstype selectie vereist'
+  );
+
+  static String get selectDeliveryTypeFirst => _byLang(
+      'You need to select a delivery type first to view products.',
+      'Ürünleri görüntülemek için önce teslimat türünü seçmeniz gerekiyor.',
+      'Vous devez d\'abord sélectionner un type de livraison pour voir les produits.',
+      'U moet eerst een leveringstype selecteren om producten te bekijken.'
+  );
+
+  static String get selectDeliveryType => _byLang(
+      'Select Delivery Type',
+      'Teslimat Türü Seç',
+      'Sélectionner le type de livraison',
+      'Leveringstype selecteren'
+  );
+
+  static String get chooseDeliveryTypeTitle => _byLang(
+      'Choose Delivery Type',
+      'Teslimat Türü Seçin',
+      'Choisir le type de livraison',
+      'Leveringstype kiezen'
+  );
+
+  static String get pickupFromStore => _byLang(
+      'Pickup from Store',
+      'Mağazadan Teslim Alma',
+      'Retrait en magasin',
+      'Ophalen in winkel'
+  );
+
+  static String get deliveryToAddress => _byLang(
+      'Delivery to Address',
+      'Adrese Teslim',
+      'Livraison à domicile',
+      'Thuisbezorging'
+  );
+
+  static String get selectStore => _byLang(
+      'Select Store',
+      'Mağaza Seçin',
+      'Sélectionner le magasin',
+      'Winkel selecteren'
+  );
+
+  static String get warning => _byLang(
+      'Warning',
+      'Uyarı',
+      'Avertissement',
+      'Waarschuwing'
+  );
+
+  static String get cartWillBeCleared => _byLang(
+      "delivery_change_warning_en",
+      "delivery_change_warning_tr",
+      "delivery_change_warning_fr",
+      "delivery_change_warning_nl"
+  );
+
+  static String get clearCartAndContinue => _byLang(
+      'Clear Cart and Continue',
+      'Sepeti Temizle ve Devam Et',
+      'Vider le panier et continuer',
+      'Winkelwagen legen en doorgaan'
+  );
+
+  static String get cartCleared => _byLang(
+      'Cart cleared',
+      'Sepet temizlendi',
+      'Panier vidé',
+      'Winkelwagen geleegd'
+  );
+
+  static String get cartClearError => _byLang(
+      'An error occurred while clearing the cart',
+      'Sepet temizlenirken hata oluştu',
+      'Une erreur s\'est produite lors du vidage du panier',
+      'Er is een fout opgetreden bij het legen van de winkelwagen'
+  );
+
+  static String get selectDeliveryTypeTooltip => _byLang(
+      'Select delivery type',
+      'Teslimat türü seçin',
+      'Sélectionner le type de livraison',
+      'Leveringstype selecteren'
+  );
+
+  static String get deliveryToAddressTooltip => _byLang(
+      'Delivery to Address',
+      'Adrese Teslim',
+      'Livraison à domicile',
+      'Thuisbezorging'
+  );
+
+  static String get pickupFromStoreTooltip => _byLang(
+      'Pickup from Store',
+      'Mağazadan Teslim Alma',
+      'Retrait en magasin',
+      'Ophalen in winkel'
+  );
+
+  static String get minimumOrderWarning => _byLang(
+      'Minimum order amount',
+      'Minimum sipariş tutarı',
+      'Montant minimum de commande',
+      'Minimum bestelbedrag'
+  );
+
+  static String get remaining => _byLang(
+      'Remaining',
+      'Kalan',
+      'Restant',
+      'Resterend'
+  );
+
 
 
   static String _byLang(String en, String tr, String fr, String nl) {

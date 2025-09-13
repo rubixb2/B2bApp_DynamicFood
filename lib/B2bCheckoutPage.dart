@@ -7,8 +7,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'B2bOrderCompletePage.dart';
 import 'helpers/FlushBar.dart';
+import 'helpers/SessionManager.dart';
 import 'helpers/Strings.dart';
 import 'models/cart/CartProductModel.dart';
+import 'models/cart/PickupModel.dart';
 
 class B2bCheckoutPage extends StatefulWidget {
   final String deliveryType;
@@ -30,11 +32,41 @@ class _B2bCheckoutPageState extends State<B2bCheckoutPage> {
   int _cartId = 0;
   String _sessionId = "";
   bool isLoading = true;
+  List<PickupModel> _pickupList = [];
+  String _deliveryAddress = "";
+  String _selectedWarehouseName = "";
 
   @override
   void initState() {
     super.initState();
+    _loadDeliveryInfo();
     fetchCart();
+  }
+
+  void _loadDeliveryInfo() {
+    // Müşteri adresini al
+    _deliveryAddress = SessionManager().b2bCustomerAddress;
+    
+    // Önce SessionManager'dan kayıtlı depo adını al
+    _selectedWarehouseName = SessionManager().selectedWarehouseName ?? '';
+    
+    // Eğer kayıtlı ad yoksa pickup listesinden bul
+    if (_selectedWarehouseName.isEmpty) {
+      final pickupListJson = SessionManager().pickupListJson;
+      if (pickupListJson != null && pickupListJson.isNotEmpty) {
+        final List<dynamic> pickupData = jsonDecode(pickupListJson);
+        _pickupList = pickupData.map((item) => PickupModel.fromJson(item)).toList();
+        
+        // Seçili depo adını bul
+        if (widget.pickupId != null) {
+          final selectedWarehouse = _pickupList.firstWhere(
+            (warehouse) => warehouse.id == widget.pickupId,
+            orElse: () => PickupModel(id: 0, name: 'Bilinmeyen Depo', address: ''),
+          );
+          _selectedWarehouseName = selectedWarehouse.name ?? selectedWarehouse.address ?? 'Bilinmeyen Depo';
+        }
+      }
+    }
   }
 
   Future<void> fetchCart() async {
@@ -117,8 +149,8 @@ class _B2bCheckoutPageState extends State<B2bCheckoutPage> {
         "sessionId": sessionId,
         "customerId": customerId,
         "cartId": cartId,
-        "deliveryType": deliveryType,
-        "pickupId": pickupId,
+        "deliveryType": deliveryType == "" || deliveryType == null ? "delivery" : deliveryType,
+        "pickupId": pickupId == null ? 0 : pickupId ,
 
       };
 
@@ -197,6 +229,55 @@ class _B2bCheckoutPageState extends State<B2bCheckoutPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Teslimat Bilgileri Kartı
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(16),
+                    margin: EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              widget.deliveryType == 'pickup'
+                                ? Icons.store
+                                : Icons.local_shipping,
+                              color: Colors.orange,
+                              size: 20,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              widget.deliveryType == 'pickup'
+                                ? Strings.pickupFromStore
+                                : Strings.deliveryToAddress,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          widget.deliveryType == 'pickup'
+                            ? _selectedWarehouseName
+                            : _deliveryAddress,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
                   Text(
                     Strings.shoppingSummary,
                     style: TextStyle(
