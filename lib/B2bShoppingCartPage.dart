@@ -111,29 +111,6 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     return '';
   }
 
-/*  Future<void> _checkCartLimitAndContinue() async {
-    setState(() => _isLoading = true);
-
-    try {
-      final sessionId = SessionManager().sessionId ?? '';
-      final result = await CartService().fetchCartLimit(
-          sessionId: sessionId,
-          cartId:  SessionManager().cartId ?? 0,
-          deliveryType: _selectedDeliveryType,);
-
-      if (result == "success") {
-        _checkout(); // Başarılı ise devam et
-      } else {
-        showCustomErrorToast(context, result); // Gelen mesajı göster
-      }
-    } catch (e) {
-      showCustomErrorToast(context, '${Strings.generalError}: $e');
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }*/
-
-
   void _loadCart() {
     debugPrint('🛒 _loadCart çağrıldı');
     debugPrint('🛒 SessionId: ${SessionManager().sessionId}');
@@ -150,7 +127,6 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
       _cartId = SessionManager().cartId ?? 0;
     });
   }
-
 
   double _calculateItemsTotal(List<CartProductModel> cartProducts) {
     return cartProducts.fold(0.0, (sum, item) {
@@ -388,68 +364,6 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     );
   }
 
-
-
-  /*Widget _buildCartItem(CartProductModel product) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                image: DecorationImage(
-                  image: NetworkImage(product.imageUrl ?? 'https://via.placeholder.com/80'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.productName ?? "",
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-'$_currency${product.price?.toStringAsFixed(2) ?? "0.00"} x ${product.boxQuantity ?? 0}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.green,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$_currency${((product.price ?? 0) * (product.boxQuantity ?? 0)).toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () => _removeItem(product.id),
-            ),
-          ],
-        ),
-      ),
-    );
-  }*/
-
   Widget _buildOrderSummary(double itemsTotal, double discount, double total) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -586,7 +500,6 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     }
   }
 
-
   Future<void> _removeItem(int productId) async {
     setState(() => _isLoading = true);
     try {
@@ -710,7 +623,6 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     );
   }
 
-
   Future<void> _showPickupAddressModal(void Function(void Function()) updateParent) async {
     await showDialog(
       context: context,
@@ -799,4 +711,5 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
       },
     );
   }
+
 }
