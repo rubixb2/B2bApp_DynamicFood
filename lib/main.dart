@@ -6,6 +6,7 @@ import 'helpers/SessionManager.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
+import 'theme/theme.dart';
 
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -34,12 +35,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Tan-Tan',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: const SplashPage(), // Start with SplashPage
       debugShowCheckedModeBanner: false,
+      theme: B2BTheme.lightTheme,
+      home: const SplashPage(),
     );
   }
 }

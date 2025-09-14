@@ -41,6 +41,25 @@ class Strings {
   static String get orderCompleted => _byLang('Order completed', 'Sipariş tamamlandı', 'Commande terminée', 'Bestelling voltooid');
   static String get invoiced => _byLang('Invoiced', 'Faturalandı', 'Facturé', 'Gefactureerd');
 
+  // Shopping Cart Strings
+  static String get shoppingCart => _byLang('Shopping Cart', 'Alışveriş Sepeti', 'Panier', 'Winkelwagen');
+  static String get emptyCart => _byLang('Your cart is empty', 'Sepetiniz Boş', 'Votre panier est vide', 'Uw winkelwagen is leeg');
+  static String get startShopping => _byLang('Start Shopping', 'Alışverişe Başla', 'Commencer les achats', 'Begin met winkelen');
+  static String get startShoppingMessage => _byLang(
+    'Add products to start shopping', 
+    'Alışverişe başlamak için ürün ekleyin',
+    'Ajoutez des produits pour commencer vos achats',
+    'Voeg producten toe om te beginnen met winkelen'
+  );
+  static String get noProductName => _byLang('No Product Name', 'Ürün Adı Yok', 'Pas de nom de produit', 'Geen productnaam');
+  static String get orderSummary => _byLang('Order Summary', 'Sipariş Özeti', 'Récapitulatif de la commande', 'Besteloverzicht');
+  static String get subtotal => _byLang('Subtotal', 'Ara Toplam', 'Sous-total', 'Subtotaal');
+  static String get discount => _byLang('Discount', 'İndirim', 'Remise', 'Korting');
+  static String get total => _byLang('Total', 'Toplam', 'Total', 'Totaal');
+  static String get proceedToCheckout => _byLang('Proceed to Checkout', 'Ödemeye Geç', 'Passer à la caisse', 'Afrekenen');
+  static String get continueText => _byLang('Continue', 'Devam Et', 'Continuer', 'Doorgaan');
+  //static String get totalLabel => _byLang('Total', 'Toplam', 'Total', 'Totaal');
+
   // ... diğer strings
 
   static String get deleteAccount => _byLang(
@@ -203,12 +222,12 @@ class Strings {
       'Winkeloverzicht'
   );
 
-  static String get total => _byLang(
+/*  static String get total => _byLang(
       'Total',
       'Toplam',
       'Total',
       'Totaal'
-  );
+  );*/
   static String get orderComplete => _byLang(
       'Order Complete',
       'Siparişi Tamamla',
@@ -398,10 +417,10 @@ class Strings {
   );
 
   static String get addToCart => _byLang(
-      'Add to cart',
+      'Add',
       'Sepete Ekle',
-      'Ajouter au panier',
-      'In winkelwagen'
+      'Ajouter',
+      'Toevoegen'
   );
 
   static String get productAdded => _byLang(
@@ -508,19 +527,21 @@ class Strings {
       'Winkelwagen'
   );
 
+/*
   static String get subtotal => _byLang(
       'Subtotal',
       'Ara Toplam',
       'Sous-total',
       'Subtotaal'
   );
+*/
 
-  static String get discount => _byLang(
+ /* static String get discount => _byLang(
       'Discount',
       'İndirim',
       'Remise',
       'Korting'
-  );
+  );*/
 
  /* static String get total => _byLang(
       'Total',
@@ -558,10 +579,10 @@ class Strings {
   );
 
   static String get addCart => _byLang(
-      'Add Cart',
+      'Add',
       'Sepete Ekle',
-      'Ajouter au panier',
-      'In winkelwagen'
+      'Ajouter',
+      'Toevoegen'
   );
   static String get home => _byLang(
       'Home',

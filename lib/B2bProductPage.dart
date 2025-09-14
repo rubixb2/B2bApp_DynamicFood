@@ -61,6 +61,7 @@ class _B2bProductPageState extends State<B2bProductPage> {
   double _deliveryLimit = 0;
   double _pickupLimit = 0;
   bool _isDeliveryChoiceEnabled = false;
+  bool _deleteProductCache = false;
 
   final _scrollController = ScrollController();
   final _searchFocusNode = FocusNode();
@@ -195,10 +196,11 @@ class _B2bProductPageState extends State<B2bProductPage> {
       return;
     }
 
-    if (_cache.isProductsCacheValid && _cache.cachedProducts.isNotEmpty) {
+    if ((_cache.isProductsCacheValid && _cache.cachedProducts.isNotEmpty ) && !_deleteProductCache) {
       _allProducts = _cache.cachedProducts;
     } else {
       try {
+
         final sessionId = SessionManager().sessionId ?? "";
         final customerId = SessionManager().customerId ?? 0;
         
@@ -222,6 +224,7 @@ class _B2bProductPageState extends State<B2bProductPage> {
           priceListId: 1,
           warehouseId: warehouseId, // Warehouse ID'yi ekle
         );
+        _deleteProductCache = false;
         _cache.cacheProducts(_allProducts);
       } catch (e) {
         debugPrint('Error fetching products: $e');
@@ -893,7 +896,8 @@ class _B2bProductPageState extends State<B2bProductPage> {
                       ? () async {
                           // Modalı kapat
                           if (mounted) Navigator.of(context).pop();
-                          
+
+                          _deleteProductCache = true;
                           // Sepet silme koşullarını kontrol et
                           bool shouldClearCart = false;
                           

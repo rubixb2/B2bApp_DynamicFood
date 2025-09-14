@@ -10,7 +10,7 @@ void showCustomToast(BuildContext context, String message) {
     message: message,
     icon: Icon(Icons.check, color: Colors.white),
     duration: Duration(milliseconds: 1500),
-    flushbarPosition: FlushbarPosition.BOTTOM,
+    flushbarPosition: FlushbarPosition.TOP,
     flushbarStyle: FlushbarStyle.FLOATING,
     reverseAnimationCurve: Curves.decelerate,
     forwardAnimationCurve: Curves.easeIn,
