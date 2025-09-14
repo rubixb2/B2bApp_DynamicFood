@@ -40,6 +40,7 @@ class _CartPageState extends State<CartPage> {
   int _invoiceId = 0;
   int paymentMethodId = 0;
   bool _isAddButtonEnabled = true;
+  String _currency = '€';
   PaymentMethod? selectedMethod; // Seçili müşteri
   final _formKey = GlobalKey<FormState>();
 
@@ -49,6 +50,7 @@ class _CartPageState extends State<CartPage> {
   @override
   void initState() {
     super.initState();
+    _currency = SessionManager().b2bCurrency;
     _initializeCart();
     _fetchPaymentMethods();
   }
@@ -170,14 +172,14 @@ class _CartPageState extends State<CartPage> {
                   .fold(0.0, (sum, productTotalPrice) => sum + productTotalPrice);
               return Row(children: [
               Text(
-              'Total: \€${cartAmount.toStringAsFixed(2)}', // Ondalık basamak ekleyerek düzgün görünmesini sağlıyoruz
+              'Total: $_currency${cartAmount.toStringAsFixed(2)}', // Ondalık basamak ekleyerek düzgün görünmesini sağlıyoruz
               style: AppTextStyles.bodyTextBold,
 
 
               ),
                 SizedBox(width: 15),
                 Text(
-                  'T.Total: \€${cartAmountTaxed.toStringAsFixed(2)}', // Ondalık basamak ekleyerek düzgün görünmesini sağlıyoruz
+                  'T.Total: $_currency${cartAmountTaxed.toStringAsFixed(2)}', // Ondalık basamak ekleyerek düzgün görünmesini sağlıyoruz
                   style: AppTextStyles.bodyTextBold,
                 ),
               ],);

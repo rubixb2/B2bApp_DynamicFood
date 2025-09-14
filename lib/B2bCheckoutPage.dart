@@ -35,10 +35,12 @@ class _B2bCheckoutPageState extends State<B2bCheckoutPage> {
   List<PickupModel> _pickupList = [];
   String _deliveryAddress = "";
   String _selectedWarehouseName = "";
+  String _currency = '€';
 
   @override
   void initState() {
     super.initState();
+    _currency = SessionManager().b2bCurrency;
     _loadDeliveryInfo();
     fetchCart();
   }
@@ -313,7 +315,7 @@ class _B2bCheckoutPageState extends State<B2bCheckoutPage> {
                                         ? item.lastQuantity.toInt().toString()
                                         : item.lastQuantity.toString()) +
                                     " * " +
-                                    item.price.toStringAsFixed(2),
+                                    '$_currency${item.price?.toStringAsFixed(2) ?? '0.00'} x ${item.boxQuantity?.toInt() ?? 0}',
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold,
@@ -324,7 +326,7 @@ class _B2bCheckoutPageState extends State<B2bCheckoutPage> {
                             Expanded(
                               flex: 2,
                               child: Text(
-                                "€${(item.price * item.lastQuantity).toStringAsFixed(2)}",
+                                '$_currency${(item.price * item.lastQuantity).toStringAsFixed(2)}',
                                 textAlign: TextAlign.end,
                                 style: TextStyle(
                                   color: Colors.blue,
@@ -350,7 +352,7 @@ class _B2bCheckoutPageState extends State<B2bCheckoutPage> {
                       ),
 
                       Text(
-                        "€${totalPrice.toStringAsFixed(2)}",
+                        '$_currency${totalPrice.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

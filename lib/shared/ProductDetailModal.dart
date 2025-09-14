@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:odoosaleapp/models/cart/CartProductModel.dart';
 import 'package:odoosaleapp/shared/CartState.dart';
 import 'package:provider/provider.dart';
+import 'package:odoosaleapp/helpers/SessionManager.dart';
 
 import '../helpers/Strings.dart';
 
@@ -28,10 +29,12 @@ class ProductDetailModal extends StatefulWidget {
 
 class _ProductDetailModalState extends State<ProductDetailModal> {
   late double _quantity = 1;
+  String _currency = '€';
 
   @override
   void initState() {
     super.initState();
+    _currency = SessionManager().b2bCurrency;
     _quantity = widget.product.boxQuantity ?? 0;
   }
 
@@ -74,7 +77,7 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '€${widget.product.price?.toStringAsFixed(2) ?? "0.00"}',
+                        '$_currency${widget.product.price?.toStringAsFixed(2) ?? "0.00"}',
                         style: const TextStyle(
                           fontSize: 16,
                           color: Colors.green,

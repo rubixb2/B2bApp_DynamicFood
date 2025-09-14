@@ -27,10 +27,12 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
   late Future<OrderApiResponseModel?> _ordersFuture;
   final SessionManager _sessionManager = SessionManager();
   bool _isPdfDownloading = false;
+  String _currency = '€';
 
   @override
   void initState() {
     super.initState();
+    _currency = _sessionManager.b2bCurrency;
     _loadOrders();
   }
 
@@ -214,7 +216,7 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
                 Text(
                   '${Strings.orderNumber} #${order.name}',
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -250,7 +252,7 @@ class _B2bOrderListScreenState extends State<B2bOrderListScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '€${order.amountTotal.toStringAsFixed(2)}',
+                  '$_currency${order.amountTotal.toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

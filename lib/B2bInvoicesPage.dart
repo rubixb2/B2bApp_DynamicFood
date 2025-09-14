@@ -33,6 +33,7 @@ class _B2bInvoicesPageState extends State<B2bInvoicesPage> {
   int selectedMethodId = 0;
   bool _isAddButtonEnabled = true;
   PaymentMethod? selectedMethod; // Seçili müşteri
+  String _currency = '€';
 
   //String? _selectedPaymentMethod; // Seçilen ödeme yöntemi
 
@@ -50,8 +51,9 @@ class _B2bInvoicesPageState extends State<B2bInvoicesPage> {
   @override
   void initState() {
     super.initState();
+    _currency = SessionManager().b2bCurrency;
     _initializeInvoices();
-   // _fetchPaymentMethods();
+    // _fetchPaymentMethods();
     //ordersFuture = fetchOrders();
   }
 
@@ -142,7 +144,7 @@ class _B2bInvoicesPageState extends State<B2bInvoicesPage> {
                                         style: AppTextStyles.bodyTextBold),
                                     const Spacer(),
                                     Text(
-                                      '${Strings.totalLabel}: €${invoice.amountTotal.toStringAsFixed(2)}',
+                                      '$_currency${invoice.amountTotal?.toStringAsFixed(2) ?? '0.00'}',
                                       style: AppTextStyles.bodyTextBold,
                                     ),
                                   ],

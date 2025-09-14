@@ -26,10 +26,12 @@ class ProductCard extends StatefulWidget {
 class _ProductCardState extends State<ProductCard> {
   int quantity = 1; // Moved quantity to State class
   double _cartQuantity = 0; // Moved quantity to State class
+  String _currency = '€';
 
   @override
   void initState() {
     _updateCartQuantity();
+    _currency = SessionManager().b2bCurrency;
   }
   // Yeni Metot: Sepetteki ürün miktarını bulur
   void _updateCartQuantity() {
@@ -156,7 +158,7 @@ class _ProductCardState extends State<ProductCard> {
                       Row(
                         children: [
                           Text(
-                            '${widget.product.taxedPriceText}',
+                            '$_currency${widget.product.taxedPrice?.toStringAsFixed(2) ?? '0.00'}',
                             style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.green,
@@ -164,7 +166,7 @@ class _ProductCardState extends State<ProductCard> {
                           ),
                           Spacer(),
                           Text(
-                            ' ${widget.product.unitPriceText}',
+                            'pcs- $_currency${widget.product.unitPrice?.toStringAsFixed(2) ?? '0.00'}',
                             style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.green,

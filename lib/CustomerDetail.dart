@@ -33,10 +33,12 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
   PaymentMethod? selectedMethod; // Seçili müşteri
   late Future<PaymentLineTypeResponseModel?> dropListFuture = Future.value();
   final _formKey = GlobalKey<FormState>();
+  String _currency = '€';
 
   @override
   void initState() {
     super.initState();
+    _currency = SessionManager().b2bCurrency;
     fetchCustomerDetail();
     _fetchPaymentMethods();
   }
@@ -93,10 +95,10 @@ class _CustomerDetailModalState extends State<CustomerDetail> {
               children: [
                 Spacer(),
                 Text("Credit: ", style: TextStyle(color: Colors.green, fontSize: 18, fontWeight: FontWeight.bold)),
-                Text("${customerDetail!.credit}", style: TextStyle(color: Colors.green, fontSize: 18, fontWeight: FontWeight.bold)),
+                Text("$_currency${customerDetail!.credit}", style: TextStyle(color: Colors.green, fontSize: 18, fontWeight: FontWeight.bold)),
                 SizedBox(width: 20),
                 Text("Overdue: ", style: TextStyle(color: Colors.red, fontSize: 18,fontWeight: FontWeight.bold)),
-                Text("${customerDetail!.overdueDept}", style: TextStyle(color: Colors.red, fontSize: 18, fontWeight: FontWeight.bold)),
+                Text("$_currency${customerDetail!.overdueDept}", style: TextStyle(color: Colors.red, fontSize: 18, fontWeight: FontWeight.bold)),
                 Spacer()
               ],
             ),

@@ -35,7 +35,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   int? _selectedPickupId;
   bool _isDeliveryChoiceEnabled = false;
   bool _isDeliveryChoiceEnabledCheckOut = false;
-  String _currency = '€';
+  String _currency = '€'; // SessionManager'dan yüklenecek
 
 
   @override
@@ -329,7 +329,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                           ),
                         ),
                         Text(
-                          '€${product.price?.toStringAsFixed(2) ?? "0.00"}',
+                          '$_currency${product.price?.toStringAsFixed(2) ?? "0.00"}',
                           style: const TextStyle(
                             fontSize: 14,
                             color: Colors.green,
@@ -368,7 +368,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                       ],
                     ),*/
                     Text(
-                      '${Strings.totalLabel}: €${((product.price ?? 0) * (product.boxQuantity ?? 0)).toStringAsFixed(2)}',
+                      '${Strings.totalLabel}: $_currency${((product.price ?? 0) * (product.boxQuantity ?? 0)).toStringAsFixed(2)}',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -423,7 +423,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '€${product.price?.toStringAsFixed(2) ?? "0.00"} x ${product.boxQuantity ?? 0}',
+'$_currency${product.price?.toStringAsFixed(2) ?? "0.00"} x ${product.boxQuantity ?? 0}',
                     style: const TextStyle(
                       fontSize: 14,
                       color: Colors.green,
@@ -431,7 +431,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '€${((product.price ?? 0) * (product.boxQuantity ?? 0)).toStringAsFixed(2)}',
+                    '$_currency${((product.price ?? 0) * (product.boxQuantity ?? 0)).toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -468,7 +468,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
               ),
 
               Text(
-                '€${itemsTotal.toStringAsFixed(2)}',
+                '$_currency${itemsTotal.toStringAsFixed(2)}',
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ],
@@ -484,7 +484,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                 ),
 
                 Text(
-                  '-€${discount.toStringAsFixed(2)}',
+                  '-$_currency${discount.toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -504,7 +504,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
               ),
 
               Text(
-                '€${total.toStringAsFixed(2)}',
+                '$_currency${total.toStringAsFixed(2)}',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -644,7 +644,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                       children: [
                         Expanded(child: Text(Strings.pickup)),
                         if (!canPickup)
-                          Text('  Min: €${_pickupLimit.toStringAsFixed(2)}',
+                          Text('  Min: $_currency${_pickupLimit.toStringAsFixed(2)}',
                               style: const TextStyle(fontSize: 12, color: Colors.red)),
                       ],
                     ),
@@ -667,7 +667,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                       children: [
                         Expanded(child: Text(Strings.delivery)),
                         if (!canDelivery)
-                          Text('  Min: €${_deliveryLimit.toStringAsFixed(2)}',
+                          Text('  Min: $_currency${_deliveryLimit.toStringAsFixed(2)}',
                               style: const TextStyle(fontSize: 12, color: Colors.red)),
                       ],
                     ),

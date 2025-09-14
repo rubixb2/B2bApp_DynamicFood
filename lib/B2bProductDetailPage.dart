@@ -11,7 +11,9 @@ import 'helpers/Strings.dart';
 class B2bProductDetailPage extends StatefulWidget {
   final ProductsResponseModel product;
 
+
   const B2bProductDetailPage({Key? key, required this.product}) : super(key: key);
+
 
   @override
   _ProductDetailPageState createState() => _ProductDetailPageState();
@@ -20,6 +22,7 @@ class B2bProductDetailPage extends StatefulWidget {
 class _ProductDetailPageState extends State<B2bProductDetailPage> {
   int _quantity = 1;
   final CartService _cartService = CartService();
+  String _currency = SessionManager().b2bCurrency;
 
   @override
   Widget build(BuildContext context) {
@@ -77,14 +80,16 @@ class _ProductDetailPageState extends State<B2bProductDetailPage> {
                       // Fiyat ve başlık
                       Row(
                         children: [
-                          Text( '${widget.product.taxedPriceText}',
+                          Text(
+                            '$_currency${widget.product.taxedPrice?.toStringAsFixed(2) ?? '0.00'}',
                             style: const TextStyle(
                                 fontSize: 18,
                                 color: Colors.green,
                                 fontWeight: FontWeight.bold),
                           ),
                           Spacer(),
-                          Text( 'pcs- ${widget.product.unitPriceText}',
+                          Text(
+                            'pcs- $_currency${widget.product.unitPrice?.toStringAsFixed(2) ?? '0.00'}',
                             style: const TextStyle(
                                 fontSize: 18,
                                 color: Colors.green,

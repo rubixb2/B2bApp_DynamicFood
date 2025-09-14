@@ -18,10 +18,12 @@ class OrdersPage extends StatefulWidget {
 class _OrdersPageState extends State<OrdersPage> {
   late Future<OrderApiResponseModel?> ordersFuture = Future.value();
   final TextEditingController searchController = TextEditingController();
+  String _currency = '€';
 
   @override
   void initState() {
     super.initState();
+    _currency = SessionManager().b2bCurrency;
     _initializeOrders();
     //ordersFuture = fetchOrders();
   }
@@ -111,7 +113,7 @@ class _OrdersPageState extends State<OrdersPage> {
                               ),
                             ),
                             SizedBox(width: 10),
-                            Text('Total: \€${order.amountTotal.toStringAsFixed(2)}',
+                            Text('Total: $_currency${order.amountTotal.toStringAsFixed(2)}',
                                 style: AppTextStyles.bodyTextBold),
                             SizedBox(width: 10),
                             Text(order.invoicestatus,
