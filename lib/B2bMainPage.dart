@@ -81,7 +81,7 @@ class _B2bMainPageState extends State<B2bMainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tan-Tan')),
+      appBar: AppBar(title: const Text('Dynamic Food')),
       drawer: AppDrawer(onNavItemSelected: _onItemTapped),
       body: _pages[_currentIndex],
       bottomNavigationBar: FixedBottomNavBar(

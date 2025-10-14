@@ -30,7 +30,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.rubixb2.odoob2bsaleapp"
+    namespace "com.rubixb2.b2bappDynamicFood"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion "27.0.12077973" // Buraya ekleyin
 
@@ -58,7 +58,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.rubixb2.odoob2bsaleapp"
+        applicationId "com.rubixb2.b2bappDynamicFood"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()

@@ -6,7 +6,7 @@ class UserService {
 
 
   final String loginUrl = SessionManager().baseUrl+'B2bSale/Login';
-  final int merchantId = 1;
+  final int merchantId = 21;
   final String logoutUrl = SessionManager().baseUrl+'B2bSale/Logout';
   final String deleteUserUrl = SessionManager().baseUrl+'B2bSale/deleteUser';
   final String sessionCheckUrl = SessionManager().baseUrl+'B2bSale/GetBySession';

@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Tan-Tan',
+      title: 'Dynamic Food',
       debugShowCheckedModeBanner: false,
       theme: B2BTheme.lightTheme,
       home: const SplashPage(),

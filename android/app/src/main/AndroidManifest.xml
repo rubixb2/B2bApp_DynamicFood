@@ -6,7 +6,7 @@
 
     <application
         android:enableOnBackInvokedCallback="true"
-        android:label="Tan-Tan"
+        android:label="Dynamic Food"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
