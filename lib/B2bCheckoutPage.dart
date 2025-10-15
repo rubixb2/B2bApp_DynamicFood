@@ -231,6 +231,8 @@ class _B2bCheckoutPageState extends State<B2bCheckoutPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  (_selectedWarehouseName.isNotEmpty && _deliveryAddress.isNotEmpty ) == true?
+
                   // Teslimat Bilgileri Kartı
                   Container(
                     width: double.infinity,
@@ -244,6 +246,7 @@ class _B2bCheckoutPageState extends State<B2bCheckoutPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+
                         Row(
                           children: [
                             Icon(
@@ -278,7 +281,7 @@ class _B2bCheckoutPageState extends State<B2bCheckoutPage> {
                         ),
                       ],
                     ),
-                  ),
+                  ) : SizedBox(height: 0,),
                   
                   Text(
                     Strings.shoppingSummary,
