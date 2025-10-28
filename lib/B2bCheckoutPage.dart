@@ -318,7 +318,7 @@ class _B2bCheckoutPageState extends State<B2bCheckoutPage> {
                                         ? item.lastQuantity.toInt().toString()
                                         : item.lastQuantity.toString()) +
                                     " * " +
-                                    '$_currency${item.price?.toStringAsFixed(2) ?? '0.00'} x ${item.boxQuantity?.toInt() ?? 0}',
+                                    '$_currency${item.price?.toStringAsFixed(2) ?? '0.00'}',
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold,
