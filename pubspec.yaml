@@ -30,7 +30,7 @@ dependencies:
   firebase_messaging_web: ^3.6.9
   printing: ^5.11.0
   share_plus: ^10.0.0
-  package_info_plus: ^7.0.0
+  package_info_plus: ^8.0.0
   cupertino_icons: ^1.0.2
   change_app_package_name: ^1.5.0
   flutter_native_splash: ^2.4.1
@@ -54,7 +54,6 @@ flutter:
   assets:
     - assets/icon/iconlogo.png
     - assets/splash/splashlogo.png
-    - assets/shopping_cart_.jpg
     - assets/shopping_cart.png
 
 flutter_icons:
