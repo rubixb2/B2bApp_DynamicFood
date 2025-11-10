@@ -181,6 +181,7 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
                 ),
               ],
             ),
+            SizedBox(height: 50,)
           ],
         ),
       ),
