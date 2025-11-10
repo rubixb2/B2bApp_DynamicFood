@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart' as cs;
+import 'package:flutter/services.dart';
+import 'package:mobile_scanner/mobile_scanner.dart'; // ✅ Yeni import
 import 'package:odoosaleapp/services/CartService.dart';
 import 'package:odoosaleapp/services/ProductCacheService.dart';
 import 'package:odoosaleapp/services/ProductService.dart';
@@ -31,6 +33,7 @@ class Category {
   Category({required this.id, required this.name, required this.imageUrl});
 }
 
+final GlobalKey<_B2bProductPageState> productPageKey = GlobalKey<_B2bProductPageState>();
 // Main Product Page
 class B2bProductPage extends StatefulWidget {
   const B2bProductPage({Key? key}) : super(key: key);
@@ -66,7 +69,6 @@ class _B2bProductPageState extends State<B2bProductPage> {
   final _scrollController = ScrollController();
   final _searchFocusNode = FocusNode();
   final _textFieldKey = GlobalKey();
-
 
   @override
   void initState() {
@@ -297,7 +299,8 @@ class _B2bProductPageState extends State<B2bProductPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true, // 👈 önemli
-      appBar: _isDeliveryChoiceEnabled ? _buildAppBar() : null,
+     appBar: _isDeliveryChoiceEnabled ? _buildAppBar() : null,
+     // appBar: _buildAppBar(),
       body: FutureBuilder<void>(
         future: _dataFuture,
         builder: (context, snapshot) {
@@ -718,7 +721,51 @@ class _B2bProductPageState extends State<B2bProductPage> {
     }
   }
 
-  // AppBar oluştur
+// Yeni: Global key üzerinden çağrılacak asıl metot
+  Future<void> startBarcodeScanFromOutside() async {
+    // 🎯 Kamerayı açacak yeni sayfaya yönlendir
+    final String? barcodeResult = await Navigator.push( // 👈 await ÖNEMLİ
+      context,
+      MaterialPageRoute(builder: (context) => const BarcodeScannerScreen()),
+    );
+
+    // Geri dönüldüğünde bu kısım çalışır.
+    if (barcodeResult != null && barcodeResult.isNotEmpty) {
+      // 📢 Burası, ürün arama ve detay sayfasına yönlendirme mantığınızdır.
+      _navigateToProductDetail(barcodeResult);
+    } else {
+      // Tarama iptal edildi veya barkod bulunamadıysa burası çalışır
+    }
+  }
+
+  // 2. Barkod değeri ile ürünü bulma ve detay sayfasına yönlendirme fonksiyonu
+  void _navigateToProductDetail(String barcode) {
+    try {
+      // Ürün listesinde barkoda göre ürünü bul
+      final product = _allProducts.firstWhere(
+            (p) => p.barcode == barcode, // Ürünün 'barcode' alanını kullanıyoruz.
+        // Eğer ürün bulunamazsa 'orElse' ile hata fırlatıyoruz ki 'catch' bloğu çalışsın.
+        orElse: () => throw Exception('Product not found with barcode: $barcode'),
+      );
+
+      // Ürün bulunursa detay sayfasına yönlendir
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => B2bProductDetailPage(
+            product: product,
+          ),
+        ),
+      );
+    } catch (e) {
+      // Ürün bulunamazsa kullanıcıya bilgi ver
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(Strings.noProductsFound +'-'+ barcode)),
+      );
+      print(e); // Hata detayını konsola yazdır
+    }
+  }
+// AppBar Widget'ı
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       title: Text(Strings.productsTitle),
@@ -726,21 +773,24 @@ class _B2bProductPageState extends State<B2bProductPage> {
       foregroundColor: Colors.black,
       elevation: 1,
       actions: [
+        // BARCODE Butonu
+
+        // Mevcut teslimat tipi butonu
         IconButton(
           icon: Icon(
-            _selectedDeliveryType == 'delivery' 
-                ? Icons.local_shipping 
-                : _selectedDeliveryType == 'pickup' 
-                    ? Icons.store 
-                    : Icons.settings,
+            _selectedDeliveryType == 'delivery'
+                ? Icons.local_shipping
+                : _selectedDeliveryType == 'pickup'
+                ? Icons.store
+                : Icons.settings,
             color: _selectedDeliveryType != null ? Colors.orange : Colors.grey,
           ),
           onPressed: () => _showDeliveryTypeModal(),
-          tooltip: _selectedDeliveryType == null 
-              ? Strings.selectDeliveryTypeTooltip 
-              : _selectedDeliveryType == 'delivery' 
-                  ? Strings.deliveryToAddressTooltip 
-                  : Strings.pickupFromStoreTooltip,
+          tooltip: _selectedDeliveryType == null
+              ? Strings.selectDeliveryTypeTooltip
+              : _selectedDeliveryType == 'delivery'
+              ? Strings.deliveryToAddressTooltip
+              : Strings.pickupFromStoreTooltip,
         ),
       ],
     );
@@ -1111,5 +1161,60 @@ class _B2bProductPageState extends State<B2bProductPage> {
     setState(() {
       _dataFuture = _loadInitialData();
     });
+  }
+}
+
+// B2bProductPage.dart dosyanızda veya ayrı dosyanızda
+
+class BarcodeScannerScreen extends StatefulWidget {
+  const BarcodeScannerScreen({Key? key}) : super(key: key);
+
+  @override
+  State<BarcodeScannerScreen> createState() => _BarcodeScannerScreenState();
+}
+
+class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
+  // MobileScannerController tanımla
+  final MobileScannerController _scannerController = MobileScannerController();
+  bool _isScanned = false; // Aynı barkodu tekrar okumayı engeller
+
+  @override
+  void dispose() {
+    // 🧹 Kontrolcüyü serbest bırak (Bellek sızıntısını önler)
+    _scannerController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Barkod'),
+        backgroundColor: Colors.white,
+        // Geri butonu otomatik gelir.
+      ),
+      body: MobileScanner(
+        controller: _scannerController, // Kontrolcüyü bağla
+        // Tüm alan: Size(1000, 1000), // Gerekirse tarama alanını kısıtlayabilirsiniz
+        onDetect: (capture) async {
+          final List<Barcode> barcodes = capture.barcodes;
+          if (barcodes.isNotEmpty && !_isScanned) {
+            final String? barcodeValue = barcodes.first.rawValue;
+
+            if (barcodeValue != null) {
+              _isScanned = true; // Tekrar taramayı engelle
+
+              // 1. Tarayıcıyı Durdur
+              await _scannerController.stop();
+
+              // 2. Sayfayı kapatıp sonucu geri gönder
+              if (mounted) { // Widget'ın hala ağaçta olduğunu kontrol et
+                Navigator.pop(context, barcodeValue);
+              }
+            }
+          }
+        },
+      ),
+    );
   }
 }
